@@ -1,0 +1,207 @@
+#+TITLE:     大数据环境下信息抽取模板自动发现与聚类
+#+AUTHOR:    计92 丘骏鹏 2009011282
+#+EMAIL:     qjp-ch-mail@163.com
+#+DATE:      指导老师：朱小燕~郝宇
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+
+#+STARTUP: beamer
+#+LaTeX_CLASS: beamer
+#+LaTeX_CLASS_OPTIONS: [11pt,presentation]
+#+BEAMER_FRAME_LEVEL: 2
+#+BEAMER_HEADER_EXTRA: \usetheme{Singapore}\usecolortheme{crane}
+#+BEAMER_HEADER_EXTRA: \usepackage{listings}\usepackage{fontspec}\usepackage{xunicode}\usepackage{xltxtra}\usepackage{xeCJK}\beamerdefaultoverlayspecification{}
+#+BEAMER_HEADER_EXTRA: \setmainfont{Times New Roman}\setmonofont{Courier New}\setCJKmainfont[BoldFont=YouYuan]{SimSun}\setCJKfamilyfont{song}{SimSun}\setCJKfamilyfont{msyh}{微软雅黑}\setCJKfamilyfont{fs}{FangSong}
+#+BEAMER_HEADER_EXTRA: \setbeamertemplate{bibliography item}[text]
+#+COLUMNS: %45ITEM %10BEAMER_env(Env) %10BEAMER_envargs(Env Args) %4BEAMER_col(Col) %8BEAMER_extra(Extra)
+#+PROPERTY: BEAMER_col_ALL 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 :ETC
+#+LATEX_HEADER: \AtBeginSection[]{\begin{frame}<beamer>\frametitle{Topic}\tableofcontents[currentsection]\end{frame}}
+
+* Introduction
+** Background
+- 已经获取到海量的新闻、博客、论坛等网页原始数据，需要从中提取结构化的信息
+- 从已有数据中抽取模板，利用模板去抽取相似网页中的信息
+- 新的网页可能采取新的模板，需要自动检测，分类和抽取这些新的模板
+
+** Motivation
+- 一个网站可能采用多个模板，如果采用人工标注模板的办法工作量很大
+- 前期同学的工作主要基于一个网页检测其中的模板，没有利用大数据的优势
+- 充分利用数据的冗余性来进行模板的抽取
+
+** Related Work
+*** 计算HTML文档结构相似度
+#+BEGIN_LaTeX
+\begin{itemize}
+\item 基于DOM Tree本身的方法：Tree Edit Distance\cite{1}。特点：直接对树结构进行操作，算法
+     复杂度大，不适用于大量数据的处理。
+\item 基于Path集合：每个节点的路径是根节点到该节点的序列，将DOM Tree用路径集合表示，在两个
+     网页的路径集合上计算相似度\cite{4,5,6}。
+\item 基于Tag集合或序列：直接计算两个网页的Tag集合的Jaccard相似度，或者利用树的遍历将DOM
+     Tree转化为Tag序列，然后通过最长公共子序列等方法计算相似度\cite{4,5,8}。
+\item 基于傅里叶变换：将文档结构转化为一个序列，将其视为时序序列，用傅里叶变换变换
+     到频域计算幅度差别\cite{4,7}。
+\end{itemize}
+#+END_LaTeX
+
+** Related Work
+*** 网页聚类算法
+- 基于划分的聚类。主要用的是k-medoids，但需要已知模板个数，对于本问题不太适用。
+- 层次聚类。这种聚类算法不需要预先知道类的个数，速度较快。
+
+*** 模板提取算法
+#+BEGIN_LaTeX
+\begin{itemize}
+\item 无监督方法：利用网页结构和内容的重复出现发现模板，后期需要人工指定语义\cite{2}。
+\item 半监督方法：利用少量标注，进行学习，然后抽取出模板。学习过程可以考虑语义的信息\cite{3}。
+\end{itemize}
+#+END_LaTeX
+
+* Idea & Design
+** Idea
+- 实验的数据量决定了设计的算法不能太复杂，但同时数据的冗余也可以弥补算法的粗糙性，
+  从而也能获得较好的效果。
+- 每一步可以先采用一些复杂度较低的算法，评价其运行效果和时间，然后再进行改进
+- 同时需要考虑可以动态增加模板和进行并行化处理
+
+** Framework
+
+***                                                   :BMCOL:B_ignoreheading:
+    :PROPERTIES:
+    :BEAMER_col: 0.3
+    :BEAMER_env: ignoreheading
+    :BEAMER_envargs: C[t]
+    :END:
+整体框架示意图
+***                                                   :B_ignoreheading:BMCOL:
+    :PROPERTIES:
+    :BEAMER_env: ignoreheading
+    :BEAMER_col: 0.7
+
+    :END:
+    #+CAPTION: framework
+    #+LABEL: fig:1
+    #+ATTR_LaTeX: width=20em,angle=0
+    [[./framework.png]]
+#+begin_src dot :file framework.png :exports none
+  digraph G {
+          subgraph cluster0 {
+                  label="主体框架";
+                  node[shape=box, style="filled,rounded", color=darkturquoise, fontcolor=white];
+                  A[label="网页过滤"];
+                  C[label="网页聚类"];
+                  D[label="网页模板提取"];
+                  node[shape=ellipse, style="filled,rounded",color=tomato];
+                  B[label="详细页集合"];
+                  A->B->C->D;
+          }
+          node[shape=ellipse, style="filled,rounded",color=gray, fontcolor=white];
+          input[label="输入网页集合"];
+          output[label="抽取结构化信息",shape=box,color=gray];
+          input->A;
+          D->output;
+          node[shape=plaintext,color=white,fontcolor=black];
+          E[label="计算HTML文档相似度"];
+          E->C;
+          F[label="无监督或半监督方法"];
+          F->D;
+  }
+#+end_src
+
+#+RESULTS:
+[[file:framework.png]]
+
+** Design
+*** 网页过滤
+    - 网页中含有目录页和详细页，需要过滤掉目录页
+    - 要能快速进行计算，不需要过于复杂的机器学习算法
+    - 可以采用URL特征结合一些文本特征，比如目录页一般是一些超链接列表，且一般都
+      是短文本
+*** 聚类
+#+BEGIN_LaTeX
+\begin{itemize}
+\item 计算相似度可以采用基于Path集合或者Tag集合的方法，并可以利用一些已有的集合
+       相似度的近似算法，降低计算复杂度
+\item 采用层次聚类方法进行模板的自动聚类
+\item 初步计划参照\cite{4,5,6}的方法进行实现
+\end{itemize}
+#+END_LaTeX
+** 模板表示
+*** DOM Tree
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=10em,angle=0]{./Selection_001.png}
+    \end{figure}
+*** Path集合                                                          :BMCOL:
+\tiny
+#+begin_example
+| Document\<html>                   |
+| Document\<html>\<body>            |
+| Document\<html>\<body>\<h1>       |
+| Document\<html>\<body>\<h1>\World |
+| Document\<html>\<body>\<br>       |
+| Document\<html>\<body>\List       |
+#+end_example
+\normalsize
+*** Tag序列
+    \tiny
+#+begin_example
+    Document,<html>,<body>,<h1>,World,<br>,<List>
+#+end_example
+** 相似度计算
+*** 基于Path集合
+- Common Path
+\[
+d_{CP}(D_1,D_2)=1-\frac{|p(D_1)\cap p(D_2)|}{\max (|p(D_1)|, |p(D_2)|)}
+\]
+- Common Path Shingles
+\[
+d_{CPS}(D_1,D_2)=1-\frac{|S(D_1,w)\cap S(D_2,w)|}{\max (|S(D_1,w)|, |S(D_2,w)|)}
+\]
+- MDL\cite{6}\\
+  利用路径-文档矩阵进行计算，较为复杂，根据实验效果决定是否使用
+** 相似度计算
+*** 基于Tag序列
+- Tag Vector
+\[
+d_{TV}(D_1,D_2)=\sqrt{\sum_{i=1}^N(v_i(D_1)-v_i(D_2))^2}
+\]
+- Longest Common Tag Subsequence
+\[
+d_{LCTS}(D_1,D_2)=1-\frac{|lcts(D_1,D_2)|}{\max(|D_1|,|D_2|)}
+\]
+** Design
+*** 模板抽取                                                        
+    - 可以考虑直接利用聚类的结果（例如，一个类中的文档之间的共同路径集合），利用
+      路径集合可以直接表示文档的模板结构
+    - 或者采取一些标注，结合一些已有的模板检测算法进行模板的抽取
+*** 优化和改进
+    - 在计算相似度时加入其他特征，和结构特征共同考虑。内容特征，比如文本的行间分
+      布，tag的属性值，比如某些div的id，CSS类名
+    - 考虑算法的并行性，部署到Hadoop集群上，加快算法运行速度
+* Schedule
+** 日程安排
+- 1-4周：任务分析，文献阅读，研究算法
+- 5-8周：网页过滤，网页聚类和网页模板提取模块初步实现
+- 9-12周：算法修正，系统改进，结果分析
+  - 是否需要改进相似度算法（包括加入新的特征，改变计算方法）
+  - 如何设计并行化计算
+  - 如何有效评价系统的功能
+- 13-15周：论文撰写
+
+* References
+** 参考文献
+   :PROPERTIES:
+   :BEAMER_envargs:[allowframebreaks]
+   :END:
+\scriptsize
+\bibliographystyle{plain}
+\bibliography{proposal}

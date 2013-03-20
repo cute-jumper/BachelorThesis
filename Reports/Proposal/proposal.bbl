@@ -1,0 +1,49 @@
+\begin{thebibliography}{1}
+
+\bibitem{2}
+Arvind Arasu and Hector Garcia-Molina.
+\newblock Extracting structured data from web pages.
+\newblock In {\em Proceedings of the 2003 ACM SIGMOD international conference
+  on Management of data}, pages 337--348. ACM, 2003.
+
+\bibitem{4}
+David Buttler.
+\newblock {\em A short survey of document structure similarity algorithms}.
+\newblock United States. Department of Energy, 2004.
+
+\bibitem{3}
+Andrew Carlson and Charles Schafer.
+\newblock Bootstrapping information extraction from semi-structured web pages.
+\newblock {\em Machine Learning and Knowledge Discovery in Databases}, pages
+  195--210, 2008.
+
+\bibitem{7}
+Sergio Flesca, Giuseppe Manco, Elio Masciari, Luigi Pontieri, and Andrea
+  Pugliese.
+\newblock Detecting structural similarities between xml documents.
+\newblock In {\em Proc. of the Inter. ACM SIGMOD Workshop on The Web and
+  Databases (WebDB)}, pages 55--60, 2002.
+
+\bibitem{5}
+Thomas Gottron.
+\newblock Clustering template based web documents.
+\newblock {\em Advances in Information Retrieval}, pages 40--51, 2008.
+
+\bibitem{6}
+Chulyun Kim and Kyuseok Shim.
+\newblock Text: Automatic template extraction from heterogeneous web pages.
+\newblock {\em Knowledge and Data Engineering, IEEE Transactions on},
+  23(4):612--626, 2011.
+
+\bibitem{1}
+Davi De~Castro Reis, Paulo~B Golgher, ASd Silva, and AF~Laender.
+\newblock Automatic web news extraction using tree edit distance.
+\newblock In {\em Proceedings of the 13th international conference on World
+  Wide Web}, pages 502--511. ACM, 2004.
+
+\bibitem{8}
+潘有能.
+\newblock {\em XML挖掘：聚类、分类与信息提取}.
+\newblock 浙江大学出版社, 2012.
+
+\end{thebibliography}

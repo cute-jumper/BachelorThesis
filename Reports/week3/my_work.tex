@@ -1,0 +1,120 @@
+% Created 2013-03-13 Wed 14:29
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fixltx2e}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{soul}
+\usepackage{textcomp}
+\usepackage{marvosym}
+\usepackage[nointegrals]{wasysym}
+\usepackage{latexsym}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\tolerance=1000
+\usepackage{fontspec}
+\usepackage{xunicode}
+\usepackage{xltxtra}
+\usepackage{xeCJK}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{fancybox}
+\usepackage{comment}
+\usepackage{enumerate}
+\usepackage{colortbl}
+\usepackage{framed}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\setmainfont{Times New Roman}
+\setmonofont{Courier New}
+\setCJKmainfont[BoldFont=YouYuan]{SimSun}
+\setCJKfamilyfont{song}{SimSun}
+\setCJKfamilyfont{msyh}{微软雅黑}
+\setCJKfamilyfont{fs}{FangSong}
+
+\lstset{frame=single}
+
+% new and renew command
+\newcommand{\reffig}[1]{Figure~\ref{#1}}
+\newcommand{\reftbl}[1]{Table~\ref{#1}}
+\renewcommand{\contentsname}{目录}
+\renewcommand{\baselinestretch}{1.2}
+
+% In case you need to adjust margins:
+\topmargin=-0.0in      %
+\evensidemargin=0.5in     %
+\oddsidemargin=0.5in      %
+\textwidth=5.5in        %
+\textheight=8.5in       %
+\headsep=0.25in         %
+
+\providecommand{\alert}[1]{\textbf{#1}}
+
+\title{毕设工作}
+\author{丘骏鹏}
+\date{2013-03-13 Wed}
+\hypersetup{
+  pdfkeywords={},
+  pdfsubject={},
+  pdfcreator={Emacs Org-mode version 7.8.11}}
+
+\begin{document}
+
+\maketitle
+
+
+
+\section{工作综述}
+\label{sec-1}
+
+我对主要工作的理解是：从海量的网页数据中，利用大数据的冗余性发现网页模板，抽取结
+构化的信息。主要的步骤：
+\begin{itemize}
+\item 首先需要将目录页和详细页分开，可以根据url特征和简单的文本特征来区别。这部分应
+  该要比较简单迅速。
+\item 工作的重点在于如何对海量的网页进行聚类和模板抽取。这部分工作应该要充分考虑数据
+  的冗余性，利用这些冗余信息来发现不同网页之间的共同点，从而自动生成网页抽取的模
+  板。同时考虑到数据量很大，算法不能太复杂。
+\end{itemize}
+\section{目前的工作进展}
+\label{sec-2}
+
+前两周的工作报告放在了report\_{}week1-2.zip中。
+
+这周到目前截止的工作：
+\begin{itemize}
+\item 阅读了TEXT: Automatic Template Extraction from Heterogeneous Web Pages。这篇论
+  文将DOM Tree用路径进行表示，用MDL(Minimun Description Length Principle)作为标
+  准进行聚类。由于直接计算MDL复杂度很高，该论文提出一种扩展的MinHash算法，用于近
+  似估计MDL，提高算法效率，
+\item 阅读了黄老师给的Webpage Understanding: Beyond Page-Level Search。里面主要介绍的
+  是如何将webpage understanding拆分成几个子任务。其中提到了一种分割HTML网页的
+  VIPS(VIsion-basd Page Segmentation)方法，即将原网页按照视觉区域的分块解析成一
+  个vision tree来进行表示。
+\item VIPS: a Vision-based Page Segmentation Algorithm（在读）。即上面提到的VIPS算法
+  具体实现的论文。我初看的结果是好像算法比较复杂，不确定是否适合应用到大数据上面。
+\item \href{http://code.google.com/p/cx-extractor/}{http://code.google.com/p/cx-extractor/} 上的工具和文档。该工具主要就利用了HTML
+  文档行块的分布来提取正文，方法和实现都很简单。
+\end{itemize}
+\section{我对工作的理解}
+\label{sec-3}
+
+  工作的重点应该是网页的聚类和模板抽取。
+
+  对于如何进行聚类。我觉得聚类方法可以采用现有的那些聚类算法，关键是如何有效地计
+  算两个文档的相似度。HTML可以解析成DOM Tree，可以直接利用这个树表示计算编辑距离
+  来衡量相似度，也可以将树通过某种遍历方法转化为其他数据结构再进行计算，或者是用
+  路径集合表示，也可以按照VIPS将网页划分成vision-tree后再做计算。我现在还没有想到
+  一个很好的计算方法。
+
+  对于模板如何抽取。如果聚类的时候利用了DOM Tree的结构特征，比如标签，路径，模板
+  就自动可以表示出来了。如果利用纯内容特征（应该不会这样做），可能会涉及到如何进
+  行正则表达式推导问题。
+
+\end{document}

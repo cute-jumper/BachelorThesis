@@ -1,0 +1,62 @@
+#+TITLE:     第三周报告
+#+AUTHOR:    丘骏鹏
+#+EMAIL:     qjp-ch-mail@163.com
+#+DATE:      2013-03-15 Fri
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+
+#+latex_class: zh-article
+#+options: ^:{}
+
+* 这周的工作
+前半周的工作已经在上一个报告中给出了，这里将上一份报告的对应部分复制过来，另外汇报一
+下下半周的工作。
+
+- 阅读了TEXT: Automatic Template Extraction from Heterogeneous Web Pages。这篇论
+  文将DOM Tree用路径进行表示，用MDL(Minimun Description Length Principle)作为标
+  准进行聚类。由于直接计算MDL复杂度很高，该论文提出一种扩展的MinHash算法，用于近
+  似估计MDL，提高算法效率，
+- 阅读了黄老师给的Webpage Understanding: Beyond Page-Level Search。里面主要介绍的
+  是如何将webpage understanding拆分成几个子任务。其中提到了一种分割HTML网页的
+  VIPS(VIsion-basd Page Segmentation)方法，即将原网页按照视觉区域的分块解析成一
+  个vision tree来进行表示。
+- http://code.google.com/p/cx-extractor/ 上的工具和文档。该工具主要就利用了HTML
+  文档行块的分布来提取正文，方法和实现都很简单。
+- VIPS: a Vision-based Page Segmentation Algorithm. 这篇论文讲解的是VIPS的实现。
+  方法比较复杂，由于文章比较老(2003)，网页的设计有很大的变化，论文中列出的一些启
+  发规则可能要有一定的修改。此外，我找了一下，作者没有公开实现的代码。
+- 阅读了中文文献《基于视觉的 Web 页面分块算法的改进与实现》，是一个对VIPS算法的改
+  进。主要关注的HTML中的<table>标签，将DOM Tree变成只有<table>标签的树（实际上对
+  于<div>是一样的，现在网页大部分已经采用DIV+CSS的布局方法），同时不需要用规则判
+  断节点是否可分，直接提取每一层的<table>标签子节点，后面还有对各个语义块进行合
+  并的过程。
+  
+  我原来的想法是有没有可能在vision-tree的层次上做聚类，相同模板的网页视觉布局大概
+  也会相同。但是现在网页设计有一些变化，布局信息更多放在CSS中，因此如果网页设计者
+  将HTML的布局和内容分开得比较好的话，HTML源代码中大部分会是内容，布局信息会很少，
+  而这个方法主要是依靠tag里的一些视觉相关的属性值进行判断，加上这个系统比较复杂，
+  我没找到现成的实现（好像郝老师说有类似实现），可能可行性不高。
+
+* 我的想法
+  从目前的调研结果来看，我觉得TEXT: Automatic Template Extraction from
+  Heterogeneous Web Pages这篇论文和我要做的工作比较接近，主要关注的也是从异构的网
+  页中抽取模板。他的基本特征是基于HTML的DOM Tree的路径集合，改进的地方在于提出了
+  一个近似算法（Extended MinHash）对计算进行加速。关于Extended MinHash算法的很多
+  细节我当时没有全部看懂，我打算再认真看看论文的那一部分。
+
+  现阶段我的想法是基于vision-tree的方法可能不太可行，还是基于原始的DOM Tree进行聚
+  类。模板的表示基于路径会好一些，但聚类时候用的特征不一定局限于路径，可以结合标
+  签加上文本内容特征。另外，我之前看的《XML挖掘：聚类、分类和信息提取》书中的利用
+  WordNet进行路径的词义消歧可能也会有一些帮助。
+
+  我搜索了一些其他在直接在DOM Tree上利用路径、token进行聚类的论文，接下来几天认
+  真调研直接在DOM Tree上做的方法。

@@ -1,0 +1,116 @@
+% Created 2013-03-05 Tue 19:11
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fixltx2e}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{soul}
+\usepackage{textcomp}
+\usepackage{marvosym}
+\usepackage[nointegrals]{wasysym}
+\usepackage{latexsym}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\tolerance=1000
+\usepackage{fontspec}
+\usepackage{xunicode}
+\usepackage{xltxtra}
+\usepackage{xeCJK}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{fancybox}
+\usepackage{comment}
+\usepackage{enumerate}
+\usepackage{colortbl}
+\usepackage{framed}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\setmainfont{Times New Roman}
+\setmonofont{Courier New}
+\setCJKmainfont[BoldFont=YouYuan]{SimSun}
+\setCJKfamilyfont{song}{SimSun}
+\setCJKfamilyfont{msyh}{微软雅黑}
+\setCJKfamilyfont{fs}{FangSong}
+
+\lstset{frame=single}
+
+% new and renew command
+\newcommand{\reffig}[1]{Figure~\ref{#1}}
+\newcommand{\reftbl}[1]{Table~\ref{#1}}
+\renewcommand{\contentsname}{目录}
+\renewcommand{\baselinestretch}{1.2}
+
+% In case you need to adjust margins:
+\topmargin=-0.0in      %
+\evensidemargin=0.5in     %
+\oddsidemargin=0.5in      %
+\textwidth=5.5in        %
+\textheight=8.5in       %
+\headsep=0.25in         %
+
+\providecommand{\alert}[1]{\textbf{#1}}
+
+\title{第一周进展报告}
+\author{计92 丘骏鹏 2009011282}
+\date{2013-03-05 Tue}
+\hypersetup{
+  pdfkeywords={},
+  pdfsubject={},
+  pdfcreator={Emacs Org-mode version 7.8.03}}
+
+\begin{document}
+
+\maketitle
+
+
+
+\section{每天进展}
+\label{sec-1}
+
+\begin{itemize}
+\item 周二：安装实验室电脑，配置基本编程环境
+\item 周三周四：阅读史兴的论文。有以下几个问题：
+\begin{enumerate}
+\item 关于data records的检测方法（基于桶）好像有鲁棒性不够的问题，若出现噪声标
+       签会产生问题
+\item ATree的构造方法还有一些细节方面感觉论文未详细论述
+\end{enumerate}
+除此之外，对于论文中提到的一些技术，如Hadoop，在网上自学了关于HFS、HBase等知
+    识以及简单的MapReduce程序编写。其他的比较细的东西包括Google Protocol Buffers
+    以及一些HTML清洗库（HTML Tidy，lxml.html模块等）。
+\item 周五：从图书馆和网上找了有关dom tree clustering的相关资料。主要阅读了《XML挖
+    掘: 聚类、分类与信息提取》一书，了解了一些计算两个XML文档相似性和进行聚类的
+    方法。
+\end{itemize}
+\section{对工作的理解}
+\label{sec-2}
+
+主要工作分为两部分，一部分是从网页中分类出所需要的网页，一部分是对网页进行聚类，
+然后生成模板进行提取。
+\begin{itemize}
+\item 第一部分工作我认为主要可以通过url来进行判断，一般目录页和内容页的url有较大差别，
+  这种方法会非常有效率。如果这种方法不行，比如已有的网页的url全是随机生成的，是可
+  以通过一些简单的特征，比如文本元素的内容长度进行筛选。这部分复杂度应该不能做得
+  很高。
+\item 第二部分工作是此次毕设的主要部分。主要的问题应该是“如何对Dom Tree进行聚类，并
+  从每个类别中提取出模板”（有无理解错误？）。这部分还在阅读相关的书籍和论文，打
+  算结合这周阅读论文的成果在这周的报告中给出。
+\end{itemize}
+\section{问题}
+\label{sec-3}
+
+\begin{itemize}
+\item 目前有的资源有哪些？我看了上次您发给我的软院那个同学的东西，好像只是调研了Java
+  的各个库如何抓取用了ajax的网页，应该只是和写网络爬虫那一方面相关的。目前我们有
+  没有相关的网页，是需要自己抓取，还是已经存好了？如果已经有的话，如何获取使用？
+  如果需要自己抓取数据或者预处理起来还有很多繁琐的细节，我觉得也可以和读论文同步
+  展开。
+\end{itemize}
+
+\end{document}

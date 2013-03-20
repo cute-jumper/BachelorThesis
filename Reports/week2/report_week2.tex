@@ -1,0 +1,135 @@
+% Created 2013-03-08 Fri 17:23
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fixltx2e}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{soul}
+\usepackage{textcomp}
+\usepackage{marvosym}
+\usepackage[nointegrals]{wasysym}
+\usepackage{latexsym}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\tolerance=1000
+\usepackage{fontspec}
+\usepackage{xunicode}
+\usepackage{xltxtra}
+\usepackage{xeCJK}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{fancybox}
+\usepackage{comment}
+\usepackage{enumerate}
+\usepackage{colortbl}
+\usepackage{framed}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\setmainfont{Times New Roman}
+\setmonofont{Courier New}
+\setCJKmainfont[BoldFont=YouYuan]{SimSun}
+\setCJKfamilyfont{song}{SimSun}
+\setCJKfamilyfont{msyh}{微软雅黑}
+\setCJKfamilyfont{fs}{FangSong}
+
+\lstset{frame=single}
+
+% new and renew command
+\newcommand{\reffig}[1]{Figure~\ref{#1}}
+\newcommand{\reftbl}[1]{Table~\ref{#1}}
+\renewcommand{\contentsname}{目录}
+\renewcommand{\baselinestretch}{1.2}
+
+% In case you need to adjust margins:
+\topmargin=-0.0in      %
+\evensidemargin=0.5in     %
+\oddsidemargin=0.5in      %
+\textwidth=5.5in        %
+\textheight=8.5in       %
+\headsep=0.25in         %
+
+\providecommand{\alert}[1]{\textbf{#1}}
+
+\title{第二周报告}
+\author{丘骏鹏}
+\date{2013-03-08 Fri}
+\hypersetup{
+  pdfkeywords={},
+  pdfsubject={},
+  pdfcreator={Emacs Org-mode version 7.8.11}}
+
+\begin{document}
+
+\maketitle
+
+\setcounter{tocdepth}{3}
+\tableofcontents
+\vspace*{1cm}
+
+\section{本周进展}
+\label{sec-1}
+
+本周主要工作在阅读相关资料和论文。
+
+中文部分：
+\begin{itemize}
+\item 《XML挖掘：聚类、分类与信息提取》：这本书主要是一些综述，讲解了一些基本概念和
+  方法。
+\begin{itemize}
+\item 关于XML等一系列的概念：DTD，Schema，XSL，XPath，XQuery等
+\item 基本的计算XML文档相似度的方法：简单的相似度度量，路径匹配，编辑距离，向量空
+    间模型等。不过主要是方法综述，未讲解实现细节。
+\item 书中提出的方法：类似路径匹配，加入WordNet进行语义消歧，然后计算出文档之间的
+    相似度
+\end{itemize}
+\item 《基于局部标签树匹配的改进网页聚类算法》：这篇论文主要是将DOM Tree的前几层转化
+  为字符串，然后利用字符串的编辑距离衡量DOM Tree的相似度。具体方法为：先将每层的
+  标签拼接成字符串，计算相似度，然后不同的层级给予不同的权重，相加得到总的相似度。
+  方法比较简单。
+\item 《基于网页聚类的web信息自动抽取》：这篇论文主要基于DOM Tree的编辑距离，然后计算
+  出平均绝对误差的列相似度，再利用CURE算法进行聚类。CURE聚类算法的论文我看的是
+  \href{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.83.1599&rep=rep1&type=pdf}{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.83.1599\&rep=rep1\&type=pdf}
+\end{itemize}
+
+英文部分：
+\begin{itemize}
+\item UIC Bing Liu的CS511课程课件，讲的是结构化数据抽取中有监督和无监督的wrapper生成
+  算法。里面包括了树相似度算法的介绍，有Tree Edit Distance，Simple Tree Matching
+  （STM），Center Star method和Particial Tree Alignment。
+\item Yanhong Zhai and Bing Liu. Web Data Extraction Based on Partial Tree
+  Alignment. 选择性看了关于Partial Tree Alignment的部分。
+\end{itemize}
+
+以下两篇是史兴的论文中的参考文献。
+\begin{itemize}
+\item A. Arasu and H. Garcia-Molina. Extracting structured data from web pages.
+  主要讲解的是通过构造Equivalence Class，进行模板的生成。
+\item A. Carlson and C. Schafer. Bootstrapping information extraction from
+  semi-structured web pages. 首先用partial tree alignment进行对齐，然后利用一些语
+  义特征，对这些可能的数据域和schema中的某个column的相似度进行打分，训练模型采用
+  bootstrapping。
+\end{itemize}
+
+在读的有一篇：TEXT: Automatic Template Extraction from Heterogeneous Web Pages，
+文中提出一种效率较高的计算相似度的方法，具体细节部分还在看。您给的那篇论文目前还
+没有看。
+\section{问题}
+\label{sec-2}
+
+Google开源的页面抽取工具我没找到，能否给个链接？
+\section{接下来的工作}
+\label{sec-3}
+
+\begin{itemize}
+\item 这周刚开始看论文，感觉方向有点杂，接下来要做好总结和细化工作。
+\item 看一下相关的工具，包括有些论文里提到的工具，看下能否使用以及如何使用，避免重复
+  造轮子。
+\end{itemize}
+
+\end{document}
