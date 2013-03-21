@@ -5,7 +5,7 @@
 #+DESCRIPTION:
 #+KEYWORDS:
 #+LANGUAGE:  en
-#+OPTIONS:   H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   H:3 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
 #+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
 #+EXPORT_SELECT_TAGS: export
@@ -18,26 +18,37 @@
 #+LaTeX_CLASS: beamer
 #+LaTeX_CLASS_OPTIONS: [11pt,presentation]
 #+BEAMER_FRAME_LEVEL: 2
-#+BEAMER_HEADER_EXTRA: \usetheme{Singapore}\usecolortheme{crane}
+#+BEAMER_HEADER_EXTRA: \usetheme{default}\usecolortheme{default}
 #+BEAMER_HEADER_EXTRA: \usepackage{listings}\usepackage{fontspec}\usepackage{xunicode}\usepackage{xltxtra}\usepackage{xeCJK}\beamerdefaultoverlayspecification{}
 #+BEAMER_HEADER_EXTRA: \setmainfont{Times New Roman}\setmonofont{Courier New}\setCJKmainfont[BoldFont=YouYuan]{SimSun}\setCJKfamilyfont{song}{SimSun}\setCJKfamilyfont{msyh}{微软雅黑}\setCJKfamilyfont{fs}{FangSong}
 #+BEAMER_HEADER_EXTRA: \setbeamertemplate{bibliography item}[text]
 #+COLUMNS: %45ITEM %10BEAMER_env(Env) %10BEAMER_envargs(Env Args) %4BEAMER_col(Col) %8BEAMER_extra(Extra)
 #+PROPERTY: BEAMER_col_ALL 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 :ETC
-#+LATEX_HEADER: \AtBeginSection[]{\begin{frame}<beamer>\frametitle{Topic}\tableofcontents[currentsection]\end{frame}}
+#+LATEX_HEADER: \AtBeginSection[]{\begin{frame}<beamer>\frametitle{提纲}\tableofcontents[currentsection,subsections]\end{frame}}
 
-* Introduction
-** Background
+\begin{frame}<beamer>\frametitle{提纲}\tableofcontents\end{frame}
+* 选题背景和动机
+** 背景
 - 已经获取到海量的新闻、博客、论坛等网页原始数据，需要从中提取结构化的信息
-- 从已有数据中抽取模板，利用模板去抽取相似网页中的信息
+- 从已有数据中抽取模板，利用模板去抽取相似网页中的信息。
 - 新的网页可能采取新的模板，需要自动检测，分类和抽取这些新的模板
 
-** Motivation
+** 动机
 - 一个网站可能采用多个模板，如果采用人工标注模板的办法工作量很大
 - 前期同学的工作主要基于一个网页检测其中的模板，没有利用大数据的优势
 - 充分利用数据的冗余性来进行模板的抽取
+- 目标：提取结构化信息，如新闻中的标题和正文，博客的标题和内容等，用于后续的处理。
+  \tiny
+   #+begin_src nxml
+     <document>
+       <news>
+         <title>foobar</title>
+         <content>blablabla</content>
+       </news>
+     </document>
+   #+end_src
 
-** Related Work
+** 相关工作
 *** 计算HTML文档结构相似度
 #+BEGIN_LaTeX
 \begin{itemize}
@@ -52,7 +63,7 @@
 \end{itemize}
 #+END_LaTeX
 
-** Related Work
+** 相关工作
 *** 网页聚类算法
 - 基于划分的聚类。主要用的是k-medoids，但需要已知模板个数，对于本问题不太适用。
 - 层次聚类。这种聚类算法不需要预先知道类的个数，速度较快。
@@ -65,15 +76,78 @@
 \end{itemize}
 #+END_LaTeX
 
-* Idea & Design
-** Idea
+* 工作内容和思路
+** 工作内容（输入）
+*** 文档集合
+#+begin_src html
+  <html>                |  <html>                
+    <body>              |    <body>              
+      <h1>Title1</h1>   |      <h1>Title2</h1>   
+      <p>Content1</p>   |      <p>Content2</p>   
+    </body>             |    </body>             
+  </html>               |  </html>               
+------------------------|--------------------------
+  <html>                |  <html>                
+    <body>              |    <body>              
+      <div>             |      <div>             
+        <div>foo1</div> |        <div>foo2</div> 
+        <div>bar1</div> |        <div>bar2</div> 
+      </div>            |      </div>            
+    </body>             |    </body>             
+  </html>               |  </html>               
+#+end_src
+** 工作内容（输出）
+*** 抽取的模板1                                                       :BMCOL:
+    :PROPERTIES:
+    :BEAMER_col: 0.5
+    :BEAMER_envargs: C[t]
+    :END:
+#+begin_src html
+  <html>         
+    <body>
+      <h1>?</h1>
+      <p>?</p>
+    </body>
+  </html>           
+#+end_src
+*** 抽取的模板2                                                       :BMCOL:
+    :PROPERTIES:
+    :BEAMER_col: 0.5
+    :BEAMER_envargs: C[t]
+    :END:
+#+begin_src html
+  <html>
+    <body>
+      <div>
+        <div>?</div>
+        <div>?</div>
+      </div>
+    </body>
+  </html>
+#+end_src
+*** 对比(Python的Django框架)                                          :BMCOL:
+    :PROPERTIES:
+    :BEAMER_col: 1
+    :BEAMER_envargs: C[t]
+    :END:
+#+begin_src html
+  <html>
+    <body>
+      <h1>{{ news.title }}</h1>
+      <p>{{ news.content }}</p>
+    </body>
+  </html>
+#+end_src
+
+
+** 整体思路
 - 实验的数据量决定了设计的算法不能太复杂，但同时数据的冗余也可以弥补算法的粗糙性，
   从而也能获得较好的效果。
 - 每一步可以先采用一些复杂度较低的算法，评价其运行效果和时间，然后再进行改进
+- 从前面可以看到，模板和静态HTML文档类似，不同的是模板有不变部分和变化部分，但两
+  者可以用统一的方法进行表示
 - 同时需要考虑可以动态增加模板和进行并行化处理
-
-** Framework
-
+** 框架
 ***                                                   :BMCOL:B_ignoreheading:
     :PROPERTIES:
     :BEAMER_col: 0.3
@@ -118,8 +192,7 @@
 
 #+RESULTS:
 [[file:framework.png]]
-
-** Design
+** 模块设计
 *** 网页过滤
     - 网页中含有目录页和详细页，需要过滤掉目录页
     - 要能快速进行计算，不需要过于复杂的机器学习算法
@@ -134,9 +207,9 @@
 \item 初步计划参照\cite{4,5,6}的方法进行实现
 \end{itemize}
 #+END_LaTeX
-** 模板表示
+** HTML文档的表示（模板类似）
 *** DOM Tree
-\begin{figure}[htb]
+    \begin{figure}[htb]
     \centering
     \includegraphics[width=10em,angle=0]{./Selection_001.png}
     \end{figure}
@@ -178,7 +251,7 @@ d_{TV}(D_1,D_2)=\sqrt{\sum_{i=1}^N(v_i(D_1)-v_i(D_2))^2}
 \[
 d_{LCTS}(D_1,D_2)=1-\frac{|lcts(D_1,D_2)|}{\max(|D_1|,|D_2|)}
 \]
-** Design
+** 模块设计
 *** 模板抽取                                                        
     - 可以考虑直接利用聚类的结果（例如，一个类中的文档之间的共同路径集合），利用
       路径集合可以直接表示文档的模板结构
@@ -187,7 +260,7 @@ d_{LCTS}(D_1,D_2)=1-\frac{|lcts(D_1,D_2)|}{\max(|D_1|,|D_2|)}
     - 在计算相似度时加入其他特征，和结构特征共同考虑。内容特征，比如文本的行间分
       布，tag的属性值，比如某些div的id，CSS类名
     - 考虑算法的并行性，部署到Hadoop集群上，加快算法运行速度
-* Schedule
+* 工作进度安排
 ** 日程安排
 - 1-4周：任务分析，文献阅读，研究算法
 - 5-8周：网页过滤，网页聚类和网页模板提取模块初步实现
@@ -197,7 +270,7 @@ d_{LCTS}(D_1,D_2)=1-\frac{|lcts(D_1,D_2)|}{\max(|D_1|,|D_2|)}
   - 如何有效评价系统的功能
 - 13-15周：论文撰写
 
-* References
+* 参考文献
 ** 参考文献
    :PROPERTIES:
    :BEAMER_envargs:[allowframebreaks]
