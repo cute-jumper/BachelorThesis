@@ -1,0 +1,36 @@
+#+TITLE:     第四周工作报告
+#+AUTHOR:    计92 丘骏鹏 2009011282
+#+EMAIL:     qjp@qjp-ideapad
+#+DATE:      2013-03-22 Fri
+#+DESCRIPTION:
+#+KEYWORDS:
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+
+#+latex_class: zh-article
+#+options: ^:{}
+
+* 工作内容
+- A Short Survey of Document Structure Similarity Algorithms。这篇文章总结了已有
+  的几种计算HTML文档结构相似性的方法，提出了Path Shingles的计算方法，文章中还提到
+  了几种计算方法的若干实验结果，也可以当作本实验的参考。
+- Clustering Template Based Web Documents。这篇论文讨论一种优化的树的编辑距离计算
+  方法和几个基于Path和Tag的相似度计算方法，同时还有将这些计算方法和几种聚类方法结
+  合以后的实验效果，论文中的一些评价方法可以借鉴。
+- Detecting structural similarities between XML document。这篇文章只是简单的浏览，
+  主要讲的是如何用傅里叶变换进行相似度计算。结合其他引用了这篇文章的论文来看，此
+  方法比较复杂，效果却不一定很好，因此暂时不考虑使用。
+- 其他的大部分时间在准备、修改和完善开题报告
+  
+* 下周计划
+主要是开始写代码，将数据的输入方式和预处理做好，同时初步实现网页过滤的功能。可能
+在实现过程中还要继续看一些论文，研究其中的细节。根据代码实现的进度再灵活调整工程
+进度。
+

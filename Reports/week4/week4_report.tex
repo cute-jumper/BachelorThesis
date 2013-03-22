@@ -1,0 +1,96 @@
+% Created 2013-03-22 Fri 18:31
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fixltx2e}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{soul}
+\usepackage{textcomp}
+\usepackage{marvosym}
+\usepackage[nointegrals]{wasysym}
+\usepackage{latexsym}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\tolerance=1000
+\usepackage{fontspec}
+\usepackage{xunicode}
+\usepackage{xltxtra}
+\usepackage{xeCJK}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{fancybox}
+\usepackage{comment}
+\usepackage{enumerate}
+\usepackage{colortbl}
+\usepackage{framed}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\setmainfont{Times New Roman}
+\setmonofont{Courier New}
+\setCJKmainfont[BoldFont=YouYuan]{SimSun}
+\setCJKfamilyfont{song}{SimSun}
+\setCJKfamilyfont{msyh}{微软雅黑}
+\setCJKfamilyfont{fs}{FangSong}
+
+\lstset{frame=single}
+
+% new and renew command
+\newcommand{\reffig}[1]{Figure~\ref{#1}}
+\newcommand{\reftbl}[1]{Table~\ref{#1}}
+\renewcommand{\contentsname}{目录}
+\renewcommand{\baselinestretch}{1.2}
+
+% In case you need to adjust margins:
+\topmargin=-0.0in      %
+\evensidemargin=0.5in     %
+\oddsidemargin=0.5in      %
+\textwidth=5.5in        %
+\textheight=8.5in       %
+\headsep=0.25in         %
+
+\providecommand{\alert}[1]{\textbf{#1}}
+
+\title{第四周工作报告}
+\author{计92 丘骏鹏 2009011282}
+\date{2013-03-22 Fri}
+\hypersetup{
+  pdfkeywords={},
+  pdfsubject={},
+  pdfcreator={Emacs Org-mode version 7.8.03}}
+
+\begin{document}
+
+\maketitle
+
+
+
+\section{工作内容}
+\label{sec-1}
+
+\begin{itemize}
+\item A Short Survey of Document Structure Similarity Algorithms。这篇文章总结了已有
+  的几种计算HTML文档结构相似性的方法，提出了Path Shingles的计算方法，文章中还提到
+  了几种计算方法的若干实验结果，也可以当作本实验的参考。
+\item Clustering Template Based Web Documents。这篇论文讨论一种优化的树的编辑距离计算
+  方法和几个基于Path和Tag的相似度计算方法，同时还有将这些计算方法和几种聚类方法结
+  合以后的实验效果，论文中的一些评价方法可以借鉴。
+\item Detecting structural similarities between XML document。这篇文章只是简单的浏览，
+  主要讲的是如何用傅里叶变换进行相似度计算。结合其他引用了这篇文章的论文来看，此
+  方法比较复杂，效果却不一定很好，因此暂时不考虑使用。
+\item 其他的大部分时间在准备、修改和完善开题报告
+\end{itemize}
+  
+\section{下周计划}
+\label{sec-2}
+
+主要是开始写代码，将数据的输入方式和预处理做好，同时初步实现网页过滤的功能。可能
+在实现过程中还要继续看一些论文，研究其中的细节。根据代码实现的进度再灵活调整工程
+进度。
+
+\end{document}
