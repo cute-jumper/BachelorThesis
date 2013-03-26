@@ -1,0 +1,31 @@
+package thu.qjp.preprocess
+
+import com.ibm.icu.text.{CharsetMatch, CharsetDetector}
+
+object Preprocess {
+  def main (args: Array[String]) {
+  	test
+  }
+  def test = {
+    val detector = new CharsetDetector
+    detector.setText(new java.io.BufferedInputStream(
+        new java.io.FileInputStream("../../Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f2e45101017icz.html")))
+    val res = detector.detect
+    print(res.getName())
+    print(res.getLanguage())
+    print(res.getConfidence())
+  }
+  
+  import java.io.File
+  import java.net.URLDecoder.decode
+  
+  def stripBlank(input: Array[String]) = {
+    input.filter(_.length != 0).map(_.trim)
+  }
+  
+  def stripTags(tags: Array[String]) = {
+    for (tag <- tags) {
+      
+    }
+  }
+}

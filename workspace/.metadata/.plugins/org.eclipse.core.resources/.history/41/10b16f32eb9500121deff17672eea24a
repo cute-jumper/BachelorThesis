@@ -1,0 +1,3 @@
+object scratch {
+  " asdfas ".trim                                 //> res0: java.lang.String = asdfas
+}

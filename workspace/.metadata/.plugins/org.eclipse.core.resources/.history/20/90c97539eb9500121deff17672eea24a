@@ -1,0 +1,3 @@
+object scratch {
+  println(" asdfas ".trim)                        //> 
+}

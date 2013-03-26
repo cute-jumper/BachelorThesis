@@ -1,0 +1,3 @@
+object scratch {
+  " asdfas ".stripMargin                          //> res0: String = " asdfas "
+}

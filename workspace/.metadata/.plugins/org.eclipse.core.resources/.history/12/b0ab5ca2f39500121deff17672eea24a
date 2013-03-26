@@ -1,0 +1,14 @@
+package thu.qjp.preprocess
+
+object Preprocess {
+  def main (args: Array[String]) {
+  	Preprocess
+  }
+  import java.io.File
+  import java.net.URLDecoder.{decode => unquote}
+  print(unquote("%2F"))
+  def stripBlank(input: Array[String]) = {
+    input.filter(_.length != 0).map(_.trim)
+  }
+  
+}
