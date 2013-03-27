@@ -1,3 +1,0 @@
-object scratch {
-  print(" asdfas ".trim0                          //> res0: java.lang.String = asdfas
-}

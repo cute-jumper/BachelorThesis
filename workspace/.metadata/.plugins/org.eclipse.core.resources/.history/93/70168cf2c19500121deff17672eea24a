@@ -1,7 +1,0 @@
-package thu.qjp.preprocess
-
-object Preprocess {
-  def main (args: Array[String]) {
-    println("Hello World")
-  }
-}
