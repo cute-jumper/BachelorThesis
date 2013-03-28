@@ -1,26 +1,33 @@
 package thu.ailab.utils
 
-case class CharsetNotConfidentException(charset: String, confidence: Int) extends Exception
+import com.twitter.logging.Logger
 
 /**
  * Simple wrapper of icu4j, which can used to automatically detect
- * the character set of the HTML documents.   
+ * the character set of the HTML documents.
  * 
- * Note: If the confidence is not good enough, say, lower than 50,
- * it will throw an exception and the caller should catch it. 
+ * @param filname
+ * Path to the file
+ * 
+ * @return Option[String]
+ * Possible character set with confidence not below than 50, wrapped
+ * in an option type.
  */
 object CharsetDetector {
-  def apply(fn: String) = {
+  private val logger = Logger.get(getClass)
+  def apply(filename: String): Option[String] = {
     import java.io.{BufferedInputStream, FileInputStream}
     import com.ibm.icu.text.{CharsetMatch, CharsetDetector}
     val detector = new CharsetDetector
-    val buf = new BufferedInputStream(new FileInputStream(fn))
+    val buf = new BufferedInputStream(new FileInputStream(filename))
     detector.setText(buf)
     val result = detector.detect()
-    if (result.getConfidence() < 50) {
-      throw CharsetNotConfidentException(result.getName(), result.getConfidence())
-    }
     buf.close()
-    result.getName
+    if (result.getConfidence() < 50) {
+      logger.error("Poor confidence of %s: %d", result.getName, result.getConfidence)
+      None
+    } else {
+      Some(result.getName)
+    }
   }
 }

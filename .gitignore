@@ -2,3 +2,5 @@
 .~*
 Docs/
 Data/
+workspace/.*
+workspace/TemplateExtractor/.*
