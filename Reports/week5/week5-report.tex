@@ -1,0 +1,151 @@
+% Created 2013-03-29 Fri 17:20
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fixltx2e}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{soul}
+\usepackage{textcomp}
+\usepackage{marvosym}
+\usepackage[nointegrals]{wasysym}
+\usepackage{latexsym}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\tolerance=1000
+\usepackage{fontspec}
+\usepackage{xunicode}
+\usepackage{xltxtra}
+\usepackage{xeCJK}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{fancybox}
+\usepackage{comment}
+\usepackage{enumerate}
+\usepackage{colortbl}
+\usepackage{framed}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\setmainfont{Times New Roman}
+\setmonofont{Courier New}
+\setCJKmainfont[BoldFont=YouYuan]{SimSun}
+\setCJKfamilyfont{song}{SimSun}
+\setCJKfamilyfont{msyh}{微软雅黑}
+\setCJKfamilyfont{fs}{FangSong}
+
+\lstset{frame=single}
+
+% new and renew command
+\newcommand{\reffig}[1]{Figure~\ref{#1}}
+\newcommand{\reftbl}[1]{Table~\ref{#1}}
+\renewcommand{\contentsname}{目录}
+\renewcommand{\baselinestretch}{1.2}
+
+% In case you need to adjust margins:
+\topmargin=-0.0in      %
+\evensidemargin=0.5in     %
+\oddsidemargin=0.5in      %
+\textwidth=5.5in        %
+\textheight=8.5in       %
+\headsep=0.25in         %
+
+\providecommand{\alert}[1]{\textbf{#1}}
+
+\title{第五周工作报告}
+\author{丘骏鹏}
+\date{2013-03-29 Fri}
+\hypersetup{
+  pdfkeywords={},
+  pdfsubject={},
+  pdfcreator={Emacs Org-mode version 7.8.11}}
+
+\begin{document}
+
+\maketitle
+
+
+
+\section{主要工作内容}
+\label{sec-1}
+
+这一周主要开始搭建程序的基本框架和实现数据的一些预处理。
+\subsection{简单的数据统计}
+\label{sec-1-1}
+
+首先对数据做了一些基本的统计：
+
+\begin{center}
+\begin{tabular}{lrrr}
+           &  blog.zip  &  news.zip  &  other.zip  \\
+\hline
+ 文件个数  &     59998  &     81561  &     183635  \\
+\end{tabular}
+\end{center}
+
+
+
+新浪博客的目录页和详细页可以用URL区分，比如某个博主的目录页为
+\href{http://blog.sina.com.cn/u/1439351555}{http://blog.sina.com.cn/u/1439351555}
+，他的某篇文章的URL格式为\\
+\href{http://blog.sina.com.cn/s/blog_55cac30301016yb1.html}{http://blog.sina.com.cn/s/blog\_55cac30301016yb1.html}
+。因此对于博客数据可以用URL
+正则进行过滤。通过shell命令进行统计后，得到的结果为：
+blog中不带html后缀的文件有23430，带有html后缀的文件有36568。可以初步判断blog数据
+中有用的详细页数据为36568。
+
+blog数据中还有少量的404页面，不符合上面的url组成规律的大部分是404页面。
+我用简单的''404 Not Found''字符串进行过滤，以下的shell命令：
+
+\lstset{extendedchars=false,basicstyle=\ttfamily\footnotesize,escapechar=`,breaklines,language=shell}
+\begin{lstlisting}
+ls blog/ | xargs -I{} grep "404 Not Found" -c {} | awk '{sum+=$1};END{print sum}'
+\end{lstlisting}
+结果为174，即有174个没用的404页面。这一步也可以先排除一些没用的404页面。（当然，
+如果严格来说包含“404 Not Found”的页面不一定就是404页面，但是这个简单的筛选方法
+对于这个实验来说应该够了）
+
+结合以上方法可以做一次粗粒度的筛选，然后将可用的实验页面初步筛选出来。
+
+我从blog和news中各抽取了1000个文件作为样本，用于测试使用。初步打算先用blog中的数
+据进行后续的实验。
+\subsection{实现}
+\label{sec-1-2}
+
+\begin{itemize}
+\item 实现语言：
+  打算采用Java+Scala，\href{http://en.wikipedia.org/wiki/Scala_%28programming_language%29}{Scala} 是JVM上的静态类型语言，可以和Java之间无缝操作，
+  支持面向对象和函数式等编程范式。我之前写过Java+Scala的大作业，对两者都比较熟悉。
+\item 关于实现方面的一些库的选择：
+\begin{itemize}
+\item 关于字符集探测库：上网搜了一些相关的库和相应的评价，决定选择\href{http://site.icu-project.org/}{icu4j}。这个库目前仍
+    在活跃开发中，对各个字符集的支持很成熟。目前的测试结果来看可以对下载的HTML的字
+    符集进行正常进行分辨。
+\item HTML parser：目前初步决定采用\href{http://jsoup.org}{Jsoup}，写了一些基本的程序进行初步测试，比较符合需
+    求。
+\item 日志系统：用的是twitter包装的util-logging包，是在java.util.logging上的一个简单
+    包装。
+\item 配置文件读取：基于java实现的一个配置文件读取库，支持java原生的properties文件格
+    式、JSON格式和HOCON(Human-Optimized Config Object Notation)格式的配置文件。维护
+    者是\href{http://typesafe.com}{http://typesafe.com},项目地址:\href{https://github.com/typesafehub/config}{https://github.com/typesafehub/config}
+\end{itemize}
+\item 目前已经实现的部分：
+  目前写好了简单的预处理部分，包括先将一些不关心的标签去掉，如
+  script,style,link,br,img,strong,em,font。这样可以先将文档的结果简化，后期DOM的
+  解析会快，因为DOM解析一般会比较耗内存，而且速度较慢，因此这些预处理是必要的。
+  另一方面，从我们需要关心的模板细度来说，我们也不需要这种细粒度的标签。不过这部
+  分还需要不断修改验证，可以多去掉一些标签，但是不能将一些必要的去掉了。
+
+  同时系统的日志系统和配置文件解析部分也已经基本完成。
+\end{itemize}
+\section{下周工作}
+\label{sec-2}
+
+下一周打算将网页的相似度计算和聚类部分完成，先采用一些基于path和tag的简单算法计
+算相似度。
+
+\end{document}

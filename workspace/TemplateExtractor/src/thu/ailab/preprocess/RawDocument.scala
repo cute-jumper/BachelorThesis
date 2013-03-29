@@ -1,6 +1,8 @@
 package thu.ailab.preprocess
 
 import thu.ailab.utils.CharsetDetector
+import thu.ailab.utils.MyConfig
+import thu.ailab.utils.MyConfigFactory
 
 /**
  * Document class, representing one HTML document, with some useful information. 
@@ -92,6 +94,7 @@ class RawDocument(val filename: String) {
 
 object RawDocument {
   def main(args: Array[String]) {
+    MyConfigFactory
     val foo = new RawDocument("../../Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f2e45101017icv.html")
     foo.test()
   }

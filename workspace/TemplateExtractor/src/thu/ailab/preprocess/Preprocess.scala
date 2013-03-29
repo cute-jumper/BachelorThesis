@@ -7,8 +7,6 @@ import org.jsoup.nodes.Element
 
 object Preprocess {
   import com.typesafe.config._
-  val conf = ConfigFactory.load()
-  val bar = conf.getInt()
   val doc = Jsoup.parse(
       new java.io.File("../../Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f2e45101017icv.html"), "gbk")
   val elem = doc.getElementsByTag("strong")
