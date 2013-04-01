@@ -96,6 +96,6 @@ object RawDocument {
   def main(args: Array[String]) {
     MyConfigFactory
     val foo = new RawDocument("../../Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f2e45101017icv.html")
-    foo.test()
+    //foo.test()
   }
 }
