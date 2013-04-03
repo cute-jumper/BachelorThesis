@@ -1,8 +1,13 @@
 package thu.ailab.algo
 
+import scala.collection.mutable.ArrayBuffer
+
 trait Algorithm
 
 class LCS[T <% Ordered[T]](val seq1: List[T], val seq2: List[T])  extends Algorithm {
+  object Direction extends Enumeration {
+    val DIAGONAL, DOWN, LEFT = Value
+  }
   val len1 = seq1.length
   val len2 = seq2.length
   def recursiveCalcLCS = {
@@ -20,10 +25,11 @@ class LCS[T <% Ordered[T]](val seq1: List[T], val seq2: List[T])  extends Algori
   def iterateCalcLCS: Int = {
     val table = Array.ofDim[Int](len1 + 1, len2 + 1)
     for (i <- 1 to seq1.length; j <- 1 to seq2.length) {
-      if (seq1(i -  1) == seq2(j - 1))
+      if (seq1(i -  1) == seq2(j - 1)) {
         table(i)(j) = table(i - 1)(j - 1) + 1
-      else 
+      } else { 
         table(i)(j) = Math.max(table(i - 1)(j), table(i)(j - 1))
+      }
     }
     table(seq1.length)(seq2.length)
   }
