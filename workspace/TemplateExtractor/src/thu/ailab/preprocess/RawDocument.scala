@@ -73,7 +73,7 @@ class RawDocument(val filename: String) {
     }
   } 
   
-  private val pairedTags = List("script", "style")
+  private val pairedTags = List("script", "style", "p")
   private val singleTags = List("link", "input", "br", "img")
   private val uselessTags = List("strong", "em", "font", "b")
   private val uselessPatterns = List("""(?is)<!--.*?-->""")
