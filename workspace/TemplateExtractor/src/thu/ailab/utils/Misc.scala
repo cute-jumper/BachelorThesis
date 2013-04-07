@@ -1,9 +1,9 @@
 package thu.ailab.utils
 
 object Misc {
-  def timeIt(method: => Unit) = {
+  def timeIt[T](method: => T) = {
     val start = System.nanoTime()
-    method
-    (System.nanoTime() - start) / 1e9    
+    val ret = method
+    (ret, (System.nanoTime() - start) / 1e9)    
   }
 }

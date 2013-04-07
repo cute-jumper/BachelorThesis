@@ -1,0 +1,130 @@
+% Created 2013-04-07 Sun 20:17
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fixltx2e}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{soul}
+\usepackage{textcomp}
+\usepackage{marvosym}
+\usepackage[nointegrals]{wasysym}
+\usepackage{latexsym}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\tolerance=1000
+\usepackage{fontspec}
+\usepackage{xunicode}
+\usepackage{xltxtra}
+\usepackage{xeCJK}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{fancybox}
+\usepackage{comment}
+\usepackage{enumerate}
+\usepackage{colortbl}
+\usepackage{framed}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\setmainfont{Times New Roman}
+\setmonofont{Courier New}
+\setCJKmainfont[BoldFont=YouYuan]{SimSun}
+\setCJKfamilyfont{song}{SimSun}
+\setCJKfamilyfont{msyh}{微软雅黑}
+\setCJKfamilyfont{fs}{FangSong}
+
+\lstset{frame=single}
+
+% new and renew command
+\newcommand{\reffig}[1]{Figure~\ref{#1}}
+\newcommand{\reftbl}[1]{Table~\ref{#1}}
+\renewcommand{\contentsname}{目录}
+\renewcommand{\baselinestretch}{1.2}
+
+% In case you need to adjust margins:
+\topmargin=-0.0in      %
+\evensidemargin=0.5in     %
+\oddsidemargin=0.5in      %
+\textwidth=5.5in        %
+\textheight=8.5in       %
+\headsep=0.25in         %
+
+\providecommand{\alert}[1]{\textbf{#1}}
+
+\title{第六周工作报告}
+\author{丘骏鹏}
+\date{2013-04-07 Sun}
+\hypersetup{
+  pdfkeywords={},
+  pdfsubject={},
+  pdfcreator={Emacs Org-mode version 7.9.4}}
+
+\begin{document}
+
+\maketitle
+
+\setcounter{tocdepth}{3}
+\tableofcontents
+\vspace*{1cm}
+
+
+\section{本周工作}
+\label{sec-1}
+
+\begin{enumerate}
+\item 实现了最小公共序列的动态规划算法，在一些小的数据上进行了简单的测试
+\item 利用Jsoup完成了树的遍历，利用该序列进行计算，初步进行了测试
+\item 阅读了一些weka的tutorial，学习weka的用法
+\item 代码重构和增加注释
+\end{enumerate}
+\section{一些实验数据}
+\label{sec-2}
+
+在已完成代码的基础上做了一些简单的测试，从blog中随机抽取了10篇文档（一开始取了50
+篇，但是由于计算速度太慢，改成10篇），利用tag序列求最大公共序列的方法，分别计算两
+两之间的相似性，统计数据如下：
+
+\begin{verbatim}
+Average Time: 1.9945767823333338(s)
+Max similarity: 0.29230769230769227
+Min similarity: 0.01552795031055898
+\end{verbatim}
+
+增加测试文档到20篇，得到的数据如下：
+
+\begin{verbatim}
+Average Time: 2.298010719252631(s)
+Max similarity: 0.36898395721925137
+Min similarity: 0.0
+\end{verbatim}
+
+说明：以上的Average Time表示计算两篇文档的相似度平均所花的时间（注：这个时间不包
+括预处理的时间，只是进行最长公共字串匹配算法的运行时间），从上面两个简单测试可以
+看到，大概平均需要2s左右。下面的Max similarity和Min similarity分别表示相似度的最
+大值和最小值，相似度的计算方法为：\[ 1-\frac{|lcs(t_1, t_2)|}{max(|t_1|, |t_2|)}
+\]
+
+\(t_1,t_2\)分别表示两个tag遍历序列。
+
+所有的文档都先经过了简单的处理，去掉了一些无用的标签，简化了树结构。在这个基础上，
+通过tag序列计算最长公共字串的方法，每两篇文档需要花费2s的时间。考虑最坏的情况，我们的
+blog数据有59998篇，如果每两篇都进行计算，需要的时间非常之多，大约可以计算为：
+\(60000 * 60000 / 2 * 2 / 3600 = 1000000\)小时。当然，实际情况不会这么坏，可以加
+入多个优化，以上的简单计算只是为了说明数据量增大之后可能会造成计算时间的巨大增加。
+
+现阶段可以考虑的优化包括：算法，多线程以及预处理。还包括代码本身的实现，我还需要
+再检查一下代码本身实现是否有问题，是否有较大的提高空间。
+\section{进度说明}
+\label{sec-3}
+
+由于本周清明节放假，上周的计划中“完成聚类”的工作未完成。此外花了一些额外的时间
+重构已有代码和增加必要注释，因此打算下周抓紧一些时间补上这部分的工作。
+
+总体来说上周的进度没有完成已有要求，比较慢，下一周打算加快实现的速度。
+
+\end{document}

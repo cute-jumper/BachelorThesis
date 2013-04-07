@@ -3,7 +3,7 @@ package thu.ailab.algo
 import scala.collection.mutable.ArrayBuffer
 
 trait Algorithm[T] {
-  def run(p1: T, p2: T)
+  def run(p1: T, p2: T): Double
 }
 
 class LCSAlgo[T] extends Algorithm[List[T]] {

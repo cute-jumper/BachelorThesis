@@ -48,10 +48,23 @@ class TreeBuilder(filename: String) {
 object TestTreeBuilder {
   def main(args: Array[String]) {
     import thu.ailab.utils.Misc._
-    val t1 = new TreeBuilder("../../Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f2e45101017icv.html")
-    val t2 = new TreeBuilder("../../Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f2e45101017icz.html")
-    val t3 = new TreeBuilder("../../Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f1d6140100j68c.html")
-    val runner = new thu.ailab.algo.LCSAlgo[TreeNode]    
-    println(timeIt(println(runner.run(t1.getTagSequence.toList, t2.getTagSequence.toList))))
+    import java.io.{File, FilenameFilter}
+    val MAX_FILE_COUNT = 20
+    val filenames = new File("../../Data/blog1000/").listFiles(new FilenameFilter() {
+      def accept(dir: File, name: String) = name.endsWith(".html")
+    }).slice(0, MAX_FILE_COUNT).map(_.getAbsolutePath)
+//    val filenames = List("../../Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f2e45101017icv.html",
+//        "../../Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f2e45101017icz.html",
+//        "../../Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f1d6140100j68c.html")
+    val ts = filenames.map {
+      new TreeBuilder(_).getTagSequence.toList
+    }
+    val runner = new thu.ailab.algo.LCSAlgo[TreeNode]
+    val (sims, times) = (for (i <- 0 until ts.length; j <- i + 1 until ts.length) yield {
+      timeIt(runner.run(ts(i), ts(j)))
+    }).toList.unzip
+    val averageTime = times.sum / times.length
+    println("Average Time: " + averageTime)
+    println("Max: " + sims.max + "\nMin: " + sims.min)
   }
 }

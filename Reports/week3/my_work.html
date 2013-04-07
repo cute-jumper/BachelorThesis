@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>毕设工作</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="title" content="毕设工作"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2013-03-13 Wed"/>
+<meta name="author" content="丘骏鹏"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  {margin-left:auto; margin-right:0px;  text-align:right;}
+  .left   {margin-left:0px;  margin-right:auto; text-align:left;}
+  .center {margin-left:auto; margin-right:auto; text-align:center;}
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top;  }
+  th.right  { text-align:center;  }
+  th.left   { text-align:center;   }
+  th.center { text-align:center; }
+  td.right  { text-align:right;  }
+  td.left   { text-align:left;   }
+  td.center { text-align:center; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  div.inlinetask {
+    padding:10px;
+    border:2px solid gray;
+    margin:10px;
+    background: #ffffcc;
+  }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">毕设工作</h1>
+
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> 工作综述</h2>
+<div class="outline-text-2" id="text-1">
+
+<p>我对主要工作的理解是：从海量的网页数据中，利用大数据的冗余性发现网页模板，抽取结
+构化的信息。主要的步骤：
+</p><ul>
+<li>首先需要将目录页和详细页分开，可以根据url特征和简单的文本特征来区别。这部分应
+  该要比较简单迅速。
+</li>
+<li>工作的重点在于如何对海量的网页进行聚类和模板抽取。这部分工作应该要充分考虑数据
+  的冗余性，利用这些冗余信息来发现不同网页之间的共同点，从而自动生成网页抽取的模
+  板。同时考虑到数据量很大，算法不能太复杂。
+</li>
+</ul>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> 目前的工作进展</h2>
+<div class="outline-text-2" id="text-2">
+
+<p>前两周的工作报告放在了report_week1-2.zip中。
+</p>
+<p>
+这周到目前截止的工作：
+</p><ul>
+<li>阅读了TEXT: Automatic Template Extraction from Heterogeneous Web Pages。这篇论
+  文将DOM Tree用路径进行表示，用MDL(Minimun Description Length Principle)作为标
+  准进行聚类。由于直接计算MDL复杂度很高，该论文提出一种扩展的MinHash算法，用于近
+  似估计MDL，提高算法效率，
+</li>
+<li>阅读了黄老师给的Webpage Understanding: Beyond Page-Level Search。里面主要介绍的
+  是如何将webpage understanding拆分成几个子任务。其中提到了一种分割HTML网页的
+  VIPS(VIsion-basd Page Segmentation)方法，即将原网页按照视觉区域的分块解析成一
+  个vision tree来进行表示。
+</li>
+<li>VIPS: a Vision-based Page Segmentation Algorithm（在读）。即上面提到的VIPS算法
+  具体实现的论文。我初看的结果是好像算法比较复杂，不确定是否适合应用到大数据上面。
+</li>
+<li><a href="http://code.google.com/p/cx-extractor/">http://code.google.com/p/cx-extractor/</a> 上的工具和文档。该工具主要就利用了HTML
+  文档行块的分布来提取正文，方法和实现都很简单。
+</li>
+</ul>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> 我对工作的理解</h2>
+<div class="outline-text-2" id="text-3">
+
+<p>  工作的重点应该是网页的聚类和模板抽取。
+</p>
+<p>
+  对于如何进行聚类。我觉得聚类方法可以采用现有的那些聚类算法，关键是如何有效地计
+  算两个文档的相似度。HTML可以解析成DOM Tree，可以直接利用这个树表示计算编辑距离
+  来衡量相似度，也可以将树通过某种遍历方法转化为其他数据结构再进行计算，或者是用
+  路径集合表示，也可以按照VIPS将网页划分成vision-tree后再做计算。我现在还没有想到
+  一个很好的计算方法。
+</p>
+<p>
+  对于模板如何抽取。如果聚类的时候利用了DOM Tree的结构特征，比如标签，路径，模板
+  就自动可以表示出来了。如果利用纯内容特征（应该不会这样做），可能会涉及到如何进
+  行正则表达式推导问题。
+</p>
+</div>
+</div>
+</div>
+
+<div id="postamble">
+<p class="date">Date: 2013-03-13 Wed</p>
+<p class="author">Author: 丘骏鹏</p>
+<p class="creator"><a href="http://orgmode.org">Org</a> version 7.9.4 with <a href="http://www.gnu.org/software/emacs/">Emacs</a> version 24</p>
+<a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
+
+</div>
+</body>
+</html>
