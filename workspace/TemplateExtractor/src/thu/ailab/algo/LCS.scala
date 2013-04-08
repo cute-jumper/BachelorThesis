@@ -15,11 +15,16 @@ class LCSAlgo[T] extends Algorithm[List[T]] {
   def run(seq1: List[T], seq2: List[T]) = {
     val (len1, len2) = (seq1.length, seq2.length)
     val (table, path) = getTableAndPathIter(seq1, seq2)
-    val lcs = backtraceLCS(seq1, path)
     val similarity = table(len1)(len2)
+//    val lcs = backtraceLCS(seq1, path)
+//    val similarity = getLCSRecur(seq1, seq2).length
     val distance = 1 - 1.0 * similarity / Math.max(len1, len2)
     distance
   }
+  /**
+   * Recursive version, very slow.
+   * For reference only.
+   */
   def getLCSRecur(seq1: List[T], seq2: List[T]): List[T] = {
     def maxList(lst1: List[T], lst2: List[T]) = if (lst1.length > lst2.length) lst1 else lst2
     (seq1, seq2) match {
@@ -30,6 +35,10 @@ class LCSAlgo[T] extends Algorithm[List[T]] {
         else maxList(getLCSRecur(seq1, xs2), getLCSRecur(xs1, seq2))
     }
   }
+  /**
+   * Iterative version. 
+   * Use this in application.
+   */
   def getTableAndPathIter(seq1: List[T], seq2: List[T]) = {
     val (len1, len2) = (seq1.length, seq2.length)
     val table = Array.ofDim[Int](len1 + 1, len2 + 1)
@@ -48,6 +57,9 @@ class LCSAlgo[T] extends Algorithm[List[T]] {
     }
     (table, path)
   }
+  /**
+   * Recursively find the path
+   */
   def backtraceLCS(seq: List[T], path: Array[Array[Direction]]): List[T] = {
     def helper(x: Int, y: Int): List[T] = {
       if (x < 0 || y < 0)
@@ -66,7 +78,7 @@ class LCSAlgo[T] extends Algorithm[List[T]] {
 object TestLCS {
   def main(args: Array[String]) {
     val lcsAlgo = new LCSAlgo[Char]
-    val test = lcsAlgo.run("abcdehikifg".toList, "asdfasbdfasdfcsdfdsdfefdasfsdfg".toList)
+    val test = lcsAlgo.run("abcde...fg".toList, "asdfasbdfasdfcsdfdsdfefdasfsdfg".toList)
     println(test)
   }
 }

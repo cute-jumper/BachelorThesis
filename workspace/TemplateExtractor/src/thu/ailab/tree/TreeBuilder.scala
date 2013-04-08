@@ -7,6 +7,7 @@ import org.jsoup.select.NodeVisitor
 import org.jsoup.nodes._
 import scala.collection.mutable.ListBuffer
 import thu.ailab.preprocess.RawDocument
+import thu.ailab.utils.MyConfigFactory
 
 class TreeBuilder(filename: String) {
   val rawDoc = new RawDocument(filename)
@@ -46,6 +47,8 @@ class TreeBuilder(filename: String) {
 }
 
 object TestTreeBuilder {
+  MyConfigFactory
+  val logger = com.twitter.logging.Logger.get(getClass)
   def main(args: Array[String]) {
     import thu.ailab.utils.Misc._
     import java.io.{File, FilenameFilter}
@@ -66,5 +69,6 @@ object TestTreeBuilder {
     val averageTime = times.sum / times.length
     println("Average Time: " + averageTime)
     println("Max: " + sims.max + "\nMin: " + sims.min)
+    sims.foreach(logger.info("%s", _))
   }
 }

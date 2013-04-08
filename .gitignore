@@ -4,4 +4,4 @@ Docs/
 Data/
 workspace/.*
 workspace/TemplateExtractor/.*
-workspace/TemplateExtractor/bin/*
+bin/
