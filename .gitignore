@@ -5,3 +5,4 @@ Data/
 workspace/.*
 workspace/TemplateExtractor/.*
 bin/
+target/

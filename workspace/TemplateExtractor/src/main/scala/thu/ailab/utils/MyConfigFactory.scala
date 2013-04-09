@@ -12,7 +12,7 @@ object MyConfigFactory {
   val logfile = conf.getString("logger.filepath")
   configCache("MyLoggerConfig") = new MyLoggerConfig(if (logfile.startsWith("~" + File.separator)) 
     System.getProperty("user.home") + logfile.substring(1)
-    else logfile)  
+    else logfile)
   def get(name: String) = configCache.get(name)
   def main(args: Array[String]) {
   }
@@ -25,5 +25,6 @@ private[utils] abstract class MyConfig
  */
 private[utils] class MyLoggerConfig (val logfile: String) extends MyConfig {
   val logger = Logger.get("")
+  logger.clearHandlers
   logger.addHandler(FileHandler(logfile)())
 }

@@ -69,3 +69,4 @@ object Pi extends App {
     master ! Calculate
   }
 }
+

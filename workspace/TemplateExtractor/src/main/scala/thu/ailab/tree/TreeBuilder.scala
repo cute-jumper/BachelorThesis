@@ -37,7 +37,7 @@ class TreeBuilder(filename: String) {
     def tail(node: Node, depth: Int) = {
       //tagSeq += new TreeNode("</" + node.nodeName() + ">", depth)
       node match {
-        case n: Element => tagSeq += new TreeNode("</" + node.nodeName() + ">", depth)
+        case n: Element => //tagSeq += new TreeNode("</" + node.nodeName() + ">", depth)
         case n: TextNode => //tagSeq += new TreeNode("text: " + n.text(), depth)
         case n: DataNode => //tagSeq += new TreeNode("data: " + n.getWholeData(), depth)
         case _ =>
@@ -52,7 +52,7 @@ object TestTreeBuilder {
   def main(args: Array[String]) {
     import thu.ailab.utils.Misc._
     import java.io.{File, FilenameFilter}
-    val MAX_FILE_COUNT = 20
+    val MAX_FILE_COUNT = 10
     val filenames = new File("../../Data/blog1000/").listFiles(new FilenameFilter() {
       def accept(dir: File, name: String) = name.endsWith(".html")
     }).slice(0, MAX_FILE_COUNT).map(_.getAbsolutePath)
