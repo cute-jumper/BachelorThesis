@@ -1,8 +1,8 @@
 package thu.ailab.preprocess
 
 import thu.ailab.utils.CharsetDetector
-import thu.ailab.utils.MyConfig
-import thu.ailab.utils.MyConfigFactory
+import thu.ailab.config.MyConfig
+import thu.ailab.config.MyConfigFactory
 
 /**
  * Document class, representing one HTML document, with some useful information. 
@@ -22,7 +22,8 @@ class RawDocument(val filename: String) {
   /**
    *  Since we mainly deal with Chinese documents, default is gb18030
    */ 
-  val charset = CharsetDetector(filename).getOrElse("gb18030")
+  import thu.ailab.utils.Tools.getFileCharset
+  val charset = getFileCharset(filename).getOrElse("gb18030")
   logger.info("%s Charset: %s", filename, charset)
   
   /**

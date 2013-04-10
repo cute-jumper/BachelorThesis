@@ -7,7 +7,6 @@ import org.jsoup.select.NodeVisitor
 import org.jsoup.nodes._
 import scala.collection.mutable.ListBuffer
 import thu.ailab.preprocess.RawDocument
-import thu.ailab.utils.MyConfigFactory
 
 class TreeBuilder(filename: String) {
   val rawDoc = new RawDocument(filename)
@@ -46,23 +45,18 @@ class TreeBuilder(filename: String) {
   }
 }
 
-object TestTreeBuilder {
-  MyConfigFactory
-  val logger = com.twitter.logging.Logger.get(getClass)
-  def main(args: Array[String]) {
-    import thu.ailab.utils.Misc._
+import thu.ailab.global._
+object TestTreeBuilder extends AppEntry {
+    import thu.ailab.utils.Tools._
     import java.io.{File, FilenameFilter}
     val MAX_FILE_COUNT = 10
     val filenames = new File("../../Data/blog1000/").listFiles(new FilenameFilter() {
       def accept(dir: File, name: String) = name.endsWith(".html")
     }).slice(0, MAX_FILE_COUNT).map(_.getAbsolutePath)
-//    val filenames = List("../../Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f2e45101017icv.html",
-//        "../../Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f2e45101017icz.html",
-//        "../../Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f1d6140100j68c.html")
     val ts = filenames.map {
       new TreeBuilder(_).getTagSequence.toList
     }
-    val runner = new thu.ailab.algo.LCSAlgo[TreeNode]
+    val runner = new thu.ailab.distance.LCSAlgo[TreeNode]
     val (sims, times) = (for (i <- 0 until ts.length; j <- i + 1 until ts.length) yield {
       timeIt(runner.run(ts(i), ts(j)))
     }).toList.unzip
@@ -70,5 +64,4 @@ object TestTreeBuilder {
     println("Average Time: " + averageTime)
     println("Max: " + sims.max + "\nMin: " + sims.min)
     sims.foreach(logger.info("%s", _))
-  }
 }

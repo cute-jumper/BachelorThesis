@@ -13,7 +13,7 @@ import com.twitter.logging.Logger
  * Possible character set with confidence not below than 50, wrapped
  * in an option type.
  */
-object CharsetDetector {
+private[utils] object CharsetDetector {
   private val logger = Logger.get(getClass)
   def apply(filename: String): Option[String] = {
     import java.io.{BufferedInputStream, FileInputStream}

@@ -7,8 +7,8 @@ object Preprocess {
   }
   def loadHTML(filename: String): Option[xml.Elem] = {
     import java.io.{InputStreamReader, FileInputStream}
-    import thu.ailab.utils.CharsetDetector
-    val charset = CharsetDetector(filename).getOrElse("gbk")
+    import thu.ailab.utils.Tools.getFileCharset
+    val charset = getFileCharset(filename).getOrElse("gbk")
     Some(xml.XML.load(new InputStreamReader(new FileInputStream(filename), charset)))
   }
 }
