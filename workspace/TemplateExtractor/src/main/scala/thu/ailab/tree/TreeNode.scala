@@ -8,13 +8,13 @@ class TreeNode(val name: String, val depth: Int) {
   override def equals(other: Any) = {
     other match {
       case that: TreeNode => 
-        (that canEqual this) &&
-        name == that.name &&
-        depth == that.depth
+        (that canEqual this) && this.hashCode == that.hashCode
+//        name == that.name &&
+//        depth == that.depth
       case _ => false
     }
   }
-  override def hashCode = 41 * (41 + name.hashCode) + depth
+  override val hashCode = 41 * (41 + name.hashCode) + depth
   def canEqual(that: Any) = that.isInstanceOf[TreeNode]
   // Ends here
   
