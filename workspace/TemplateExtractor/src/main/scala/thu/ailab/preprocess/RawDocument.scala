@@ -16,7 +16,7 @@ import thu.ailab.config.MyConfigFactory
  *  - simplifiedContent(strippedLines)
  */
 
-class RawDocument(val filename: String) {
+class RawDocument private[preprocess] (val filename: String) {
   private val logger = com.twitter.logging.Logger.get(getClass)
   val url = java.net.URLDecoder.decode(filename)
   /**
@@ -94,9 +94,20 @@ class RawDocument(val filename: String) {
 }
 
 object RawDocument {
+  private val fileLoaded = Array[Boolean]()
   def main(args: Array[String]) {
     MyConfigFactory
     val foo = new RawDocument("../../Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f2e45101017icv.html")
     //foo.test()
+  }
+}
+class RawDocumentFactory(dir: String) {
+  private val id2filename = new java.io.File(dir).listFiles.map(_.getAbsolutePath)
+  private def fileIsLoaded(id: Int): Boolean = documentCache(id) != null
+  private val documentCache = new Array[RawDocument](id2filename.length)
+  def getRawDocument(id: Int) = {
+    if (documentCache(id) == null)
+      documentCache(id) = new RawDocument(id2filename(id))
+    documentCache(id)
   }
 }

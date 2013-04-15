@@ -9,6 +9,9 @@ object MyConfigFactory {
   private val configCache = new HashMap[String, MyConfig]
   val logfile = conf.getString("logger.filepath")
   configCache("MyLoggerConfig") = new MyLoggerConfig(simpleExpansion(logfile))
+  val blogdir = conf.getString("document.blogdir")
+  val newsdir = conf.getString("document.newsdir")
+  configCache("MyFileDirectoriesConfig") = new MyFileDirectoriesConfig(blogdir, newsdir) 
   /**
    * Replace the `~' with user's home directory
    */

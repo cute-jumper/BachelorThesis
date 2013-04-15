@@ -16,3 +16,9 @@ private[config] class MyLoggerConfig (val logfile: String) extends MyConfig {
   logger.clearHandlers
   logger.addHandler(FileHandler(logfile)())
 }
+
+private[config] class MyFileDirectoriesConfig (val blogdir: String, val newsdir: String) 
+extends MyConfig {
+  val dirCache = Map("blogdir" -> blogdir, "newsdir" -> newsdir)
+  def get(name: String) = dirCache.get(name)
+}
