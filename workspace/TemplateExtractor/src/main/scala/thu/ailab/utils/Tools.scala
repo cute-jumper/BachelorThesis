@@ -21,6 +21,19 @@ object Tools {
    * 
    * @return character set's option
    */
-  def getFileCharset(filename: String) = CharsetDetector(filename)  
+  def getFileCharset(filename: String) = CharsetDetector(filename)
+  
+  /**
+   * new control structure to use PrintWriter
+   */
+  import java.io.PrintWriter
+  def withPrintWriter(filename: String)(op: PrintWriter => Unit) {
+    val writer = new PrintWriter(filename)
+    try {
+      op(writer)
+    } finally {
+      writer.close()
+    }
+  }
 }
 

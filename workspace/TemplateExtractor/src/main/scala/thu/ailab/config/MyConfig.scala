@@ -22,3 +22,8 @@ extends MyConfig {
   val dirCache = Map("blogdir" -> blogdir, "newsdir" -> newsdir)
   def get(name: String) = dirCache.get(name)
 }
+
+class MyOutputFilesConfig (val distancesFile: String) extends MyConfig {
+  val outputFileCache = Map("distancesFile" -> distancesFile)
+  def get(name: String) = outputFileCache.get(name)
+}

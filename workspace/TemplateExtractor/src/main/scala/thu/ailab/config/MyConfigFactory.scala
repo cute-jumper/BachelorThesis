@@ -11,7 +11,9 @@ object MyConfigFactory {
   configCache("MyLoggerConfig") = new MyLoggerConfig(simpleExpansion(logfile))
   val blogdir = conf.getString("document.blogdir")
   val newsdir = conf.getString("document.newsdir")
-  configCache("MyFileDirectoriesConfig") = new MyFileDirectoriesConfig(blogdir, newsdir) 
+  configCache("MyFileDirectoriesConfig") = new MyFileDirectoriesConfig(blogdir, newsdir)
+  val distancesFile = conf.getString("output.distancesFile")
+  configCache("MyOutputFilesConfig") = new MyOutputFilesConfig(distancesFile)
   /**
    * Replace the `~' with user's home directory
    */

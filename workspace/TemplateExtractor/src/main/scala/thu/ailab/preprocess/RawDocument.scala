@@ -18,12 +18,12 @@ import thu.ailab.config.MyConfigFactory
 
 class RawDocument(val filename: String) {
   private val logger = com.twitter.logging.Logger.get(getClass)
-  val url = java.net.URLDecoder.decode(filename)
   /**
    *  Since we mainly deal with Chinese documents, default is gb18030
    */ 
   import thu.ailab.utils.Tools.getFileCharset
   val charset = getFileCharset(filename).getOrElse("gb18030")
+  val url = java.net.URLDecoder.decode(filename, charset)
   logger.info("%s Charset: %s", filename, charset)
   
   /**
