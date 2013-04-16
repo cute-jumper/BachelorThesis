@@ -19,7 +19,7 @@ class LCSAlgo[T] extends Algorithm[List[T]] {
 //    val lcs = backtraceLCS(seq1, path)
 //    val similarity = getLCSRecur(seq1, seq2).length
     val similarity = getLCSOptimized(seq1, seq2)
-    val distance = 1 - 1.0 * similarity / Math.max(len1, len2)
+    val distance = 1 - 1.0 * similarity / math.max(len1, len2)
     distance
   }
   /**

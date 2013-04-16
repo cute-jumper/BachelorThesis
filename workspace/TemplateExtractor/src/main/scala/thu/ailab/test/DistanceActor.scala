@@ -5,24 +5,26 @@ import akka.routing.RoundRobinRouter
 import akka.util.Duration
 import akka.util.duration._
 import thu.ailab.tree.TagSeqFactory
-import thu.ailab.config.{MyConfigFactory, MyFileDirectoriesConfig}
+import thu.ailab.config._
 import thu.ailab.utils.Point
 import thu.ailab.distance.LCSAlgo
 import thu.ailab.tree.TreeNode
+import thu.ailab.global.AppEntry
 
-object TextSimilarities {
+object TextSimilarities extends AppEntry {
   object TriangleType extends Enumeration {
     type TriangleType = Value
     val DOWN, UP = Value
   }
   import TriangleType._
   sealed trait Message
-  case class StartCalculation extends Message
+  case object StartCalculation extends Message
   case class AreaSplit(p1: Point, p2: Point) extends Message
-  case class AreaFinished extends Message
+  case class AreaFinished() extends Message
   case class AllFinished(duration: Duration) extends Message
   
   val fdirConfig = (MyConfigFactory.get("MyFileDirectoriesConfig").get).asInstanceOf[MyFileDirectoriesConfig]
+  val outputFilesConfig = MyConfigFactory.get("MyOutputFilesConfig").get.asInstanceOf[MyOutputFilesConfig]
   
   val factory = new TagSeqFactory(fdirConfig.get("blogdir").get)
   val algoRunner = new LCSAlgo[TreeNode]
@@ -68,8 +70,20 @@ object TextSimilarities {
   class Listener extends Actor {
     def receive = {
       case AllFinished(duration) =>
+        writeFile(outputFilesConfig.get("distancesFile").get)
         println("Calculation time: %s".format(duration))
         context.system.shutdown
+    }
+    import thu.ailab.utils.Tools.withPrintWriter
+    def writeFile(filename: String) = {
+      withPrintWriter(filename) {pw =>
+        var idx = 0
+        for (i <- 1 until factory.size; j <- 0 until i) {
+          pw.println("%s\t%s\t%f".format(
+              factory.getFilename(i), factory.getFilename(j), distArray(idx)))
+          idx += 1
+        }
+      }
     }
   }
   

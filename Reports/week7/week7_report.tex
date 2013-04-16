@@ -1,0 +1,135 @@
+% Created 2013-04-12 Fri 22:10
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fixltx2e}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{soul}
+\usepackage{textcomp}
+\usepackage{marvosym}
+\usepackage[nointegrals]{wasysym}
+\usepackage{latexsym}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\tolerance=1000
+\usepackage{fontspec}
+\usepackage{xunicode}
+\usepackage{xltxtra}
+\usepackage{xeCJK}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{fancybox}
+\usepackage{comment}
+\usepackage{enumerate}
+\usepackage{colortbl}
+\usepackage{framed}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\setmainfont{Times New Roman}
+\setmonofont{Courier New}
+\setCJKmainfont[BoldFont=YouYuan]{SimSun}
+\setCJKfamilyfont{song}{SimSun}
+\setCJKfamilyfont{msyh}{微软雅黑}
+\setCJKfamilyfont{fs}{FangSong}
+
+\lstset{frame=single}
+
+% new and renew command
+\newcommand{\reffig}[1]{Figure~\ref{#1}}
+\newcommand{\reftbl}[1]{Table~\ref{#1}}
+\renewcommand{\contentsname}{目录}
+\renewcommand{\baselinestretch}{1.2}
+
+% In case you need to adjust margins:
+\topmargin=-0.0in      %
+\evensidemargin=0.5in     %
+\oddsidemargin=0.5in      %
+\textwidth=5.5in        %
+\textheight=8.5in       %
+\headsep=0.25in         %
+
+\providecommand{\alert}[1]{\textbf{#1}}
+
+\title{第七周工作报告}
+\author{丘骏鹏}
+\date{2013-04-12 Fri}
+\hypersetup{
+  pdfkeywords={},
+  pdfsubject={},
+  pdfcreator={Emacs Org-mode version 7.9.4}}
+
+\begin{document}
+
+\maketitle
+
+\setcounter{tocdepth}{3}
+\tableofcontents
+\vspace*{1cm}
+
+
+\section{本周工作}
+\label{sec-1}
+
+\begin{itemize}
+\item 优化原有的算法，做了很多的近似，目前运行时间从2s降到了0.1到0.2s。主要的方法是：
+\begin{enumerate}
+\item 去掉了结束标签，只保留开始标签，这一步速度提高很多，因为目前LCS算法的复杂度
+     是O(mn)，所以如果去掉结束标签理论上复杂度变成\(\frac{1}{4}\)。
+\item 将字符串做了hash，避免字符串比较，直接比较int数值。这一步速度提升有限。
+\item 做了空间上的一些优化，空间复杂度降到O(2*m)，这主要是考虑到之后如果载入很多文
+     档，内存占用也会很大，做一些这方面的优化也是有必要的。
+\end{enumerate}
+虽然目前运行速度加快了10倍左右，但是感觉提高的空间不会太大了（至少从算法上来
+  说）。如果从语言角度考虑的话，可能的方法是使用C语言实现一个LCS算法，然后用jni来
+  调用，可能可以加快一些执行速度（是否有效取决于jni调用多花的时间和C程序执行加速
+  的时间之间的大小关系）
+\item 学习了Actor模型，基于\href{http://akka.io}{akka} 库实现了一个简单的并行计算的框架。Actor模型中每个
+  actor是一个基本的计算单元，互相之间通过传递异步的消息来进行决策，是比线程、锁这
+  些并行计算的原语更高层次的一个轻量级的抽象并行计算模型。akka库目前工业上也有较
+  广泛的应用，其中包括amazon这些大的公司。我打算采用这个并行框架实现多线程的计算。
+\end{itemize}
+\section{目前的困难}
+\label{sec-2}
+
+\begin{enumerate}
+\item 拿最小的博客集合来做实验的话，共60000篇文档。假设目前采用一种简单的聚类算法，
+     只需要每两篇文档计算一次距离即可，时间是\(60000^2/2*0.1/3600\)小时，远超可以
+     承受的范围，所以必须采用并行的计算方法。如果有20台计算机可以同时计算，每台
+     上可以开10个线程，实际需要的时间为大概5000小时。
+
+     和郝老师讨论的方案是先将样本数减少，因为这是和样本个数平方成正比的，所以效
+     果会很明显，但是会不会数据量一小就和选题的着重点（大数据量）有些偏差？
+
+     也和房磊学长讨论了一下，他说暂时没有想到很好的解决方案，不过可以放到hadoop
+     上做。
+
+     我想大部分的聚类算法可能都需要至少计算一次两两的距离，如果可以显著减少计算相
+     似度的次数会提高算法的执行速度，不知道老师能不能提供关于这方面的算法的一些参
+     考（或者组里有没有师兄师姐做过类似的工作）？除了减少样本量和计算次数外，只能
+     将计算相似度的方法再进行简化。实际在做了多次简化后，目前这个LCS已经算挺粗糙
+     的了，我觉得如果采用jaccard或者转化为一个tag vector计算欧几里得距离之类的方
+     法就可能太过于简单了（不过时间也可以显著减小）。
+\item 聚类的意义。取了些样本做实验，发现实验结果差异较大的是404网页和详细页，意义
+     不大。
+     
+     关于聚类的意义，我的看法是这样的：大数据的优点是可以让我们更好地发现
+     “共同点”，但是为了计算速度，我们可能采取较粗糙的算法，这样会导致发现出来的
+     “共同点”可能会很稀疏，也就是说模板会很简单。因此如果网页的模板差异不是特别
+     大，差异部分可能在这些稀疏的模板体现不明显，也就很难通过聚类区分开来。实际上
+     因为我们不知道聚出来的类的个数，我们只有通过控制阈值的方法来控制聚类的过程，
+     能分多少类也会取决于我们的阈值是如何取的，如果阈值设置不合适，可能就会有不合
+     理的结果。但这个阈值取多少合适本身也很难决定，没有一个好的方法衡量多大的阈值
+     是好的。
+
+     另外，进行聚类需要耗费的计算资源这么大，聚类结果实际上可能只会有少量甚至只有
+     1类，而且还会因为不同的阈值和聚类的方法存在诸多不确定性，因此这样的做法是否
+     真正切合实际的需求？从实用角度考虑，在我们这个系统中这样做是不是有些复杂了？
+\end{enumerate}
+
+\end{document}
