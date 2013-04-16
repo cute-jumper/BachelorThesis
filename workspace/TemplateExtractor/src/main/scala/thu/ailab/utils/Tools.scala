@@ -21,5 +21,6 @@ object Tools {
    * 
    * @return character set's option
    */
-  def getFileCharset(filename: String) = CharsetDetector(filename)
+  def getFileCharset(filename: String) = CharsetDetector(filename)  
 }
+

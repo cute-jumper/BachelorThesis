@@ -21,7 +21,7 @@ class TreeBuilder(filename: String) {
   def getTagSequence = {
     val visitor = new TagVisitor
     doc.traverse(visitor)
-    visitor.tagSeq
+    visitor.tagSeq.toList
   }
   class TagVisitor extends NodeVisitor {
     val tagSeq = new ListBuffer[TreeNode]
@@ -54,11 +54,9 @@ object TestTreeBuilder extends AppEntry {
       def accept(dir: File, name: String) = name.endsWith(".html")
     }).slice(0, MAX_FILE_COUNT).map(_.getAbsolutePath)
     val ts = filenames.map {
-      new TreeBuilder(_).getTagSequence.toList
+      new TreeBuilder(_).getTagSequence
     }
     val runner = new thu.ailab.distance.LCSAlgo[TreeNode]
-    //val (sims, times, nameParis,foo) =
-    
     val results = 
       (for (i <- 0 until ts.length; j <- i + 1 until ts.length) yield {
       (timeIt(runner.run(ts(i), ts(j))), (filenames(i), filenames(j)))
