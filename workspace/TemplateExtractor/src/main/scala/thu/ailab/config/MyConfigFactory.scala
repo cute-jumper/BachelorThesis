@@ -7,21 +7,24 @@ import java.io.File
 object MyConfigFactory {
   private val conf = ConfigFactory.load()
   private val configCache = new HashMap[String, MyConfig]
-  val logfile = conf.getString("logger.filepath")
-  configCache("MyLoggerConfig") = new MyLoggerConfig(simpleExpansion(logfile))
-  val blogdir = conf.getString("document.blogdir")
-  val newsdir = conf.getString("document.newsdir")
+  val logfile = getConfString(conf, "logger.filepath")
+  configCache("MyLoggerConfig") = new MyLoggerConfig(logfile)
+  val blogdir = getConfString(conf, "document.blogdir")
+  val newsdir = getConfString(conf, "document.newsdir")
   configCache("MyFileDirectoriesConfig") = new MyFileDirectoriesConfig(blogdir, newsdir)
-  val distancesFile = conf.getString("output.distancesFile")
+  val distancesFile = getConfString(conf, "output.distancesFile")
   configCache("MyOutputFilesConfig") = new MyOutputFilesConfig(distancesFile)
-  /**
-   * Replace the `~' with user's home directory
-   */
-  private def simpleExpansion(filepath: String) = 
-    if (filepath.startsWith("~" + File.separator)) 
-      System.getProperty("user.home") + filepath.substring(1)
-    else 
-      filepath
+  private def getConfString(conf: Config, path: String) = {
+    /**
+     * Replace the `~' with user's home directory
+     */
+    def simpleExpansion(filepath: String) = 
+      if (filepath.startsWith("~" + File.separator)) 
+        System.getProperty("user.home") + filepath.substring(1)
+      else 
+        filepath
+    simpleExpansion(conf.getString(path))
+  }
   /**
    * Get configuration according to the name
    */

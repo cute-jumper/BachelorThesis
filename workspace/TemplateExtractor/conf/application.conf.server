@@ -1,0 +1,10 @@
+logger {
+       filepath="~/log/example.log"
+}
+document {
+       blogdir="~/Data/blog1000"
+       newsdir="~/Data/news1000"
+}
+output {
+       distancesFile="~/log/distanceFile"
+}

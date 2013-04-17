@@ -1,12 +1,13 @@
 package thu.ailab.distance
 
 import scala.collection.mutable.ArrayBuffer
+import thu.ailab.global._
 
-trait Algorithm[T] {
+abstract class Algorithm[T] {
   def run(p1: T, p2: T): Double
 }
 
-class LCSAlgo[T] extends Algorithm[List[T]] {
+class LCSList[T] extends Algorithm[List[T]] with LoggerTrait {
   object Direction extends Enumeration {
     type Direction = Value
     val DIAGONAL, DOWN, RIGHT = Value
@@ -91,11 +92,35 @@ class LCSAlgo[T] extends Algorithm[List[T]] {
   }
 }
 
-
-object TestLCS {
-  def main(args: Array[String]) {
-    val lcsAlgo = new LCSAlgo[Char]
-    val test = lcsAlgo.run("abcde...fg".toList, "asdfasbdfasdfcsdfdsdfefdasfsdfg".toList)
-    println(test)
+class LCSArray[T] extends Algorithm[Array[T]] with LoggerTrait {
+  def run(seq1: Array[T], seq2: Array[T]) = {
+    val (len1, len2) = (seq1.length, seq2.length)
+    logger.debug("len1: %d\tlen2: %d\n", len1, len2)
+    val similarity = getLCSOptimized(seq1, seq2)
+    val distance = 1 - 1.0 * similarity / math.max(len1, len2)
+    distance    
   }
+  def getLCSOptimized(seq1: Array[T], seq2: Array[T]) = {
+    val (len1, len2) = (seq1.length, seq2.length)    
+    val twoRows = Array.ofDim[Int](2, len2 + 1) // For simplicity, always use the second one
+    for {
+      i <- 1 to len1
+      nextRow = i & 1
+      currentRow = 1 - nextRow
+      j <- 1 to len2
+    } {
+      if (seq1(i - 1) == seq2(j - 1))
+        twoRows(nextRow)(j) = twoRows(currentRow)(j - 1) + 1
+      else
+        twoRows(nextRow)(j) = math.max(twoRows(nextRow)(j - 1), twoRows(currentRow)(j))    
+    }
+    twoRows(len1 % 2)(len2)
+  }  
+}
+
+
+object TestLCS extends AppEntry {
+  val lcsAlgo = new LCSList[Char]
+  val test = lcsAlgo.run("abcde...fg".toList, "asdfasbdfasdfcsdfdsdfefdasfsdfg".toList)
+  println(test)
 }
