@@ -3,6 +3,7 @@ package thu.ailab.preprocess
 import thu.ailab.utils.CharsetDetector
 import thu.ailab.config.MyConfig
 import thu.ailab.config.MyConfigFactory
+import thu.ailab.global.LoggerTrait
 
 /**
  * Document class, representing one HTML document, with some useful information. 
@@ -16,15 +17,14 @@ import thu.ailab.config.MyConfigFactory
  *  - simplifiedContent(strippedLines)
  */
 
-class RawDocument(val filename: String) {
-  private val logger = com.twitter.logging.Logger.get(getClass)
+class RawDocument(val filename: String) extends LoggerTrait {
   /**
    *  Since we mainly deal with Chinese documents, default is gb18030
    */ 
   import thu.ailab.utils.Tools.getFileCharset
   val charset = getFileCharset(filename).getOrElse("gb18030")
   val url = java.net.URLDecoder.decode(filename, charset)
-  logger.info("%s Charset: %s", filename, charset)
+  logger.debug("%s Charset: %s", filename, charset)
   
   /**
    * Get full content, with blank lines stripped

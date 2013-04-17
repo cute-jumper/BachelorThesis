@@ -8,13 +8,15 @@ abstract class MyDocumentFactory[T](dir: String) {
   protected val documentCache: Array[T]
 }
 
-class TagSeqFactory(dir: String) extends MyDocumentFactory[List[TreeNode]](dir) {
-  override val documentCache = new Array[List[TreeNode]](size)
+class TagSeqFactory(dir: String) extends MyDocumentFactory[Array[TreeNode]](dir) {
+  override val documentCache = new Array[Array[TreeNode]](size)
   private def fileIsLoaded(id: Int): Boolean = documentCache(id) != null
   
   override def getInstance(id: Int) = {
-    if (documentCache(id) == null)
-      documentCache(id) = new TreeBuilder(id2filename(id)).getTagSequence
+    if (documentCache(id) == null) {
+      val tagArray: Array[TreeNode] = new TreeBuilder(id2filename(id)).getTagSequence.toArray
+      documentCache(id) = tagArray
+    }
     documentCache(id)
   }
 }

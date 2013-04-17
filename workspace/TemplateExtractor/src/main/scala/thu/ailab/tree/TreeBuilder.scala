@@ -49,14 +49,14 @@ import thu.ailab.global._
 object TestTreeBuilder extends AppEntry {
     import thu.ailab.utils.Tools._
     import java.io.{File, FilenameFilter}
-    val MAX_FILE_COUNT = 20
+    val MAX_FILE_COUNT = 100
     val filenames = new File("../../Data/blog1000/").listFiles(new FilenameFilter() {
       def accept(dir: File, name: String) = name.endsWith(".html")
     }).slice(0, MAX_FILE_COUNT).map(_.getAbsolutePath)
     val ts = filenames.map {
-      new TreeBuilder(_).getTagSequence
+      new TreeBuilder(_).getTagSequence.toArray
     }
-    val runner = new thu.ailab.distance.LCSAlgo[TreeNode]
+    val runner = new thu.ailab.distance.LCSArray[TreeNode]
     val results = 
       (for (i <- 0 until ts.length; j <- i + 1 until ts.length) yield {
       (timeIt(runner.run(ts(i), ts(j))), (filenames(i), filenames(j)))

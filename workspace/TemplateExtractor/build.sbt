@@ -12,4 +12,4 @@ scalacOptions += "-deprecation"
 
 unmanagedSourceDirectories in Compile <+= baseDirectory{ _ / "conf"}
 
-mainClass in (Compile, run) := Some("thu.ailab.algo.TestLCS")
+mainClass in (Compile, run) := Some("thu.ailab.test.TextSimilarities")

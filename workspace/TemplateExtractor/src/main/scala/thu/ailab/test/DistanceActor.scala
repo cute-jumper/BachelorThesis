@@ -4,12 +4,14 @@ import akka.actor._
 import akka.routing.RoundRobinRouter
 import akka.util.Duration
 import akka.util.duration._
+import akka.event.Logging
 import thu.ailab.tree.TagSeqFactory
 import thu.ailab.config._
 import thu.ailab.utils.Point
-import thu.ailab.distance.LCSAlgo
+import thu.ailab.distance.LCSArray
 import thu.ailab.tree.TreeNode
 import thu.ailab.global.AppEntry
+import thu.ailab.utils.Tools.timeIt
 
 object TextSimilarities extends AppEntry {
   object TriangleType extends Enumeration {
@@ -26,21 +28,27 @@ object TextSimilarities extends AppEntry {
   val fdirConfig = (MyConfigFactory.get("MyFileDirectoriesConfig").get).asInstanceOf[MyFileDirectoriesConfig]
   val outputFilesConfig = MyConfigFactory.get("MyOutputFilesConfig").get.asInstanceOf[MyOutputFilesConfig]
   
+  println(fdirConfig.get("blogdir").get)  
   val factory = new TagSeqFactory(fdirConfig.get("blogdir").get)
-  val algoRunner = new LCSAlgo[TreeNode]
+
+  val algoRunner = new LCSArray[TreeNode]
       
   val distArray = new Array[Double](factory.size * (factory.size - 1) / 2)
   
   class Worker extends Actor {
     def receive = {
       case triangleSplit @ AreaSplit(p1, p2) =>
-        calculateArea(p1, p2)
+        val (count, duration) = timeIt(calculateArea(p1, p2))
+        logger.info("Time spent: %f at %d".format(duration, count))
         sender ! AreaFinished
     }
     def calculateArea(p1: Point, p2: Point) = {
-      for (i <- p1.x + 1 to p2.x; j <- p1.y until math.max(p2.y, i)) {
+      var acc = 0 
+      for (i <- p1.x + 1 to p2.x; j <- p1.y until math.min(p2.y, i)) {
         distArray((i - 1) * i / 2 + j) = algoRunner.run(factory.getInstance(i), factory.getInstance(j))
+        acc += 1
       }
+      acc
     }
   }
   class Master(nrOfWorkers: Int,
@@ -51,15 +59,19 @@ object TextSimilarities extends AppEntry {
       Props[Worker].withRouter(RoundRobinRouter(nrOfWorkers)), name = "workRouter")
     val nrOfHSplit = (factory.size - 1) / pieceLength + 1
     val nrOfMessages = (nrOfHSplit + 1) * nrOfHSplit / 2
+    logger.info("Total area count: %d".format(nrOfMessages))
     var finishedCount = 0
     def receive = {
       case StartCalculation =>
-        for (i <- 0 until nrOfHSplit - 1; j <- 0 to i)
+        for (i <- 0 until nrOfHSplit - 1; j <- 0 to i) {
+          logger.info("Start worker at %d, %d".format(i, j))
           workerRouter ! AreaSplit(Point(i * pieceLength, j * pieceLength), 
               Point(math.min((i + 1) * pieceLength, factory.size),
                   math.min((j + 1) * pieceLength, factory.size)))
+        }
       case AreaFinished => 
         finishedCount += 1
+        logger.info("FinishedCount: %d".format(finishedCount))
         if (finishedCount == nrOfMessages) {
           listener ! AllFinished((System.currentTimeMillis() - start).millis)
           context.stop(self)
@@ -96,5 +108,5 @@ object TextSimilarities extends AppEntry {
      master ! StartCalculation 
   }
   
-  calculate(nrOfWorkers = 100, pieceLength = 100)
+  calculate(nrOfWorkers = 4, pieceLength = 100)
 }

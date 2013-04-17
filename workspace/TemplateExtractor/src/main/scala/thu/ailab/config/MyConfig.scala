@@ -15,6 +15,7 @@ class MyLoggerConfig (val logfile: String) extends MyConfig {
   val logger = Logger.get("")
   logger.clearHandlers
   logger.addHandler(FileHandler(logfile)())
+  logger.setLevel(  com.twitter.logging.Level.INFO)
 }
 
 class MyFileDirectoriesConfig (val blogdir: String, val newsdir: String) 
