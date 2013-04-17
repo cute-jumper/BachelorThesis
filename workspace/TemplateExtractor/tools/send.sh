@@ -27,7 +27,12 @@ change_back() {
 }
 
 make_jar() {
-    rm $ONE_JAR_PATH $JAR_PATH
+    if [ -x $JAR_PATH ]; then
+        rm  $JAR_PATH
+    fi
+    if [ -x $ONE_JAR_PATH ]; then
+        rm $ONE_JAR_PATH
+    fi
     cd $PROJECT_DIR
     tools/onejar.sh $mainClass
 }

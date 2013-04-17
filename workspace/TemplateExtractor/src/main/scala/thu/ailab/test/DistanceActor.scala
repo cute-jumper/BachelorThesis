@@ -25,11 +25,11 @@ object TextSimilarities extends AppEntry {
   case class AreaFinished() extends Message
   case class AllFinished(duration: Duration) extends Message
   
-  val fdirConfig = (MyConfigFactory.get("MyFileDirectoriesConfig").get).asInstanceOf[MyFileDirectoriesConfig]
-  val outputFilesConfig = MyConfigFactory.get("MyOutputFilesConfig").get.asInstanceOf[MyOutputFilesConfig]
+  val fdirConfig = MyConfigFactory.getConfig("MyFileDirectoriesConfig")
+  val outputFilesConfig = MyConfigFactory.getConfig("MyOutputFilesConfig")
+  val actorConfig = MyConfigFactory.getConfig("MyActorConfig")
   
-  println(fdirConfig.get("blogdir").get)  
-  val factory = new TagSeqFactory(fdirConfig.get("blogdir").get)
+  val factory = new TagSeqFactory(fdirConfig.getValue("blogdir"))
 
   val algoRunner = new LCSArray[TreeNode]
       
@@ -37,7 +37,7 @@ object TextSimilarities extends AppEntry {
   
   class Worker extends Actor {
     def receive = {
-      case triangleSplit @ AreaSplit(p1, p2) =>
+      case AreaSplit(p1, p2) =>
         val (count, duration) = timeIt(calculateArea(p1, p2))
         logger.info("Time spent: %f at %d".format(duration, count))
         sender ! AreaFinished
@@ -57,17 +57,19 @@ object TextSimilarities extends AppEntry {
     val start = System.currentTimeMillis()
     val workerRouter = context.actorOf(
       Props[Worker].withRouter(RoundRobinRouter(nrOfWorkers)), name = "workRouter")
-    val nrOfHSplit = (factory.size - 1) / pieceLength + 1
+    val nrOfHSplit = (factory.size - 2) / pieceLength + 1
     val nrOfMessages = (nrOfHSplit + 1) * nrOfHSplit / 2
     logger.info("Total area count: %d".format(nrOfMessages))
     var finishedCount = 0
     def receive = {
       case StartCalculation =>
-        for (i <- 0 until nrOfHSplit - 1; j <- 0 to i) {
-          logger.info("Start worker at %d, %d".format(i, j))
+        var acc = 1
+        for (i <- 0 until nrOfHSplit; j <- 0 to i) {
+          logger.info("Start %d worker".format(acc))
+          acc += 1
           workerRouter ! AreaSplit(Point(i * pieceLength, j * pieceLength), 
-              Point(math.min((i + 1) * pieceLength, factory.size),
-                  math.min((j + 1) * pieceLength, factory.size)))
+              Point(math.min((i + 1) * pieceLength, factory.size - 1),
+                  math.min((j + 1) * pieceLength, factory.size - 1)))
         }
       case AreaFinished => 
         finishedCount += 1
@@ -82,7 +84,7 @@ object TextSimilarities extends AppEntry {
   class Listener extends Actor {
     def receive = {
       case AllFinished(duration) =>
-        writeFile(outputFilesConfig.get("distancesFile").get)
+        writeFile(outputFilesConfig.getValue("distancesFile"))
         println("Calculation time: %s".format(duration))
         context.system.shutdown
     }
@@ -90,9 +92,9 @@ object TextSimilarities extends AppEntry {
     def writeFile(filename: String) = {
       withPrintWriter(filename) {pw =>
         var idx = 0
-        for (i <- 1 until factory.size; j <- 0 until i) {
-          pw.println("%s\t%s\t%f".format(
-              factory.getFilename(i), factory.getFilename(j), distArray(idx)))
+        for (i <- 0 until factory.size; j <- 0 until i) {
+          pw.println("%s,%d\t%s,%d\t%f".format(
+              factory.getFilename(i), i, factory.getFilename(j), j, distArray(idx)))
           idx += 1
         }
       }
@@ -108,5 +110,6 @@ object TextSimilarities extends AppEntry {
      master ! StartCalculation 
   }
   
-  calculate(nrOfWorkers = 4, pieceLength = 100)
+  calculate(nrOfWorkers = actorConfig.getValue("nrOfWorkers").toInt, 
+      pieceLength = actorConfig.getValue("pieceLength").toInt)
 }

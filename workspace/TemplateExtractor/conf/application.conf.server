@@ -2,9 +2,18 @@ logger {
        filepath="~/log/example.log"
 }
 document {
-       blogdir="~/Data/blog1000"
-       newsdir="~/Data/news1000"
+         blogdir="~/Data/blog1000"
+         newsdir="~/Data/news1000"
 }
 output {
        distancesFile="~/log/distanceFile"
+}
+actor {
+      nrOfWorkers=16
+      pieceLength=100
+}
+cluster {
+        NaiveAggloCluster {
+                          clusterThreshold=0.1
+        }
 }
