@@ -25,11 +25,7 @@ object TextSimilarities extends AppEntry {
   case class AreaFinished() extends Message
   case class AllFinished(duration: Duration) extends Message
   
-  val fdirConfig = MyConfigFactory.getConfig("MyFileDirectoriesConfig")
-  val outputFilesConfig = MyConfigFactory.getConfig("MyOutputFilesConfig")
-  val actorConfig = MyConfigFactory.getConfig("MyActorConfig")
-  
-  val factory = new TagSeqFactory(fdirConfig.getValue("blogdir"))
+  val factory = new TagSeqFactory(MyConfigFactory.getConfString("document.blogdir"))
 
   val algoRunner = new LCSArray[TreeNode]
       
@@ -84,7 +80,7 @@ object TextSimilarities extends AppEntry {
   class Listener extends Actor {
     def receive = {
       case AllFinished(duration) =>
-        writeFile(outputFilesConfig.getValue("distancesFile"))
+        writeFile(MyConfigFactory.getConfString("output.distFile"))
         println("Calculation time: %s".format(duration))
         context.system.shutdown
     }
@@ -93,8 +89,7 @@ object TextSimilarities extends AppEntry {
       withPrintWriter(filename) {pw =>
         var idx = 0
         for (i <- 0 until factory.size; j <- 0 until i) {
-          pw.println("%s,%d\t%s,%d\t%f".format(
-              factory.getFilename(i), i, factory.getFilename(j), j, distArray(idx)))
+          pw.println("%f".format(distArray(idx)))
           idx += 1
         }
       }
@@ -110,6 +105,6 @@ object TextSimilarities extends AppEntry {
      master ! StartCalculation 
   }
   
-  calculate(nrOfWorkers = actorConfig.getValue("nrOfWorkers").toInt, 
-      pieceLength = actorConfig.getValue("pieceLength").toInt)
+  calculate(nrOfWorkers = MyConfigFactory.getConfInt("actor.nrOfWorkers"), 
+      pieceLength = MyConfigFactory.getConfInt("actor.pieceLength"))
 }

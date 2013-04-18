@@ -1,7 +1,6 @@
 package thu.ailab.preprocess
 
 import thu.ailab.utils.CharsetDetector
-import thu.ailab.config.MyConfig
 import thu.ailab.config.MyConfigFactory
 import thu.ailab.global.LoggerTrait
 

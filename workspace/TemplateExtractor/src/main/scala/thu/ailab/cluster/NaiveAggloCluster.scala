@@ -2,6 +2,7 @@ package thu.ailab.cluster
 
 import thu.ailab.config._
 import thu.ailab.tree._
+import thu.ailab.global._
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.{HashSet => MHashSet, HashMap => MHashMap}
 
@@ -10,36 +11,50 @@ import scala.collection.mutable.{HashSet => MHashSet, HashMap => MHashMap}
  * because I try to minimize all the
  * overhead to make it run faster.
  */
-class NaiveAggloCluster(filename: String) {
-  val fdirConfig = MyConfigFactory.getConfig("MyFileDirectoriesConfig")
-  val factory = new TagSeqFactory(fdirConfig.getValue("blogdir"))
-  val distArray = new Array[Double](factory.size)
-  for ((i, idx) <- scala.io.Source.fromFile(filename).getLines.zipWithIndex) {
-    val pieces = i.split("\t")
-    distArray(idx) = pieces(pieces.length - 1).toDouble
+class NaiveAggloCluster extends LoggerTrait {
+  val factory = new TagSeqFactory(MyConfigFactory.getConfString("document.blogdir"))
+  val distArray = new Array[Double]((factory.size - 1) * factory.size / 2)
+  for ((line, idx) <- scala.io.Source.fromFile(
+      MyConfigFactory.getConfString("output.distFile")).getLines.zipWithIndex) {
+    distArray(idx) = line.toDouble
   }
-  val clusterThreshold = MyConfigFactory.getConfig("MyClusterConfig").getValue("clusterThreshold")
-  val clusters = new MHashSet[Cluster]
-  val clusterDists = new MHashMap[Tuple2[Int, Int], Double]
+  val clusterThreshold = MyConfigFactory.getConfDouble("cluster.NaiveAggloCluster.clusterThreshold")
+  val clusters = new MHashMap[Int, Cluster]
   var minDist = Double.MaxValue
   var minPair = (0, 0)
   for (i <- 0 until factory.size) {
-    val c = new Cluster(new ClusterPoint(i))
-    for (j <- clusters) {
-      val dist = distArray(getIndex(c.centerId, j.centerId))
-      clusterDists += (c.centerId, j.centerId) -> dist 
-      if (dist < minDist) {
-        minDist = dist
-        minPair = (c.centerId, j.centerId)
-      }
-    }
-    clusters += c
+    clusters += i -> new Cluster(new ClusterPoint(i))
   }
   def clustering() = {
     var cont = true
     while (cont) {
-       
+       val (minPairId, minDist) = findNearest
+       val newCluster = clusters(minPairId._1).mergeCluster(clusters(minPairId._2))
+       clusters.remove(minPairId._1)
+       clusters.remove(minPairId._2)
+       clusters(newCluster.centerId) = newCluster
+       logger.info("center: %d\tcluster size: %d", newCluster.centerId, newCluster.size)
+       if (minDist > clusterThreshold) cont = false
     }
+  }
+  /**
+   * May have bugs
+   */
+  def findNearest() = {
+    val bank = new MHashSet[Cluster]
+    var minDist = Double.MaxValue
+    var minPairId = (-1, -1)
+    for (c <- clusters.values) {
+      for (deposit <- bank) {
+        val dist = c.distFrom(deposit)
+        if (dist < minDist) {
+          minDist = dist
+          minPairId = (c.centerId, deposit.centerId)
+        }
+      }
+      bank.add(c)
+    }
+    (minPairId, minDist)
   }
   def getIndex(id1: Int, id2: Int) = {
     if (id1 < id2) (id2 - 1) * id2 / 2 + id1
@@ -59,6 +74,7 @@ class NaiveAggloCluster(filename: String) {
       }
       this.cps.append(that.cps: _*)
       updateCenter
+      this
     }
     def updateCenter = {
       var minSum = Double.MaxValue
@@ -68,11 +84,28 @@ class NaiveAggloCluster(filename: String) {
           centerId = i.id
         }
       }
+      centerId
     }
-    def clusterDistance(that: Cluster) = 
+    def distFrom(that: Cluster) = 
       distArray(getIndex(this.centerId, that.centerId))
+    def size = cps.size
+    override def toString = {
+      "Cluster Center: %s\n".format(factory.getFilename(centerId)) +
+      cps.map(c => factory.getFilename(c.id)).mkString("\n")
+    }
+  }
+  import thu.ailab.utils.Tools.withPrintWriter  
+  def writeFile(filename: String) = {
+    withPrintWriter(filename){ pw =>
+      clusters.foreach(pw.println)
+    }
   }
 }
 
-
+object TestNaiveAggloCluster extends AppEntry {
+  import thu.ailab.utils.Tools.timeIt
+  val naive = new NaiveAggloCluster
+  println(timeIt(naive.clustering)._2)
+  naive.writeFile(MyConfigFactory.getConfString("output.clusterFile"))
+}
 

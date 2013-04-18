@@ -8,7 +8,7 @@ import thu.ailab.config.MyConfigFactory
  */
 trait AppEntry extends LoggerTrait {
   val executionStart: Long = currentTime
-  MyConfigFactory
+  LoggerSettings(MyConfigFactory.getConfString("logger.filepath"))
   def main(args: Array[String]) {
     logger.info("App Entry. Execution time: " + (currentTime - executionStart) + "ms")
   }
