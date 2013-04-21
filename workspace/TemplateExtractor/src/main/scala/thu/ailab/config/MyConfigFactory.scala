@@ -6,7 +6,7 @@ import java.io.File
 
 object MyConfigFactory {
   private val conf = ConfigFactory.load()
-  def getConfString(path: String) = {
+  private def getConfString(path: String) = {
     /**
      * Replace the `~' with user's home directory
      */
@@ -17,8 +17,6 @@ object MyConfigFactory {
         filepath
     simpleExpansion(conf.getString(path))
   }
-  val getConfInt = conf.getInt _
-  val getConfDouble = conf.getDouble _
   /**
    * A generic method using Manifest
    */

@@ -12,13 +12,13 @@ import scala.collection.mutable.{HashSet => MHashSet, HashMap => MHashMap}
  * overhead to make it run faster.
  */
 class NaiveAggloCluster extends LoggerTrait {
-  val factory = new TagSeqFactory(MyConfigFactory.getConfString("document.blogdir"))
+  val factory = new TagSeqFactory(MyConfigFactory.getValue[String]("document.blogdir"))
   val distArray = new Array[Double]((factory.size - 1) * factory.size / 2)
   for ((line, idx) <- scala.io.Source.fromFile(
-      MyConfigFactory.getConfString("output.distFile")).getLines.zipWithIndex) {
+      MyConfigFactory.getValue[String]("output.distFile")).getLines.zipWithIndex) {
     distArray(idx) = line.toDouble
   }
-  val clusterThreshold = MyConfigFactory.getConfDouble("cluster.NaiveAggloCluster.clusterThreshold")
+  val clusterThreshold = MyConfigFactory.getValue[Double]("cluster.NaiveAggloCluster.clusterThreshold")
   val clusters = new MHashMap[Int, Cluster]
   var minDist = Double.MaxValue
   var minPair = (0, 0)
@@ -106,6 +106,6 @@ object TestNaiveAggloCluster extends AppEntry {
   import thu.ailab.utils.Tools.timeIt
   val naive = new NaiveAggloCluster
   println(timeIt(naive.clustering)._2)
-  naive.writeFile(MyConfigFactory.getConfString("output.clusterFile"))
+  naive.writeFile(MyConfigFactory.getValue[String]("output.clusterFile"))
 }
 
