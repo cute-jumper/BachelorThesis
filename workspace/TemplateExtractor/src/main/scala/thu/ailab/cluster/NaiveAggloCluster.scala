@@ -12,7 +12,8 @@ import scala.collection.mutable.{HashSet => MHashSet, HashMap => MHashMap}
  * overhead to make it run faster.
  */
 class NaiveAggloCluster extends LoggerTrait {
-  val factory = new TagSeqFactory(MyConfigFactory.getValue[String]("document.blogdir"))
+  val id2filename = scala.io.Source.fromFile(MyConfigFactory.getValue[String]("output.id2filename")).getLines.toArray
+  val factory = new TagSeqFactory(id2filename)
   val distArray = new Array[Double]((factory.size - 1) * factory.size / 2)
   for ((line, idx) <- scala.io.Source.fromFile(
       MyConfigFactory.getValue[String]("output.distFile")).getLines.zipWithIndex) {
@@ -26,16 +27,21 @@ class NaiveAggloCluster extends LoggerTrait {
     clusters += i -> new Cluster(new ClusterPoint(i))
   }
   def clustering() = {
-    var cont = true
-    while (cont) {
+    import scala.annotation.tailrec
+    @tailrec
+    def tailrecClustering(clusters: MHashMap[Int, Cluster]) {
        val (minPairId, minDist) = findNearest
+       if (minDist > clusterThreshold) {
+         logger.info("minDist: %f ".format(minDist) + minPairId)
+         return
+       }
        val newCluster = clusters(minPairId._1).mergeCluster(clusters(minPairId._2))
        clusters.remove(minPairId._1)
        clusters.remove(minPairId._2)
        clusters(newCluster.centerId) = newCluster
-       logger.info("center: %d\tcluster size: %d", newCluster.centerId, newCluster.size)
-       if (minDist > clusterThreshold) cont = false
+       tailrecClustering(clusters)
     }
+    tailrecClustering(clusters)
   }
   /**
    * May have bugs

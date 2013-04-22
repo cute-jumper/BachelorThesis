@@ -6,8 +6,9 @@ PROJECT_DIR="$HOME/Programs/BachelorThesis/workspace/TemplateExtractor"
 JAR_PATH="$PROJECT_DIR/target/scala-2.9.2/templateextractor_2.9.2-0.1-SNAPSHOT.jar"
 ONE_JAR_PATH="$PROJECT_DIR/target/scala-2.9.2/templateextractor_2.9.2-0.1-SNAPSHOT-one-jar.jar"
 CLASSES_DIR="$PROJECT_DIR/target/scala-2.9.2/classes"
+REMOVE_HOST="qiujunpeng@166.111.138.18"
 
-if [ $# -ne 1 ]; then
+if [ $# -lt 1 ]; then
     echo "Error! You must supply the main class!"
     exit
 fi
@@ -38,10 +39,14 @@ make_jar() {
 }
 
 copy_to_server() {
-    scp $ONE_JAR_PATH qiujunpeng@166.111.138.18:/home/qiujunpeng/prog/
+    scp $ONE_JAR_PATH $REMOVE_HOST:/home/qiujunpeng/prog/
 }
 
 change_conf
 make_jar
 change_back
 copy_to_server
+
+if [ $# -eq 2 ]; then
+    ssh $REMOVE_HOST -t "cd prog && java -jar templateextractor_2.9.2-0.1-SNAPSHOT-one-jar.jar"
+fi

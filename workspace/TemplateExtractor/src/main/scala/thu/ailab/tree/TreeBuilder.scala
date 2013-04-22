@@ -49,6 +49,7 @@ import thu.ailab.global._
 object TestTreeBuilder extends AppEntry with LoggerTrait {
     import thu.ailab.utils.Tools._
     import java.io.{File, FilenameFilter}
+  def foo1 = {
     val MAX_FILE_COUNT = 100
     val filenames = new File("../../Data/blog1000/").listFiles(new FilenameFilter() {
       def accept(dir: File, name: String) = name.endsWith(".html")
@@ -57,14 +58,51 @@ object TestTreeBuilder extends AppEntry with LoggerTrait {
       new TreeBuilder(_).getTagSequence.toArray
     }
     val runner = new thu.ailab.distance.LCSArray[TreeNode]
-    val results = 
+    val results =
       (for (i <- 0 until ts.length; j <- i + 1 until ts.length) yield {
-      (timeIt(runner.run(ts(i), ts(j))), (filenames(i), filenames(j)))
-    }).toList
+        (timeIt(runner.run(ts(i), ts(j))), (filenames(i), filenames(j)))
+      }).toList
     val (resList, filenamePairList) = results.unzip
     val (sims, times) = resList.unzip
     val averageTime = times.sum / times.length
     println("Average Time: " + averageTime)
     println("Max: " + sims.max + "\nMin: " + sims.min)
     results.foreach(res => logger.info("%s\t%s\n%s", res._2._1, res._2._2, res._1._1))
+  }
+  def foo2 = {
+    val filenames = List(
+      "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00db44d201010rr7.html",
+      "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00dcd3260101a7sl.html",
+      "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00007e300100f9fq.html",
+      "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00dab8c20100g4lp.html",
+      "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_000612600100y7nc.html",
+      "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00033ac30102e3pz.html",
+      "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_002b5d980100szxu.html",
+      "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00dab8c20102egxk.html",
+      "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_0006126001013no7.html",
+      "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00ea674b0100by3m.html",
+      "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00084edc0100rj17.html",
+      "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00033ac30100q70k.html",
+      "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_0000c9a20100bqd6.html",
+      "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_002b5d980100smle.html",
+      "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fmain_v5%2Fria%2F%2520http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_562792630102dwmp.html")
+    val ts = filenames.map {
+      new TreeBuilder(_).getTagSequence.toArray
+    }
+    val runner = new thu.ailab.distance.LCSArrayFilterDepth 
+    for (i <- 0 until ts.length; j <- i + 1 until ts.length) {
+      println(filenames(i), filenames(j))
+      println(timeIt(runner.run(ts(i), ts(j))))
+    }
+  }
+  def foo3 = {
+    val runner = new thu.ailab.distance.LCSArrayFilterDepth
+    val (fn1, fn2) = ("/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f2e45101017icv.html",
+    "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00033ac301017mht.html")
+    val (t1, t2) = (new TreeBuilder(fn1).getTagSequence.toArray, new TreeBuilder(fn2).getTagSequence.toArray)
+    println(t1 mkString " ")
+    println(t2 mkString " ")
+    println(timeIt(runner.run(t1, t2)))
+  }
+  foo3
 }

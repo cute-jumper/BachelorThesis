@@ -1,14 +1,13 @@
 package thu.ailab.tree
 
-abstract class MyDocumentFactory[T](dir: String) {
-  protected val id2filename = new java.io.File(dir).listFiles.map(_.getAbsolutePath)
+abstract class MyDocumentFactory[T](protected val id2filename: Array[String]) {
   final val size = id2filename.length
   def getFilename(id: Int) = id2filename(id)
   def getInstance(id: Int):T
   protected val documentCache: Array[T]
 }
 
-class TagSeqFactory(dir: String) extends MyDocumentFactory[Array[TreeNode]](dir) {
+class TagSeqFactory(id2filename: Array[String]) extends MyDocumentFactory[Array[TreeNode]](id2filename) {
   override val documentCache = new Array[Array[TreeNode]](size)
   private def fileIsLoaded(id: Int): Boolean = documentCache(id) != null
   

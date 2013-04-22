@@ -2,18 +2,20 @@ logger {
        filepath="~/log/example.log"
 }
 document {
-         blogdir="~/Data/blog1000"
-         newsdir="~/Data/news1000"
+       blogdir="~/Data/blog1000"
+       newsdir="~/Data/news1000"
 }
 output {
        distFile="~/log/distFile"
+       clusterFile="~/log/clusterFile"
+       id2filename="~/log/id2filename"
 }
 actor {
-      nrOfWorkers=16
-      pieceLength=100
+       nrOfWorkers=2
+       pieceLength=100      
 }
 cluster {
         NaiveAggloCluster {
-                          clusterThreshold=0.7
+                          clusterThreshold=0.5
         }
 }

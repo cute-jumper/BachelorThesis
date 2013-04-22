@@ -8,7 +8,7 @@ import akka.event.Logging
 import thu.ailab.tree.TagSeqFactory
 import thu.ailab.config._
 import thu.ailab.utils.Point
-import thu.ailab.distance.LCSArray
+import thu.ailab.distance._
 import thu.ailab.tree.TreeNode
 import thu.ailab.global._
 import thu.ailab.utils.Tools.timeIt
@@ -19,10 +19,11 @@ object TextSimilarities extends AppEntry with LoggerTrait {
   case class AreaSplit(p1: Point, p2: Point) extends Message
   case class AreaFinished() extends Message
   case class AllFinished(duration: Duration) extends Message
-  
-  val factory = new TagSeqFactory(MyConfigFactory.getValue[String]("document.blogdir"))
 
-  val algoRunner = new LCSArray[TreeNode]
+  val id2filename = new java.io.File(MyConfigFactory.getValue[String]("document.blogdir")).listFiles().map(_.getAbsolutePath)
+  val factory = new TagSeqFactory(id2filename)
+
+  val algoRunner = new LCSArrayFilterDepth
       
   val distArray = new Array[Double](factory.size * (factory.size - 1) / 2)
   
@@ -73,14 +74,17 @@ object TextSimilarities extends AppEntry with LoggerTrait {
   }
   
   class Listener extends Actor {
+    import thu.ailab.utils.Tools.withPrintWriter
     def receive = {
       case AllFinished(duration) =>
-        writeFile(MyConfigFactory.getValue[String]("output.distFile"))
+        writeDistFile(MyConfigFactory.getValue[String]("output.distFile"))
+        withPrintWriter(MyConfigFactory.getValue[String]("output.id2filename")){pw =>
+          id2filename.foreach(pw.println)
+        }
         println("Calculation time: %s".format(duration))
         context.system.shutdown
     }
-    import thu.ailab.utils.Tools.withPrintWriter
-    def writeFile(filename: String) = {
+    def writeDistFile(filename: String) = {
       withPrintWriter(filename) {pw =>
         var idx = 0
         for (i <- 0 until factory.size; j <- 0 until i) {
