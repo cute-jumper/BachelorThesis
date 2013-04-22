@@ -10,22 +10,17 @@ import thu.ailab.config._
 import thu.ailab.utils.Point
 import thu.ailab.distance.LCSArray
 import thu.ailab.tree.TreeNode
-import thu.ailab.global.AppEntry
+import thu.ailab.global._
 import thu.ailab.utils.Tools.timeIt
 
-object TextSimilarities extends AppEntry {
-  object TriangleType extends Enumeration {
-    type TriangleType = Value
-    val DOWN, UP = Value
-  }
-  import TriangleType._
+object TextSimilarities extends AppEntry with LoggerTrait {
   sealed trait Message
   case object StartCalculation extends Message
   case class AreaSplit(p1: Point, p2: Point) extends Message
   case class AreaFinished() extends Message
   case class AllFinished(duration: Duration) extends Message
   
-  val factory = new TagSeqFactory(MyConfigFactory.getConfString("document.blogdir"))
+  val factory = new TagSeqFactory(MyConfigFactory.getValue[String]("document.blogdir"))
 
   val algoRunner = new LCSArray[TreeNode]
       
@@ -80,7 +75,7 @@ object TextSimilarities extends AppEntry {
   class Listener extends Actor {
     def receive = {
       case AllFinished(duration) =>
-        writeFile(MyConfigFactory.getConfString("output.distFile"))
+        writeFile(MyConfigFactory.getValue[String]("output.distFile"))
         println("Calculation time: %s".format(duration))
         context.system.shutdown
     }
@@ -105,6 +100,6 @@ object TextSimilarities extends AppEntry {
      master ! StartCalculation 
   }
   
-  calculate(nrOfWorkers = MyConfigFactory.getConfInt("actor.nrOfWorkers"), 
-      pieceLength = MyConfigFactory.getConfInt("actor.pieceLength"))
+  calculate(nrOfWorkers = MyConfigFactory.getValue[Int]("actor.nrOfWorkers"), 
+      pieceLength = MyConfigFactory.getValue[Int]("actor.pieceLength"))
 }

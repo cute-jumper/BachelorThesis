@@ -46,7 +46,7 @@ class TreeBuilder(filename: String) {
 }
 
 import thu.ailab.global._
-object TestTreeBuilder extends AppEntry {
+object TestTreeBuilder extends AppEntry with LoggerTrait {
     import thu.ailab.utils.Tools._
     import java.io.{File, FilenameFilter}
     val MAX_FILE_COUNT = 100
