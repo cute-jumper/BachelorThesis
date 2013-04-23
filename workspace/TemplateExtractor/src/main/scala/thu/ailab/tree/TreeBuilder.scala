@@ -97,8 +97,8 @@ object TestTreeBuilder extends AppEntry with LoggerTrait {
   }
   def foo3 = {
     val runner = new thu.ailab.distance.LCSArrayFilterDepth
-    val (fn1, fn2) = ("/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f2e45101017icv.html",
-    "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00033ac301017mht.html")
+    val (fn1, fn2) = ("/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_000173770100g2g7.html",
+    "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_002b5d980100sf47.html")
     val (t1, t2) = (new TreeBuilder(fn1).getTagSequence.toArray, new TreeBuilder(fn2).getTagSequence.toArray)
     println(t1 mkString " ")
     println(t2 mkString " ")
