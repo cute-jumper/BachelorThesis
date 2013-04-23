@@ -1,4 +1,4 @@
-package thu.ailab.config
+package thu.ailab.factory
 
 import com.typesafe.config._
 import scala.collection.mutable.HashMap

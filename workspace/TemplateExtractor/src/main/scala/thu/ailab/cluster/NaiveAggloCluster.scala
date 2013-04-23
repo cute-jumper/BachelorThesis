@@ -1,6 +1,6 @@
 package thu.ailab.cluster
 
-import thu.ailab.config._
+import thu.ailab.factory._
 import thu.ailab.tree._
 import thu.ailab.global._
 import scala.collection.mutable.ArrayBuffer

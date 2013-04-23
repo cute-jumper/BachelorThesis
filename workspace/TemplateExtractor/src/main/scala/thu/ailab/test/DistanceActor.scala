@@ -5,8 +5,7 @@ import akka.routing.RoundRobinRouter
 import akka.util.Duration
 import akka.util.duration._
 import akka.event.Logging
-import thu.ailab.tree.TagSeqFactory
-import thu.ailab.config._
+import thu.ailab.factory._
 import thu.ailab.utils.Point
 import thu.ailab.distance._
 import thu.ailab.tree.TreeNode
