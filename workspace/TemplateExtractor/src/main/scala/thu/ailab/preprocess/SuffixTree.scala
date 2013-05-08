@@ -14,11 +14,11 @@ object RenderChars {
 
 class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T], 
     val nullEdge: T, 
-    val canonicalChar: T) {
+    val canonicalEnd: T) {
   val inputSeq =
     if (rawInputSeq.indexOf(
         rawInputSeq(rawInputSeq.length - 1)) < rawInputSeq.length - 1)
-      rawInputSeq :+ canonicalChar
+      rawInputSeq :+ canonicalEnd
     else rawInputSeq
   abstract class Show {
     def accept(visitor: SuffixTreeVisitor)
@@ -33,7 +33,7 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
     def getEndIndex() = if (endNode.isLeaf) endPtr + 1 else fixEndIndex
     private var fixEndIndex: Int = 0
     var endNode: BaseNode = Leaf()
-    def getCharAt(idx: Int) = inputSeq(beginIndex + idx)
+    def getElemAt(idx: Int) = inputSeq(beginIndex + idx)
     def splitEdge(edgeLen: Int, _beginIndex: Int) = {
       val iNode = InternalNode()
       //before any modification
@@ -46,16 +46,16 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
     def sameExceptStart(_parentNode: InternalNode, _beginIndex: Int) = {
       new Edge(_parentNode, _beginIndex, this.endNode, this.fixEndIndex)
     }
-    def length = getEndIndex - beginIndex
     def getEdgeSeq = inputSeq.slice(beginIndex, getEndIndex)
+    def getEdgeSeqLength = getEndIndex - beginIndex
     def getEdgeString = inputSeq.slice(beginIndex, getEndIndex).mkString(" ")
-    def getEdgeLength = getEdgeString.length
+    def getEdgeStringLength = getEdgeString.length
     def isClosed = endNode.isInstanceOf[InternalNode]
     
     def toAscii(prefix: String, maxEdgeLength: Int) = {
       getEdgeString + (endNode match {
         case node: InternalNode =>
-          RenderChars.HorizontalLine * (maxEdgeLength - getEdgeLength + 1) + 
+          RenderChars.HorizontalLine * (maxEdgeLength - getEdgeStringLength + 1) + 
           node.toAscii(prefix + " " * (maxEdgeLength + 1))
         case _ => ""
       })
@@ -97,7 +97,9 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
   }
   class InternalNode private(number: Int) extends BaseNode("node", number) {
     val edges = new MHashMap[T, Edge]
-    var suffixLink: Option[InternalNode] = None 
+    var suffixLink: Option[InternalNode] = None
+    var childLeafCount = -1
+    
     def hasEdge(c: T) = edges.contains(c)
     def addEdge(idx: Int) = {
       edges(inputSeq(idx)) = new Edge(InternalNode.this, idx)
@@ -113,7 +115,7 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       val nodeLabel = getNodeLabel + (
           if (suffixLink.isDefined) "->" + suffixLink.get.getNodeLabel 
           else "")
-      val maxEdgeLength = edges.values.maxBy(_.getEdgeLength).getEdgeLength
+      val maxEdgeLength = edges.values.maxBy(_.getEdgeStringLength).getEdgeStringLength
       val prefixPadding = prefix + " " * nodeLabel.length
       nodeLabel + (if (edges.size == 1) {
         RenderChars.HorizontalLine * 2 +
@@ -157,7 +159,7 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
         activeLength += 1
       } else {
         if (activeNode.hasEdge(activeEdge) &&
-          activeNode.getEdge(activeEdge).get.getCharAt(activeLength) == c) {
+          activeNode.getEdge(activeEdge).get.getElemAt(activeLength) == c) {
           activeLength += 1
         } else {
           ret = true
@@ -198,7 +200,7 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
     def normalizeAfterUpdate() = {
       if (activeNode.hasEdge(activeEdge)) {
         val edge = activeNode.getEdge(activeEdge).get
-        if (activeLength == edge.length && edge.isClosed) {
+        if (activeLength == edge.getEdgeSeqLength && edge.isClosed) {
           activeNode = edge.endNode.asInstanceOf[InternalNode]
           activeEdge = nullEdge
           activeLength = 0
@@ -210,13 +212,13 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       def doNormalize(beginIndex: Int): Unit = {
         if (activeNode.hasEdge(activeEdge)) {
           val newEdge = activeNode.getEdge(activeEdge).get
-          if (newEdge.length <= activeLength) {
+          if (newEdge.getEdgeSeqLength <= activeLength) {
             assert(!newEdge.endNode.isLeaf)
             activeNode = newEdge.endNode.asInstanceOf[InternalNode]
-            activeLength -= newEdge.length
+            activeLength -= newEdge.getEdgeSeqLength
             if (activeLength == 0) activeEdge = nullEdge
-            else activeEdge = oldEdge.getCharAt(beginIndex + newEdge.length)
-            doNormalize(beginIndex + newEdge.length)
+            else activeEdge = oldEdge.getElemAt(beginIndex + newEdge.getEdgeSeqLength)
+            doNormalize(beginIndex + newEdge.getEdgeSeqLength)
           }
         }
       }
@@ -262,19 +264,20 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       translateToAscii
       endPtr += 1
       build
-    } else {
+    } else { // End of building
       endPtr -= 1
+      tagWithChildLeafCount(root)
     }
   }
   build
-  assert(inputSeq.length == getLeafCount(root))
-  def getLeafCount(node: InternalNode): Int = {
-    (for (edge <- node.edges.values) yield {
-      if (edge.isClosed)
-        getLeafCount(edge.endNode.asInstanceOf[InternalNode])
-      else
-        1
-    }).sum
+  assert(inputSeq.length == root.childLeafCount)
+  def tagWithChildLeafCount(node: InternalNode): Int = {
+    node.childLeafCount = 
+      (for (edge <- node.edges.values) yield {
+        if (edge.isClosed) 
+          tagWithChildLeafCount(edge.endNode.asInstanceOf[InternalNode])
+        else 1}).sum
+    node.childLeafCount
   }
   class SuffixTreeVisitor(pw: java.io.PrintWriter, toPrint: (Show) => String) {
     def visit(show: Show) = {
@@ -311,27 +314,43 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
   }
 }
 
-class HTMLSuffixTree(html: Array[String]) extends SuffixTree[String](html, "\0", "$") {
+class HTMLSuffixTree(html: Array[String]) extends SuffixTree[String](html, "\0", "$0") {
   def findAllRepetitions() = {
-    for (key <- root.edges.keys.toList.sortBy(_.filter(_.isDigit))) {
-      val minDepth = key.filter(_.isDigit).toInt
-      val edge = root.getEdge(key).get
-      val edgeSeq = edge.getEdgeSeq
-      var rep = edgeSeq.takeWhile(_.filter(_.isDigit).toInt >= minDepth)
-      if (rep.length < edgeSeq.length) rep
-    } 
-  }
+    def findAllRepetitionsImpl(curNode: InternalNode, preMinDepth: Int): List[(IndexedSeq[String], Int)] = {
+      (for {(key, curEdge) <- curNode.edges.filter(x =>
+        x._1.filter(_.isDigit).toInt >= preMinDepth &&
+        x._2.isClosed).toList.sortBy(_._1.filter(_.isDigit).toInt)
+        curMinDepth = key.filter(_.isDigit).toInt
+      } yield {
+        val edgeSeq = curEdge.getEdgeSeq
+        var rep = edgeSeq.takeWhile(_.filter(_.isDigit).toInt >= curMinDepth)
+        if (rep.length < edgeSeq.length) {
+          List((rep, curEdge.endNode.asInstanceOf[InternalNode].childLeafCount))
+        } else {
+          val nextNode = curEdge.endNode.asInstanceOf[InternalNode]
+          val subRepList = findAllRepetitionsImpl(nextNode, 
+              edgeSeq(edgeSeq.length - 1).filter(_.isDigit).toInt)
+          if (subRepList.size == 0) List((rep, nextNode.childLeafCount))
+          else subRepList.map(x => (rep ++ x._1, x._2))
+        }
+      }).flatten
+    }
+    findAllRepetitionsImpl(root, 0)
+  }  
 }
 
 object TestSuffixTree extends App {
-  val s = "dedododeeodo"
-  val t1 = new SuffixTree[Char](s, '\0', '$')
-  //val html = Array("html1", "head2", "meta3", "meta3", 
-  //    "body2", "div3", "a4", "div4", "img5", "div3", "a4", "div4", "img5", "div3")
-  val html = Array("body2", "div3", "a4", "div4", "img5", "div3", "a4", "div4", "img5", "div3")
-  val head = html(0)
-  val son = html(1)
+  //val s = "dedododeeodo"
+  //val t1 = new SuffixTree[Char](s, '\0', '$')
+  val html = Array("html1", "head2", "meta3", "meta3", 
+      "body2", "div3", "a4", "div4", "img5", "div3", "a4", "div4", "img5",
+      "div3", "a4", "div4", "img5", "div3")
+  //val html = Array("body2", "div3", "a4", "div4", "img5", "div3", "a4", "div4", "img5", "div3")
   //val html = Array("body1", "head2", "div3", "a4", "p4", "a4", "p4", "div3", "ul4", "li5", "li5", "li5")
-  val t2 = new SuffixTree[String](html, "\0", "$")
+  val t2 = new HTMLSuffixTree(html)
   t2.translateToAscii
+  val allReps = t2.findAllRepetitions
+  allReps.foreach(println)
+  println
+  allReps.filter(_._1.length > 1).sortBy(_._1.length)(implicitly[Ordering[Int]].reverse) foreach println
 }
