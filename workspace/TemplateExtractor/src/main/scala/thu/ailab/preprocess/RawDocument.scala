@@ -73,8 +73,8 @@ class RawDocument(val filename: String) extends LoggerTrait {
     }
   } 
   
-  private val pairedTags = List("script", "style", "p", "title", "head", "a", "li", "ul", "ol", "td", "tr", "tbody","table")
-  private val singleTags = List("link", "input", "br", "img", "meta", "wbr")
+  private val pairedTags = List("script", "style", "p", "title", "head", "li", "ul", "ol", "td", "tr", "tbody","table")
+  private val singleTags = List("link", "input", "br", "img", "meta", "wbr", "meta")
   private val uselessTags = List("strong", "em", "font", "b")
   private val uselessPatterns = List("""(?is)<!--.*?-->""")
   /**

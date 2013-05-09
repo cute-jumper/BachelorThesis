@@ -3,6 +3,7 @@ package thu.ailab.preprocess
 import scala.collection.mutable.{HashMap => MHashMap, ArrayBuffer}
 import scala.annotation.tailrec
 import thu.ailab.utils.Tools.withPrintWriter
+import thu.ailab.tree.TreeBuilder
 
 object RenderChars {
   val TJunctionDown  = "┬";
@@ -14,7 +15,8 @@ object RenderChars {
 
 class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T], 
     val nullEdge: T, 
-    val canonicalEnd: T) {
+    val canonicalEnd: T,
+    val verbose: Boolean = true) {
   val inputSeq =
     if (rawInputSeq.indexOf(
         rawInputSeq(rawInputSeq.length - 1)) < rawInputSeq.length - 1)
@@ -49,6 +51,7 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
     def getEdgeSeq = inputSeq.slice(beginIndex, getEndIndex)
     def getEdgeSeqLength = getEndIndex - beginIndex
     def getEdgeString = inputSeq.slice(beginIndex, getEndIndex).mkString(" ")
+    //def getEdgeString = "(%d, %d)".format(beginIndex, getEndIndex)
     def getEdgeStringLength = getEdgeString.length
     def isClosed = endNode.isInstanceOf[InternalNode]
     
@@ -123,7 +126,7 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       }
       else {
         (for ((edge, idx) <- edges.values.toList.sortBy(
-            edge => inputSeq(edge.beginIndex)).zipWithIndex) yield {
+            edge => -edge.getEdgeSeqLength/* inputSeq(edge.beginIndex)*/).zipWithIndex) yield {
           if (idx == 0) {
             RenderChars.TJunctionDown + RenderChars.HorizontalLine + 
             edge.toAscii(prefixPadding + RenderChars.VerticalLine + " ", maxEdgeLength)
@@ -257,11 +260,15 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
   }
   def build {
     if (endPtr < inputSeq.length) {
-      println(activePoint)
-      println("# remainder: " + remainder)
+      if (verbose) {
+        println(activePoint)
+        println("# remainder: " + remainder)
+      }
       insertSuffix(remainder, None)
-      println("insert %s at %d".format(inputSeq(endPtr), endPtr))
-      translateToAscii
+      if (verbose) {
+        println("insert %s at %d".format(inputSeq(endPtr), endPtr))
+        translateToAscii
+      }
       endPtr += 1
       build
     } else { // End of building
@@ -314,43 +321,59 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
   }
 }
 
-class HTMLSuffixTree(html: Array[String]) extends SuffixTree[String](html, "\0", "$0") {
+class HTMLSuffixTree(html: Array[String], verbose: Boolean = true) extends SuffixTree[String](html, "\0", "$0", verbose) {
   def findAllRepetitions() = {
-    def findAllRepetitionsImpl(curNode: InternalNode, preMinDepth: Int): List[(IndexedSeq[String], Int)] = {
-      (for {(key, curEdge) <- curNode.edges.filter(x =>
+    val nodeToSeq = new MHashMap[InternalNode, IndexedSeq[String]]
+    def findAllRepetitionsImpl(curNode: InternalNode, prefixSeq: IndexedSeq[String], preMinDepth: Int) {
+      val usefulEdges = curNode.edges.filter(x =>
         x._1.filter(_.isDigit).toInt >= preMinDepth &&
         x._2.isClosed).toList.sortBy(_._1.filter(_.isDigit).toInt)
+      if (usefulEdges.size == 0 && curNode != root) {
+        
+      }
+      for {(key, curEdge) <- usefulEdges
         curMinDepth = key.filter(_.isDigit).toInt
       } yield {
         val edgeSeq = curEdge.getEdgeSeq
         var rep = edgeSeq.takeWhile(_.filter(_.isDigit).toInt >= curMinDepth)
         if (rep.length < edgeSeq.length) {
-          List((rep, curEdge.endNode.asInstanceOf[InternalNode].childLeafCount))
+          nodeToSeq(curEdge.endNode.asInstanceOf[InternalNode]) = prefixSeq ++ rep
         } else {
           val nextNode = curEdge.endNode.asInstanceOf[InternalNode]
-          val subRepList = findAllRepetitionsImpl(nextNode, 
+          findAllRepetitionsImpl(nextNode, rep,
               edgeSeq(edgeSeq.length - 1).filter(_.isDigit).toInt)
-          if (subRepList.size == 0) List((rep, nextNode.childLeafCount))
-          else subRepList.map(x => (rep ++ x._1, x._2))
         }
-      }).flatten
+      }
     }
-    findAllRepetitionsImpl(root, 0)
-  }  
+    findAllRepetitionsImpl(root, IndexedSeq[String](), 0)
+    nodeToSeq
+  }
 }
 
 object TestSuffixTree extends App {
   //val s = "dedododeeodo"
   //val t1 = new SuffixTree[Char](s, '\0', '$')
+  val fn = "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_000173770100g2g7.html"
+  val tagSeq = new TreeBuilder(fn).getTagSequence.map{_.toString}.toArray
+  //tagSeq.foreach(print)
   val html = Array("html1", "head2", "meta3", "meta3", 
       "body2", "div3", "a4", "div4", "img5", "div3", "a4", "div4", "img5",
       "div3", "a4", "div4", "img5", "div3")
   //val html = Array("body2", "div3", "a4", "div4", "img5", "div3", "a4", "div4", "img5", "div3")
   //val html = Array("body1", "head2", "div3", "a4", "p4", "a4", "p4", "div3", "ul4", "li5", "li5", "li5")
-  val t2 = new HTMLSuffixTree(html)
-  t2.translateToAscii
-  val allReps = t2.findAllRepetitions
-  allReps.foreach(println)
-  println
-  allReps.filter(_._1.length > 1).sortBy(_._1.length)(implicitly[Ordering[Int]].reverse) foreach println
+  val tree = new HTMLSuffixTree(html, verbose = true)
+  tree.translateToAscii
+  tree.findAllRepetitions.sortBy(-_._1.length).foreach(println)
+//  import thu.ailab.utils.Tools.timeIt
+//  val (allReps, totalTime) = timeIt{
+//    val t2 = new HTMLSuffixTree(tagSeq, false)
+//    //t2.translateToAscii
+//    t2.findAllRepetitions
+//  }
+//  println("totalTime: " + totalTime)
+//  val usefulReps = allReps.filter(_._1.length > 1).sortBy(_._1.length)(implicitly[Ordering[Int]].reverse)
+//  usefulReps.foreach(println)
+//  for (rep <- usefulReps) {
+//    
+//  }
 }
