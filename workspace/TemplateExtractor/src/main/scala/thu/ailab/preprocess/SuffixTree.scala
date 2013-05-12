@@ -74,8 +74,11 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       })
     }
     def toDot() = {
+      val compactString = getEdgeString split " " map { s =>
+        "%c%c".format(s(0), s(s.length - 1))
+      } mkString " "
       "\t" + parentNode.name + "->" + endNode.name + 
-      "[label=\"%s\"];".format(getEdgeString)
+      "[label=\"%s\"];".format(compactString)
     }
     def accept(visitor: SuffixTreeVisitor) = {
       visitor.visit(Edge.this)
@@ -319,8 +322,10 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       node.accept(visitor)
       node match {
         case iNode: InternalNode => 
-          for (edge <- iNode.edges.values)
+          for (edge <- iNode.edges.values) {
             edge.accept(visitor)
+            doTraverse(edge.endNode)
+          }
         case _ =>
       }
     }
@@ -348,9 +353,9 @@ class HTMLSuffixTree(html: Array[String], verbose: Boolean = true) extends Suffi
   def findAllRepetitions() = {
     val rangeMap = new MHashMap[Int, (Int, InternalNode)]
     def findAllRepetitionsImpl(curNode: InternalNode, prefixSeq: IndexedSeq[String], preMinDepth: Int): Boolean = {
-      val usefulEdges = curNode.edges.filter(x =>
+      val (usefulEdges, uselessEdges) = curNode.edges.partition(x =>
         x._1.filter(_.isDigit).toInt >= preMinDepth &&
-          x._2.isClosed).toList.sortBy(_._1.filter(_.isDigit).toInt)      
+          x._2.isClosed)
       for {
         (key, curEdge) <- usefulEdges
         curMinDepth = key.filter(_.isDigit).toInt
@@ -362,19 +367,34 @@ class HTMLSuffixTree(html: Array[String], verbose: Boolean = true) extends Suffi
             !findAllRepetitionsImpl(nextNode, prefixSeq ++ edgeSeq,
             edgeSeq(edgeSeq.length - 1).filter(_.isDigit).toInt)) {
           for (beginIndex <- curEdge.ranges) {
-            val key = beginIndex + rep.length
+            val endIndex = beginIndex + rep.length
             val newLength = prefixSeq.length + rep.length
-            if (rangeMap.contains(key)) {
-              val origLength = rangeMap.get(key).get._1
+            if (rangeMap.contains(endIndex)) {
+              val origLength = rangeMap.get(endIndex).get._1
               if (origLength < newLength)
-                rangeMap(key) = (newLength, nextNode) 
+                rangeMap(endIndex) = (newLength, nextNode) 
             } else {
-              rangeMap(key) = (newLength, nextNode)
+              rangeMap(endIndex) = (newLength, nextNode)
             }
           }
         }
       }
-      usefulEdges.length != 0
+      if (curNode != root) {
+        for {
+          (key, curEdge) <- uselessEdges
+          newLength = prefixSeq.length
+          beginIndex <- curEdge.ranges
+        } {
+          if (rangeMap.contains(beginIndex)) {
+            val origLength = rangeMap.get(beginIndex).get._1
+            if (origLength < newLength)
+              rangeMap(beginIndex) = (newLength, curNode)
+          } else {
+            rangeMap(beginIndex) = (newLength, curNode)
+          }
+        }
+      }
+      usefulEdges.size != 0
     }
     findAllRepetitionsImpl(root, IndexedSeq[String](), 0)
     rangeMap.groupBy(_._2._2).map { x =>
@@ -389,29 +409,60 @@ object TestSuffixTree extends App {
   import thu.ailab.utils.Tools.timeIt
   //val s = "dedododeeodo"
   //val t1 = new SuffixTree[Char](s, '\0', '$')
-  val fn = "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_000173770100g2g7.html"
-  val tagSeq = new TreeBuilder(fn).getTagSequence.map{_.toString}.toArray
+  val fn = System.getProperty("user.home") + "/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_000173770100g2g7.html"
+  //val tagSeq = new TreeBuilder(fn).getTagSequence.map{_.toString}.toArray
   //tagSeq.foreach(print)
-  val html = Array("html1", "head2", "meta3", "meta3", 
+  val tagSeq = Array("html1", "head2", "meta3", "meta3", 
       "body2", "div3", "a4", "div4", "img5", "div3", "a4", "div4", "img5",
-      "div3", "a4", "div4", "img5", "div3")
+      "div3", "a4", "div4", "img5", "div3", "div3")
   //val html = Array("body2", "div3", "a4", "div4", "img5", "div3", "a4", "div4", "img5", "div3")
   //val html = Array("body1", "head2", "div3", "a4", "p4", "a4", "p4", "div3", "ul4", "li5", "li5", "li5")
   //val tree = new HTMLSuffixTree(html, verbose = true)
   val tree = new HTMLSuffixTree(tagSeq, verbose = false)
-  //tree.translateToAscii
-  val rangeMap = tree.findAllRepetitions
-  val removeRanges = (for ((node, seq) <- rangeMap) yield {
-    seq.slice(1, seq.length)
-  }).flatten.toSeq.sortBy(_._1)
-  val compactSeq = (for (i <- 0 to removeRanges.length) yield {
-    if (i == 0) {
-      tagSeq.slice(0, removeRanges(i)._1)
-    } else if (i == removeRanges.length) {
-      tagSeq.slice((removeRanges(i - 1)._2), tagSeq.length)
-    } else {
-      tagSeq.slice(removeRanges(i - 1)._2, removeRanges(i)._1)
+  tree.translateToAscii
+  tree.translateToDot(System.getProperty("user.home") + "/tmp/tree.dot")
+  println(timeIt {
+    val rangeMap = tree.findAllRepetitions
+    println(rangeMap.map { x =>
+      x._2
+    }.mkString)
+    val (oneMap, moreMap) = rangeMap.partition{x => (x._2(0)._2 - x._2(0)._1) == 1}
+    val newOneSeq = for ((key, seq) <- oneMap) yield {
+      var (head, low, len) = (seq(0), 0, 1)
+      val newSeq = new ArrayBuffer[(Int, Int)]
+      for (i <- 1 to seq.length) {
+        if (i == seq.length) {
+          if (len > 1) {
+            newSeq += ((head._2, seq(i - 1)._2))
+          }
+        } else if (seq(i)._1 - head._1 != i - low) {
+          if (len > 1) {
+            newSeq += ((head._2, seq(i - 1)._2))
+          }
+          head = seq(i)
+          low = i
+          len = 1
+        } else {
+          len += 1
+        }
+      }
+      newSeq
     }
-  }).flatten
-  println(compactSeq mkString " ")
+    val removeRanges = 
+      ((for ((node, seq) <- moreMap) yield {
+        seq.slice(1, seq.length)
+      }) ++ 
+      newOneSeq).flatten.toSeq.sortBy(_._1)
+    println(removeRanges.mkString)
+    val compactSeq = (for (i <- 0 to removeRanges.length) yield {
+      if (i == 0) {
+        tagSeq.slice(0, removeRanges(i)._1)
+      } else if (i == removeRanges.length) {
+        tagSeq.slice((removeRanges(i - 1)._2), tagSeq.length)
+      } else {
+        tagSeq.slice(removeRanges(i - 1)._2, removeRanges(i)._1)
+      }
+    }).flatten
+    println(compactSeq mkString " ")
+  }._2)
 }
