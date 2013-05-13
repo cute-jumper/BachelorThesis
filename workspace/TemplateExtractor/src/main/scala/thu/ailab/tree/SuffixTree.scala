@@ -1,9 +1,8 @@
-package thu.ailab.preprocess
+package thu.ailab.tree
 
 import scala.collection.mutable.{HashMap => MHashMap, ArrayBuffer}
 import scala.annotation.tailrec
 import thu.ailab.utils.Tools.withPrintWriter
-import thu.ailab.tree.TreeBuilder
 
 object RenderChars {
   val TJunctionDown  = "┬";
@@ -405,29 +404,13 @@ class HTMLSuffixTree(html: Array[String], verbose: Boolean = true) extends Suffi
   }
 }
 
-object TestSuffixTree extends App {
-  import thu.ailab.utils.Tools.timeIt
-  //val s = "dedododeeodo"
-  //val t1 = new SuffixTree[Char](s, '\0', '$')
-  val fn = System.getProperty("user.home") + "/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_000173770100g2g7.html"
-  //val tagSeq = new TreeBuilder(fn).getTagSequence.map{_.toString}.toArray
-  //tagSeq.foreach(print)
-  val tagSeq = Array("html1", "head2", "meta3", "meta3", 
-      "body2", "div3", "a4", "div4", "img5", "div3", "a4", "div4", "img5",
-      "div3", "a4", "div4", "img5", "div3", "div3")
-  //val html = Array("body2", "div3", "a4", "div4", "img5", "div3", "a4", "div4", "img5", "div3")
-  //val html = Array("body1", "head2", "div3", "a4", "p4", "a4", "p4", "div3", "ul4", "li5", "li5", "li5")
-  //val tree = new HTMLSuffixTree(html, verbose = true)
-  val tree = new HTMLSuffixTree(tagSeq, verbose = false)
-  tree.translateToAscii
-  tree.translateToDot(System.getProperty("user.home") + "/tmp/tree.dot")
-  println(timeIt {
-    val rangeMap = tree.findAllRepetitions
-    println(rangeMap.map { x =>
-      x._2
-    }.mkString)
-    val (oneMap, moreMap) = rangeMap.partition{x => (x._2(0)._2 - x._2(0)._1) == 1}
-    val newOneSeq = for ((key, seq) <- oneMap) yield {
+object HTMLSuffixTree {
+  def stripRepetitions[T <% String](tagSeq: Array[T]) = {
+    val suffixTree = new HTMLSuffixTree(tagSeq.map(_.toString), verbose = false)
+    val rangeMap = suffixTree.findAllRepetitions
+    val (singleRanges, longRanges) = rangeMap.partition{x =>
+      (x._2(0)._2 - x._2(0)._1) == 1}
+    val newSingleSeq = for ((key, seq) <- singleRanges) yield {
       var (head, low, len) = (seq(0), 0, 1)
       val newSeq = new ArrayBuffer[(Int, Int)]
       for (i <- 1 to seq.length) {
@@ -449,12 +432,13 @@ object TestSuffixTree extends App {
       newSeq
     }
     val removeRanges = 
-      ((for ((node, seq) <- moreMap) yield {
+      ((for ((node, seq) <- longRanges) yield {
         seq.slice(1, seq.length)
       }) ++ 
-      newOneSeq).flatten.toSeq.sortBy(_._1)
-    println(removeRanges.mkString)
-    val compactSeq = (for (i <- 0 to removeRanges.length) yield {
+      newSingleSeq).flatten.toSeq.sortBy(_._1)
+    if (removeRanges.size == 0)
+      tagSeq.toIndexedSeq
+    else (for (i <- 0 to removeRanges.length) yield {
       if (i == 0) {
         tagSeq.slice(0, removeRanges(i)._1)
       } else if (i == removeRanges.length) {
@@ -463,6 +447,23 @@ object TestSuffixTree extends App {
         tagSeq.slice(removeRanges(i - 1)._2, removeRanges(i)._1)
       }
     }).flatten
-    println(compactSeq mkString " ")
-  }._2)
+  }  
+}
+
+object TestSuffixTree extends App {
+  import thu.ailab.utils.Tools.timeIt
+  //val s = "dedododeeodo"
+  //val t1 = new SuffixTree[Char](s, '\0', '$')
+  val fn = System.getProperty("user.home") + "/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_000173770100g2g7.html"
+  //val tagSeq = new TreeBuilder(fn).getTagSequence.map{_.toString}.toArray
+  //tagSeq.foreach(print)
+  val tagSeq = Array("html1", "body2", "a3", "body2", "a3")
+//  val tagSeq = Array("html1", "head2", "meta3", "meta3", 
+//      "body2", "div3", "a4", "div4", "img5", "div3", "a4", "div4", "img5",
+//      "div3", "a4", "div4", "img5", "div3", "div3")
+  //val html = Array("body2", "div3", "a4", "div4", "img5", "div3", "a4", "div4", "img5", "div3")
+  //val html = Array("body1", "head2", "div3", "a4", "p4", "a4", "p4", "div3", "ul4", "li5", "li5", "li5")
+  //val tree = new HTMLSuffixTree(html, verbose = true)
+   val newTagSeq = HTMLSuffixTree.stripRepetitions(tagSeq)
+   println(newTagSeq.mkString)
 }
