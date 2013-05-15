@@ -120,9 +120,11 @@ class LCSArray[T] extends Algorithm[Array[T]] with LoggerTrait {
 import thu.ailab.tree.TreeNode
 class LCSArrayFilterDepth extends Algorithm[Array[TreeNode]] with LoggerTrait {
   def run(seq1: Array[TreeNode], seq2: Array[TreeNode]) = {
-    val maxDepth = (seq1.maxBy(_.depth).depth + seq2.maxBy(_.depth).depth) / 2
-    def sumDepth(seq: Array[TreeNode]) = {
-      seq.foldLeft(0)((acc, node) => acc + maxDepth - node.depth)
+    //val maxDepth = (seq1.maxBy(_.depth).depth + seq2.maxBy(_.depth).depth) / 2
+    val maxDepth = math.max(seq1.maxBy(_.depth).depth, seq2.maxBy(_.depth).depth)
+    def getCostFromDepth(node: TreeNode) = maxDepth - node.depth
+    def sumCost(seq: Array[TreeNode]) = {
+      seq.foldLeft(0)((acc, node) => acc + getCostFromDepth(node))
     }
     def getLCSOptimized(seq1: Array[TreeNode], seq2: Array[TreeNode]) = {
       val (len1, len2) = (seq1.length, seq2.length)
@@ -134,7 +136,7 @@ class LCSArrayFilterDepth extends Algorithm[Array[TreeNode]] with LoggerTrait {
         j <- 1 to len2
       } {
         if (seq1(i - 1) == seq2(j - 1))
-          twoRows(nextRow)(j) = twoRows(currentRow)(j - 1) + maxDepth - seq1(i - 1).depth
+          twoRows(nextRow)(j) = twoRows(currentRow)(j - 1) + getCostFromDepth(seq1(i - 1))
         else
           twoRows(nextRow)(j) = math.max(twoRows(nextRow)(j - 1), twoRows(currentRow)(j))
       }
@@ -143,7 +145,7 @@ class LCSArrayFilterDepth extends Algorithm[Array[TreeNode]] with LoggerTrait {
     val (seq_1, seq_2) = (seq1.filter(_.depth <= maxDepth), seq2.filter(_.depth <= maxDepth))
     val (len1, len2) = (seq_1.length, seq_2.length)
     val similarity = getLCSOptimized(seq_1, seq_2)
-    val distance = 1 - 1.0 * similarity / math.max(sumDepth(seq_1), sumDepth(seq_2))
+    val distance = 1 - 1.0 * similarity / math.max(sumCost(seq_1), sumCost(seq_2))
     distance
   }
 }
@@ -159,7 +161,7 @@ class LCSArrayWithWeight extends Algorithm[Array[TreeNode]] with LoggerTrait {
     distance    
   }
   def getLCSOptimized(seq1: Array[TreeNode], seq2: Array[TreeNode]) = {
-    val (len1, len2) = (seq1.length, seq2.length)    
+    val (len1, len2) = (seq1.length, seq2.length)
     val twoRows = Array.ofDim[Double](2, len2 + 1) // For simplicity, always use the second one
     for {
       i <- 1 to len1

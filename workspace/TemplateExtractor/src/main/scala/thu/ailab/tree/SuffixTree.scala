@@ -12,45 +12,76 @@ object RenderChars {
   val CornerRight    = "└";
 }
 
+/**
+ * This is an implementation of the Suffix Tree in order to find out the
+ * repeated data record in HTML source file.
+ * 
+ * Note that I wrote this implementation according to the SO question:
+ * http://stackoverflow.com/questions/9452701/ukkonens-suffix-tree-algorithm-in-plain-english
+ * 
+ * There two ways to display the result tree:
+ * 1. toAscii: an ASCII tree
+ * 2. toDot: translate to a dot file. Use `dot -Tpng input.dot -o output.png'
+ *    to generate a PNG image.  
+ */
 class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T], 
     val nullEdge: T, 
     val canonicalEnd: T,
     val verbose: Boolean = true) {
+  /**
+   * Add `canonicalEnd' to the string if the last element
+   * occurs in the subsequence before
+   */
   val inputSeq =
     if (rawInputSeq.indexOf(
         rawInputSeq(rawInputSeq.length - 1)) < rawInputSeq.length - 1)
       rawInputSeq :+ canonicalEnd
     else rawInputSeq
+    
   def getInputSeqSlice(beginIndex: Int, endIndex: Int) = {
     inputSeq.slice(beginIndex, endIndex)
   } 
   
+  /**
+   * Base class for the Edge and Node in order to implement the
+   * `Visitor Pattern'
+   */ 
   abstract class Show {
     def accept(visitor: SuffixTreeVisitor)
   }
   class Edge(val parentNode: InternalNode, val beginIndex: Int) extends Show {
+    /**
+     *  Auxiliary construct
+     */ 
     def this(_parentNode: InternalNode, _beginIndex: Int, _endNode: BaseNode, 
         _fixEndIndex: Int) = {
       this(_parentNode, _beginIndex)
       this.endNode = _endNode
       this.fixEndIndex = _fixEndIndex
     }
+    // Used when the edge is closed
     private var fixEndIndex: Int = 0
     var endNode: BaseNode = Leaf()
     val ranges = new ArrayBuffer[Int]
-    
-    def getEndIndex() = if (endNode.isLeaf) endPtr + 1 else fixEndIndex
+    /**
+     * Link to a InternalNode or a Leaf, 
+     * or whether this edge is closed
+     */
+    def isClosed = !endNode.isLeaf
+    /**
+     * Various getters for internal use
+     */
+    def getEndIndex() = if (isClosed) fixEndIndex else endPtr + 1
     def getElemAt(idx: Int) = inputSeq(beginIndex + idx)
     def getEdgeSeq = inputSeq.slice(beginIndex, getEndIndex)
     def getEdgeSeqLength = getEndIndex - beginIndex
-    def getEdgeString = inputSeq.slice(beginIndex, getEndIndex).mkString(" ")
-    //def getEdgeString = "(%d, %d)".format(beginIndex, getEndIndex)
-    def getEdgeStringLength = getEdgeString.length
-    def isClosed = endNode.isInstanceOf[InternalNode]
     
+    /**
+     * Important function used in construction
+     */
     def splitEdge(edgeLen: Int, _beginIndex: Int) = {
       val iNode = InternalNode()
-      //before any modification
+      // save original state before any modification
       val save = sameExceptStart(iNode, beginIndex + edgeLen)
       fixEndIndex = beginIndex + edgeLen
       iNode.addEdge(_beginIndex)
@@ -64,6 +95,9 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
     /**
      * For display purposes
      */    
+    def getEdgeString = inputSeq.slice(beginIndex, getEndIndex).mkString(" ")
+    def getEdgeStringLength = getEdgeString.length
+    
     def toAscii(prefix: String, maxEdgeLength: Int) = {
       getEdgeString + (endNode match {
         case node: InternalNode =>
@@ -83,6 +117,9 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       visitor.visit(Edge.this)
     }
   }
+  /**
+   * Base class for InternalNode and Leaf
+   */
   abstract class BaseNode(baseName: String, number: Int) extends Show {
     val name = baseName + number
     val isLeaf: Boolean
@@ -93,6 +130,11 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       "\t" + name + "[label=\"\"];"
     }
   }
+  /**
+   * Return two closures for the subclass object.
+   * The first one will be used to construct subclass
+   * object and the second is just a getter.
+   */
   private def InstanceBuilder[T](stm: (Int) => T) = {
     var number = -1
     (() => {
@@ -100,16 +142,19 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       stm(number)
     }, () => number)
   }
-  object InternalNode {
-    val (getInstance, getNumber) = InstanceBuilder(new InternalNode(_))
-    def apply() = getInstance()
-    def getTotalInternalNodeCount = getNumber() + 1
-  }
   object Leaf {
     val (getInstance, getNumber) = InstanceBuilder(new Leaf(_))
     def apply() = getInstance()
     def getTotalLeafCount = getNumber() + 1
   }
+  object InternalNode {
+    val (getInstance, getNumber) = InstanceBuilder(new InternalNode(_))
+    def apply() = getInstance()
+    def getTotalInternalNodeCount = getNumber() + 1
+  }
+  class Leaf private(number: Int) extends BaseNode("leaf", number) {
+    val isLeaf = true
+  }  
   class InternalNode private(number: Int) extends BaseNode("node", number) {
     val edges = new MHashMap[T, Edge]
     var suffixLink: Option[InternalNode] = None
@@ -141,7 +186,7 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       }
       else {
         (for ((edge, idx) <- edges.values.toList.sortBy(
-            edge => -edge.getEdgeSeqLength/* inputSeq(edge.beginIndex)*/).zipWithIndex) yield {
+            edge => -edge.getEdgeSeqLength).zipWithIndex) yield {
           if (idx == 0) {
             RenderChars.TJunctionDown + RenderChars.HorizontalLine + 
             edge.toAscii(prefixPadding + RenderChars.VerticalLine + " ", maxEdgeLength)
@@ -157,19 +202,27 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       })
     }
   }
-  class Leaf private(number: Int) extends BaseNode("leaf", number) {
-    val isLeaf = true
-  }
   /**
-   * Tree variable
+   * Tree variables
+   * 1. endPtr: points to the current last position in the input sequence
+   * 2. root: stands for the tree's root
+   * 3. activePoint: a triple tuple indicating where the insertion should 
+   *    happen
+   * 4. remainder: indicates how many elements left in the sequence that wait
+   *    for insertion.
    */
   var endPtr = 0
   val root = InternalNode()
   val activePoint = new ActivePoint
+  var remainder: Int = 1
+  
   class ActivePoint {
     var activeNode = root
     var activeEdge = nullEdge
     var activeLength = 0
+    /**
+     * See if a new element should be inserted into the tree.
+     */
     def tryInsert(c: T) = {
       var ret = false
       if (activeEdge == nullEdge && activeNode.hasEdge(c)) {
@@ -186,6 +239,10 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       normalizeAfterUpdate
       ret
     }
+    /**
+     * Perform an insertion from the active point.
+     * Return the new edge's endNode
+     */
     def insertEdge(curEndIndex: Int, preInsertNode: Option[InternalNode]) = {
       if (activeEdge == nullEdge || activeLength == 0) {
         activeNode.addEdge(curEndIndex)
@@ -198,6 +255,11 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
         edge.endNode
       }
     }
+    /**
+     * Update the active point after an insertion.
+     * Add a new parameter `endNode' according to the SO question's second
+     * answer.
+     */
     def moveActivePoint(endNode: BaseNode) = {
       val oldEdgeOption = activeNode.getEdge(activeEdge)
       if (activeNode == root) {
@@ -215,6 +277,11 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       if (!endNode.isLeaf) 
         endNode.asInstanceOf[InternalNode].suffixLink = Some(activeNode)
     }
+    /**
+     * Normalize when a new element is not really inserted to the tree.
+     * Note we call this function every time we call `tryInsert', meaning
+     * that this function is not necessary to be recursive.  
+     */
     def normalizeAfterUpdate() = {
       if (activeNode.hasEdge(activeEdge)) {
         val edge = activeNode.getEdge(activeEdge).get
@@ -225,6 +292,9 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
         }
       }
     }
+    /**
+     * Normalize when we move the active point along with the suffix link.
+     */
     def normalizeAfterSuffix(oldEdge: Edge, initialIndex: Int) = {
       @tailrec
       def doNormalize(beginIndex: Int): Unit = {
@@ -248,17 +318,23 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
           "# activeLength: " + activeLength.toString).mkString("\n") 
     }
   }
-  var remainder: Int = 1
-  // Tree variable ends
+  /**
+   * Top-level insertion function
+   * 
+   * @param times how many insertion should we make
+   * @param preInsertNode node previous inserted
+   */
   @tailrec
   private def insertSuffix(times: Int, 
       preInsertNode: Option[InternalNode]): Unit = {
     def doInsert = {
       val c = inputSeq(endPtr)
       if (!activePoint.tryInsert(c)) {
+        // Need not to insert. Increase the remainder
         remainder += 1
         None
       } else {
+        // do real insertion
         val endNode = activePoint.insertEdge(endPtr, preInsertNode)
         if (remainder > 1) remainder -= 1
         activePoint.moveActivePoint(endNode)
@@ -269,7 +345,7 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       doInsert match {
         case Some(internalNode: InternalNode) => insertSuffix(times - 1, Some(internalNode))
         case Some(leaf: Leaf) => insertSuffix(times - 1, preInsertNode)
-        case _ =>
+        case _ => // if we did not insert a node at previous step, stop recursion
       }
     }
   }
@@ -286,13 +362,17 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       }
       endPtr += 1
       build
-    } else { // End of building
-      endPtr -= 1
+    } else {
+      endPtr -= 1 // End of building, making endPtr point to right place
     }
   }
+  /**
+   * The build process of the main constructor
+   */
   build
-  postBuild
+  postBuild  
   assert(inputSeq.length == root.childLeafCount)
+  
   def postBuild {
     def updateNodeEdge(node: InternalNode) {      
       for (edge <- node.edges.values) {
@@ -330,6 +410,9 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
     }
     doTraverse(root)
   }
+  /**
+   * Store the suffix tree in graphviz dot format
+   */
   def translateToDot(filename: String) = {
     withPrintWriter(filename) { pw =>
       pw.println("digraph G {\n\trankdir = LR;\n" +
@@ -348,10 +431,13 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
   }
 }
 
-class HTMLSuffixTree(html: Array[String], verbose: Boolean = true) extends SuffixTree[String](html, "\0", "$0", verbose) {
-  def findAllRepetitions() = {
+class HTMLSuffixTree(html: Array[String], verbose: Boolean = true) extends 
+SuffixTree[String](html, "\0", "$0", verbose) {
+  private def findAllRepetitions() = {
     val rangeMap = new MHashMap[Int, (Int, InternalNode)]
-    def findAllRepetitionsImpl(curNode: InternalNode, prefixSeq: IndexedSeq[String], preMinDepth: Int): Boolean = {
+    def findAllRepetitionsImpl(curNode: InternalNode, 
+        prefixSeq: IndexedSeq[String],
+        preMinDepth: Int): Boolean = {
       val (usefulEdges, uselessEdges) = curNode.edges.partition(x =>
         x._1.filter(_.isDigit).toInt >= preMinDepth &&
           x._2.isClosed)
@@ -410,41 +496,43 @@ object HTMLSuffixTree {
     val rangeMap = suffixTree.findAllRepetitions
     val (singleRanges, longRanges) = rangeMap.partition{x =>
       (x._2(0)._2 - x._2(0)._1) == 1}
-    val newSingleSeq = for ((key, seq) <- singleRanges) yield {
-      var (head, low, len) = (seq(0), 0, 1)
-      val newSeq = new ArrayBuffer[(Int, Int)]
+    val reserveSeq, removeSeq = new ArrayBuffer[(Int, Int)]
+    for ((key, seq) <- singleRanges) {
+      var (head, headIndex, len) = (seq(0), 0, 1)
       for (i <- 1 to seq.length) {
         if (i == seq.length) {
           if (len > 1) {
-            newSeq += ((head._2, seq(i - 1)._2))
+            removeSeq += ((head._2, seq(i - 1)._2))
+          } else {
+            reserveSeq += ((head._2, seq(i - 1)._2))
           }
-        } else if (seq(i)._1 - head._1 != i - low) {
+        } else if (seq(i)._1 - head._1 != i - headIndex) {
           if (len > 1) {
-            newSeq += ((head._2, seq(i - 1)._2))
+            removeSeq += ((head._2, seq(i - 1)._2))
+          } else {
+            reserveSeq += ((head._2, seq(i - 1)._2))
           }
           head = seq(i)
-          low = i
+          headIndex = i
           len = 1
         } else {
           len += 1
         }
       }
-      newSeq
     }
-    val removeRanges = 
-      ((for ((node, seq) <- longRanges) yield {
-        seq.slice(1, seq.length)
-      }) ++ 
-      newSingleSeq).flatten.toSeq.sortBy(_._1)
-    if (removeRanges.size == 0)
+    for ((node, seq) <- longRanges) {
+      reserveSeq += seq(0)
+      removeSeq ++= seq.slice(1, seq.length)
+    }
+    if (removeSeq.size == 0)
       tagSeq.toIndexedSeq
-    else (for (i <- 0 to removeRanges.length) yield {
+    else (for (i <- 0 to removeSeq.size) yield {
       if (i == 0) {
-        tagSeq.slice(0, removeRanges(i)._1)
-      } else if (i == removeRanges.length) {
-        tagSeq.slice((removeRanges(i - 1)._2), tagSeq.length)
+        tagSeq.slice(0, removeSeq(i)._1)
+      } else if (i == removeSeq.length) {
+        tagSeq.slice((removeSeq(i - 1)._2), tagSeq.length)
       } else {
-        tagSeq.slice(removeRanges(i - 1)._2, removeRanges(i)._1)
+        tagSeq.slice(removeSeq(i - 1)._2, removeSeq(i)._1)
       }
     }).flatten
   }  
