@@ -16,41 +16,60 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
     val nullEdge: T, 
     val canonicalEnd: T,
     val verbose: Boolean = true) {
+  /**
+   * Add `canonicalEnd' to the string if the last element
+   * occurs in the subsequence before
+   */
   val inputSeq =
     if (rawInputSeq.indexOf(
         rawInputSeq(rawInputSeq.length - 1)) < rawInputSeq.length - 1)
       rawInputSeq :+ canonicalEnd
     else rawInputSeq
+    
   def getInputSeqSlice(beginIndex: Int, endIndex: Int) = {
     inputSeq.slice(beginIndex, endIndex)
   } 
   
+  /**
+   * Base class for the Edge and Node in order to implement the
+   * `Visitor Pattern'
+   */ 
   abstract class Show {
     def accept(visitor: SuffixTreeVisitor)
   }
   class Edge(val parentNode: InternalNode, val beginIndex: Int) extends Show {
+    /**
+     *  Auxiliary construct
+     */ 
     def this(_parentNode: InternalNode, _beginIndex: Int, _endNode: BaseNode, 
         _fixEndIndex: Int) = {
       this(_parentNode, _beginIndex)
       this.endNode = _endNode
       this.fixEndIndex = _fixEndIndex
     }
+    // Used when the edge is closed
     private var fixEndIndex: Int = 0
     var endNode: BaseNode = Leaf()
     val ranges = new ArrayBuffer[Int]
-    
-    def getEndIndex() = if (endNode.isLeaf) endPtr + 1 else fixEndIndex
+    /**
+     * Link to a InternalNode or a Leaf, 
+     * or whether this edge is closed
+     */
+    def isClosed = !endNode.isLeaf
+    /**
+     * Various getters for internal use
+     */
+    def getEndIndex() = if (isClosed) fixEndIndex else endPtr + 1
     def getElemAt(idx: Int) = inputSeq(beginIndex + idx)
     def getEdgeSeq = inputSeq.slice(beginIndex, getEndIndex)
     def getEdgeSeqLength = getEndIndex - beginIndex
-    def getEdgeString = inputSeq.slice(beginIndex, getEndIndex).mkString(" ")
-    //def getEdgeString = "(%d, %d)".format(beginIndex, getEndIndex)
-    def getEdgeStringLength = getEdgeString.length
-    def isClosed = endNode.isInstanceOf[InternalNode]
     
+    /**
+     * Important function used in construction
+     */
     def splitEdge(edgeLen: Int, _beginIndex: Int) = {
       val iNode = InternalNode()
-      //before any modification
+      // save original state before any modification
       val save = sameExceptStart(iNode, beginIndex + edgeLen)
       fixEndIndex = beginIndex + edgeLen
       iNode.addEdge(_beginIndex)
@@ -64,6 +83,9 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
     /**
      * For display purposes
      */    
+    def getEdgeString = inputSeq.slice(beginIndex, getEndIndex).mkString(" ")
+    def getEdgeStringLength = getEdgeString.length
+    
     def toAscii(prefix: String, maxEdgeLength: Int) = {
       getEdgeString + (endNode match {
         case node: InternalNode =>
@@ -83,6 +105,9 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       visitor.visit(Edge.this)
     }
   }
+  /**
+   * Base class for InternalNode and Leaf
+   */
   abstract class BaseNode(baseName: String, number: Int) extends Show {
     val name = baseName + number
     val isLeaf: Boolean
@@ -93,6 +118,11 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       "\t" + name + "[label=\"\"];"
     }
   }
+  /**
+   * Return two closures for the subclass object.
+   * The first one will be used to construct subclass
+   * object and the second is just a getter.
+   */
   private def InstanceBuilder[T](stm: (Int) => T) = {
     var number = -1
     (() => {
@@ -100,16 +130,19 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       stm(number)
     }, () => number)
   }
-  object InternalNode {
-    val (getInstance, getNumber) = InstanceBuilder(new InternalNode(_))
-    def apply() = getInstance()
-    def getTotalInternalNodeCount = getNumber() + 1
-  }
   object Leaf {
     val (getInstance, getNumber) = InstanceBuilder(new Leaf(_))
     def apply() = getInstance()
     def getTotalLeafCount = getNumber() + 1
   }
+  object InternalNode {
+    val (getInstance, getNumber) = InstanceBuilder(new InternalNode(_))
+    def apply() = getInstance()
+    def getTotalInternalNodeCount = getNumber() + 1
+  }
+  class Leaf private(number: Int) extends BaseNode("leaf", number) {
+    val isLeaf = true
+  }  
   class InternalNode private(number: Int) extends BaseNode("node", number) {
     val edges = new MHashMap[T, Edge]
     var suffixLink: Option[InternalNode] = None
@@ -141,7 +174,7 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       }
       else {
         (for ((edge, idx) <- edges.values.toList.sortBy(
-            edge => -edge.getEdgeSeqLength/* inputSeq(edge.beginIndex)*/).zipWithIndex) yield {
+            edge => -edge.getEdgeSeqLength).zipWithIndex) yield {
           if (idx == 0) {
             RenderChars.TJunctionDown + RenderChars.HorizontalLine + 
             edge.toAscii(prefixPadding + RenderChars.VerticalLine + " ", maxEdgeLength)
@@ -157,19 +190,27 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       })
     }
   }
-  class Leaf private(number: Int) extends BaseNode("leaf", number) {
-    val isLeaf = true
-  }
   /**
-   * Tree variable
+   * Tree variables
+   * 1. endPtr: points to the current last position in the input sequence
+   * 2. root: stands for the tree's root
+   * 3. activePoint: a triple tuple indicating where the insertion should 
+   *    happen
+   * 4. remainder: indicates how many elements left in the sequence that wait
+   *    for insertion.
    */
   var endPtr = 0
   val root = InternalNode()
   val activePoint = new ActivePoint
+  var remainder: Int = 1
+  
   class ActivePoint {
     var activeNode = root
     var activeEdge = nullEdge
     var activeLength = 0
+    /**
+     * See if a new element should be inserted into the tree.
+     */
     def tryInsert(c: T) = {
       var ret = false
       if (activeEdge == nullEdge && activeNode.hasEdge(c)) {
@@ -186,6 +227,10 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       normalizeAfterUpdate
       ret
     }
+    /**
+     * Perform an insertion from the active point.
+     * Return the new edge's endNode
+     */
     def insertEdge(curEndIndex: Int, preInsertNode: Option[InternalNode]) = {
       if (activeEdge == nullEdge || activeLength == 0) {
         activeNode.addEdge(curEndIndex)
@@ -198,6 +243,9 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
         edge.endNode
       }
     }
+    /**
+     * Update the active point if necessary
+     */
     def moveActivePoint(endNode: BaseNode) = {
       val oldEdgeOption = activeNode.getEdge(activeEdge)
       if (activeNode == root) {
@@ -215,6 +263,11 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       if (!endNode.isLeaf) 
         endNode.asInstanceOf[InternalNode].suffixLink = Some(activeNode)
     }
+    /**
+     * Normalize when a new element is not really inserted to the tree.
+     * Note we call this function every time we call `tryInsert', meaning
+     * that this function is not necessary to be recursive.  
+     */
     def normalizeAfterUpdate() = {
       if (activeNode.hasEdge(activeEdge)) {
         val edge = activeNode.getEdge(activeEdge).get
@@ -225,6 +278,9 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
         }
       }
     }
+    /**
+     * Normalize when we move the active point along with the suffix link.
+     */
     def normalizeAfterSuffix(oldEdge: Edge, initialIndex: Int) = {
       @tailrec
       def doNormalize(beginIndex: Int): Unit = {
@@ -248,8 +304,6 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
           "# activeLength: " + activeLength.toString).mkString("\n") 
     }
   }
-  var remainder: Int = 1
-  // Tree variable ends
   @tailrec
   private def insertSuffix(times: Int, 
       preInsertNode: Option[InternalNode]): Unit = {
