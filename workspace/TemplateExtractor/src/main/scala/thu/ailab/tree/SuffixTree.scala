@@ -12,6 +12,18 @@ object RenderChars {
   val CornerRight    = "└";
 }
 
+/**
+ * This is an implementation of the Suffix Tree in order to find out the
+ * repeated data record in HTML source file.
+ * 
+ * Note that I wrote this implementation according to the SO question:
+ * http://stackoverflow.com/questions/9452701/ukkonens-suffix-tree-algorithm-in-plain-english
+ * 
+ * There two ways to display the result tree:
+ * 1. toAscii: an ASCII tree
+ * 2. toDot: translate to a dot file. Use `dot -Tpng input.dot -o output.png'
+ *    to generate a PNG image.  
+ */
 class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T], 
     val nullEdge: T, 
     val canonicalEnd: T,
@@ -244,7 +256,9 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       }
     }
     /**
-     * Update the active point if necessary
+     * Update the active point after an insertion.
+     * Add a new parameter `endNode' according to the SO question's second
+     * answer.
      */
     def moveActivePoint(endNode: BaseNode) = {
       val oldEdgeOption = activeNode.getEdge(activeEdge)
@@ -304,15 +318,23 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
           "# activeLength: " + activeLength.toString).mkString("\n") 
     }
   }
+  /**
+   * Top-level insertion function
+   * 
+   * @param times how many insertion should we make
+   * @param preInsertNode node previous inserted
+   */
   @tailrec
   private def insertSuffix(times: Int, 
       preInsertNode: Option[InternalNode]): Unit = {
     def doInsert = {
       val c = inputSeq(endPtr)
       if (!activePoint.tryInsert(c)) {
+        // Need not to insert. Increase the remainder
         remainder += 1
         None
       } else {
+        // do real insertion
         val endNode = activePoint.insertEdge(endPtr, preInsertNode)
         if (remainder > 1) remainder -= 1
         activePoint.moveActivePoint(endNode)
@@ -323,7 +345,7 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       doInsert match {
         case Some(internalNode: InternalNode) => insertSuffix(times - 1, Some(internalNode))
         case Some(leaf: Leaf) => insertSuffix(times - 1, preInsertNode)
-        case _ =>
+        case _ => // if we did not insert a node at previous step, stop recursion
       }
     }
   }
@@ -340,13 +362,17 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       }
       endPtr += 1
       build
-    } else { // End of building
-      endPtr -= 1
+    } else {
+      endPtr -= 1 // End of building, making endPtr point to right place
     }
   }
+  /**
+   * The build process of the main constructor
+   */
   build
-  postBuild
+  postBuild  
   assert(inputSeq.length == root.childLeafCount)
+  
   def postBuild {
     def updateNodeEdge(node: InternalNode) {      
       for (edge <- node.edges.values) {
@@ -384,6 +410,9 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
     }
     doTraverse(root)
   }
+  /**
+   * Store the suffix tree in graphviz dot format
+   */
   def translateToDot(filename: String) = {
     withPrintWriter(filename) { pw =>
       pw.println("digraph G {\n\trankdir = LR;\n" +
@@ -402,10 +431,13 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
   }
 }
 
-class HTMLSuffixTree(html: Array[String], verbose: Boolean = true) extends SuffixTree[String](html, "\0", "$0", verbose) {
-  def findAllRepetitions() = {
+class HTMLSuffixTree(html: Array[String], verbose: Boolean = true) extends 
+SuffixTree[String](html, "\0", "$0", verbose) {
+  private def findAllRepetitions() = {
     val rangeMap = new MHashMap[Int, (Int, InternalNode)]
-    def findAllRepetitionsImpl(curNode: InternalNode, prefixSeq: IndexedSeq[String], preMinDepth: Int): Boolean = {
+    def findAllRepetitionsImpl(curNode: InternalNode, 
+        prefixSeq: IndexedSeq[String],
+        preMinDepth: Int): Boolean = {
       val (usefulEdges, uselessEdges) = curNode.edges.partition(x =>
         x._1.filter(_.isDigit).toInt >= preMinDepth &&
           x._2.isClosed)
@@ -464,41 +496,43 @@ object HTMLSuffixTree {
     val rangeMap = suffixTree.findAllRepetitions
     val (singleRanges, longRanges) = rangeMap.partition{x =>
       (x._2(0)._2 - x._2(0)._1) == 1}
-    val newSingleSeq = for ((key, seq) <- singleRanges) yield {
-      var (head, low, len) = (seq(0), 0, 1)
-      val newSeq = new ArrayBuffer[(Int, Int)]
+    val reserveSeq, removeSeq = new ArrayBuffer[(Int, Int)]
+    for ((key, seq) <- singleRanges) {
+      var (head, headIndex, len) = (seq(0), 0, 1)
       for (i <- 1 to seq.length) {
         if (i == seq.length) {
           if (len > 1) {
-            newSeq += ((head._2, seq(i - 1)._2))
+            removeSeq += ((head._2, seq(i - 1)._2))
+          } else {
+            reserveSeq += ((head._2, seq(i - 1)._2))
           }
-        } else if (seq(i)._1 - head._1 != i - low) {
+        } else if (seq(i)._1 - head._1 != i - headIndex) {
           if (len > 1) {
-            newSeq += ((head._2, seq(i - 1)._2))
+            removeSeq += ((head._2, seq(i - 1)._2))
+          } else {
+            reserveSeq += ((head._2, seq(i - 1)._2))
           }
           head = seq(i)
-          low = i
+          headIndex = i
           len = 1
         } else {
           len += 1
         }
       }
-      newSeq
     }
-    val removeRanges = 
-      ((for ((node, seq) <- longRanges) yield {
-        seq.slice(1, seq.length)
-      }) ++ 
-      newSingleSeq).flatten.toSeq.sortBy(_._1)
-    if (removeRanges.size == 0)
+    for ((node, seq) <- longRanges) {
+      reserveSeq += seq(0)
+      removeSeq ++= seq.slice(1, seq.length)
+    }
+    if (removeSeq.size == 0)
       tagSeq.toIndexedSeq
-    else (for (i <- 0 to removeRanges.length) yield {
+    else (for (i <- 0 to removeSeq.size) yield {
       if (i == 0) {
-        tagSeq.slice(0, removeRanges(i)._1)
-      } else if (i == removeRanges.length) {
-        tagSeq.slice((removeRanges(i - 1)._2), tagSeq.length)
+        tagSeq.slice(0, removeSeq(i)._1)
+      } else if (i == removeSeq.length) {
+        tagSeq.slice((removeSeq(i - 1)._2), tagSeq.length)
       } else {
-        tagSeq.slice(removeRanges(i - 1)._2, removeRanges(i)._1)
+        tagSeq.slice(removeSeq(i - 1)._2, removeSeq(i)._1)
       }
     }).flatten
   }  
