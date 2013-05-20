@@ -1,6 +1,7 @@
 package thu.ailab.tree
 
-import scala.collection.mutable.{HashMap => MHashMap, ArrayBuffer}
+import scala.collection.mutable.{HashMap => MHashMap, HashSet=> MHashSet}
+import scala.collection.mutable.ArrayBuffer
 import scala.annotation.tailrec
 import thu.ailab.utils.Tools.withPrintWriter
 
@@ -431,7 +432,11 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
   }
 }
 
-class HTMLSuffixTree(html: Array[String], verbose: Boolean = true) extends 
+/**
+ * This class must be used when the TreeNode instance has only one tag and call
+ * toString to each TreeNode
+ */
+private class HTMLSuffixTree(html: Array[String], verbose: Boolean = true) extends 
 SuffixTree[String](html, "\0", "$0", verbose) {
   private def findAllRepetitions() = {
     val rangeMap = new MHashMap[Int, (Int, InternalNode)]
@@ -494,52 +499,58 @@ object HTMLSuffixTree {
     val RESERVE, REMOVE, MERGE = Value
   }
   import ArrayElementOp._
-  def stripRepetitions(elementSeq: Array[TreeNode]) = {
-    val suffixTree = new HTMLSuffixTree(elementSeq.map(_.toString), verbose = false)
+  def stripDuplicates(elementSeq: Array[TreeNode]) = {
+    val suffixTree = new HTMLSuffixTree(elementSeq.map(_.toString), 
+        verbose = false)
+    type InternalNode = suffixTree.InternalNode
     val rangeMap = suffixTree.findAllRepetitions
-    rangeMap.foreach(x => println(x._1 + " -> " + x._2.name))
-    val (singleRanges, longRanges) = rangeMap.partition{x =>
-      (x._1._2 - x._1._1) == 1}
+    val (singleRanges, longRanges) = rangeMap.partition{ x =>
+      (x._1._2 - x._1._1) == 1
+    }
     val flagSeq = Array.fill(elementSeq.length)(RESERVE)
     val singleRangeKeys = singleRanges.keys.toList.sortBy(_._1)
-    var head: Option[(Int, Int)] = None
-    for (key <- singleRangeKeys) {
-      if (head.isEmpty) {
-        head = Some(key)
+    var (headRangeOption: Option[(Int, Int)], 
+        headNodeOption: Option[InternalNode]) = (None, None)
+    for (curRange <- singleRangeKeys) {
+      if (headRangeOption.isEmpty) {
+        headRangeOption = Some(curRange)
+        headNodeOption = Some(singleRanges(curRange))
       } else {
-        val curNode = singleRanges(head.get) 
-      }
-    }
-    for ((key, seq) <- singleRanges) {
-      var (head, headIndex, len) = (seq(0), 0, 1)
-      for (i <- 1 to seq.length) {
-        if (i == seq.length || seq(i)._1 - head._1 != i - headIndex) {
-          if (len > 1) {
-            assert(len == 2)
-            elementSeq(head._1) = new TreeNode(elementSeq(head._1), true)
-            flagSeq(head._2) = REMOVE
-          }
-          if (i < seq.length) {
-            head = seq(i)
-            headIndex = i
-            len = 1
-          }
+        val curNode = singleRanges(curRange)
+        if (curNode == headNodeOption.get &&
+            curRange._1 - headRangeOption.get._1 == 1) {
+          elementSeq(curRange._1 - 1) = new TreeNode(
+              elementSeq(curRange._1 - 1),
+              true)
+          flagSeq(curRange._1) = REMOVE
         } else {
-          len += 1
+          headRangeOption = Some(curRange)
+          headNodeOption = Some(curNode)
         }
       }
     }
-    for (seq <- longRanges.values) {
-      val (start, end) = seq(0)
-      elementSeq(start) = TreeNode.merge(elementSeq.slice(start, end))
-      flagSeq(start) = MERGE
-      for (i <- start + 1 until end) {
-        flagSeq(i) = REMOVE
+    val longRangeKeys = longRanges.keys.toList.sortBy(_._1)
+    val nodeAppearedBefore = new MHashSet[InternalNode]
+    for (index <- 0 until longRangeKeys.length) {
+      val (start, end) = longRangeKeys(index)
+      val curNode = longRanges((start, end))      
+      if (nodeAppearedBefore.contains(curNode)) {
+        for (i <- start until end)
+          flagSeq(i) = REMOVE
+      } else {
+        nodeAppearedBefore += curNode
+        if (flagSeq(start) == REMOVE && index > 0) {
+          val (preStart, preEnd) = longRangeKeys(index - 1)
+          if (preEnd > start) {
+            for (i <- preStart until start)
+              flagSeq(i) = RESERVE
+          }
+        }
+        flagSeq(start) = MERGE
+        elementSeq(start) = TreeNode.merge(elementSeq.slice(start, end))
+        for (i <- start + 1 until end)
+          flagSeq(i) = REMOVE
       }
-      for (range <- seq.slice(1, seq.length))
-        if (!flagSeq.slice(range._1, range._2).exists(_ == MERGE))
-          for (i <- range._1 until range._2)
-            flagSeq(i) = REMOVE
     }
     for ((node, flag) <- elementSeq zip flagSeq if flag != REMOVE) yield node
   }
@@ -550,19 +561,17 @@ object TestSuffixTree extends App {
   //val s = "dedododeeodo"
   //val t1 = new SuffixTree[Char](s, '\0', '$')
   val fn = System.getProperty("user.home") + "/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_000173770100g2g7.html"
-  //val tagSeq = new TreeBuilder(fn).getTagSequence.map{_.toString}.toArray
+//  val tagSeq = new TreeBuilder(fn).getTagSequence.toArray
   //tagSeq.foreach(print)
   //val tagSeq = Array("html1", "body2", "a3", "body2", "a3")
-  val tagSeq = Array("html1", "head2", "meta3", "meta3", 
-      "body2", "div2", "div3", "div2", "div3", "div2", "div3", "a4", "div4", "img5", "div3", "a4", "div4", "img5",
-      "div3", "a4", "div4", "img5").map { x =>
+  val tagSeq = Array("html1", "head2", "meta3", "meta3", "body2", "div3", 
+      "div3", "div3", "div3", "div2", "div3", "a4", "div4", "img5", "div3", 
+      "a4", "div4", "img5", "div3", "a4", "div4", "img5").map { x =>
     val (depthString, name) = x.partition(_.isDigit)
     new TreeNode(name, depthString.toInt)
   }
   //val html = Array("body2", "div3", "a4", "div4", "img5", "div3", "a4", "div4", "img5", "div3")
   //val html = Array("body1", "head2", "div3", "a4", "p4", "a4", "p4", "div3", "ul4", "li5", "li5", "li5")
-  val tree = new HTMLSuffixTree(tagSeq.map(_.toString), verbose = false)
-  tree.translateToAscii
-  val newTagSeq = HTMLSuffixTree.stripRepetitions(tagSeq, TreeNode.merge)
+  val newTagSeq = HTMLSuffixTree.stripDuplicates(tagSeq)
   println(newTagSeq mkString " ")
 }

@@ -10,9 +10,8 @@ extends MyDocumentFactory[Array[TreeNode]](id2filename) {
   
   override def getInstance(id: Int) = {
     if (documentCache(id) == null) {
-      val tagArray: Array[TreeNode] = HTMLSuffixTree.stripRepetitions(
-          new TreeBuilder(id2filename(id)).getTagSequence.toArray,
-          TreeNode.merge).toArray
+      val tagArray: Array[TreeNode] = HTMLSuffixTree.stripDuplicates(
+          new TreeBuilder(id2filename(id)).getTagSequence.toArray).toArray
       documentCache(id) = tagArray
     }
     documentCache(id)

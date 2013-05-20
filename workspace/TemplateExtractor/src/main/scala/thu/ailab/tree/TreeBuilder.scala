@@ -8,6 +8,9 @@ import org.jsoup.nodes._
 import scala.collection.mutable.ListBuffer
 import thu.ailab.preprocess.RawDocument
 
+import thu.ailab.global._
+import thu.ailab.distance.LCSArraySpaceOptimized
+
 class TreeBuilder(filename: String) {
   val rawDoc = new RawDocument(filename)
   val doc = Jsoup.parse(rawDoc.simplifiedContent, rawDoc.charset)
@@ -44,11 +47,12 @@ class TreeBuilder(filename: String) {
     }
   }
 }
-
-import thu.ailab.global._
 object TestTreeBuilder extends AppEntry with LoggerTrait {
     import thu.ailab.utils.Tools._
     import java.io.{File, FilenameFilter}
+  def calcDistance(seq1: Array[TreeNode], seq2: Array[TreeNode]) = {
+    new LCSArraySpaceOptimized(seq1, seq2).getDistance()
+  }
   def foo1 = {
     val MAX_FILE_COUNT = 100
     val filenames = new File("../../Data/blog1000/").listFiles(new FilenameFilter() {
@@ -57,10 +61,9 @@ object TestTreeBuilder extends AppEntry with LoggerTrait {
     val ts = filenames.map {
       new TreeBuilder(_).getTagSequence.toArray
     }
-    val runner = new thu.ailab.distance.LCSArray[TreeNode]
     val results =
       (for (i <- 0 until ts.length; j <- i + 1 until ts.length) yield {
-        (timeIt(runner.run(ts(i), ts(j))), (filenames(i), filenames(j)))
+        (timeIt(calcDistance(ts(i), ts(j))), (filenames(i), filenames(j)))
       }).toList
     val (resList, filenamePairList) = results.unzip
     val (sims, times) = resList.unzip
@@ -89,20 +92,18 @@ object TestTreeBuilder extends AppEntry with LoggerTrait {
     val ts = filenames.map {
       new TreeBuilder(_).getTagSequence.toArray
     }
-    val runner = new thu.ailab.distance.LCSArrayFilterDepth 
     for (i <- 0 until ts.length; j <- i + 1 until ts.length) {
       println(filenames(i), filenames(j))
-      println(timeIt(runner.run(ts(i), ts(j))))
+      println(timeIt(calcDistance(ts(i), ts(j))))
     }
   }
   def foo3 = {
-    val runner = new thu.ailab.distance.LCSArrayFilterDepth
     val (fn1, fn2) = ("/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_000173770100g2g7.html",
     "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_002b5d980100sf47.html")
     val (t1, t2) = (new TreeBuilder(fn1).getTagSequence.toArray, new TreeBuilder(fn2).getTagSequence.toArray)
     println(t1 mkString " ")
     println(t2 mkString " ")
-    println(timeIt(runner.run(t1, t2)))
+    println(timeIt(calcDistance(t1, t2)))
   }
   foo3
 }

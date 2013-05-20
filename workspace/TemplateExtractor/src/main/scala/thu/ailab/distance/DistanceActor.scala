@@ -26,8 +26,10 @@ object TextSimilarities extends AppEntry with LoggerTrait {
   }
   val factory = new TagSeqFactory(id2filename)
 
-  val algoRunner = new LCSArrayFilterDepth
-      
+  def calcDistance(seq1: Array[TreeNode], seq2: Array[TreeNode]) = {
+    new LCSArraySpaceOptimized(seq1, seq2).getDistance()
+  } 
+  
   val distArray = new Array[Double](factory.size * (factory.size - 1) / 2)
   
   class Worker extends Actor {
@@ -40,7 +42,7 @@ object TextSimilarities extends AppEntry with LoggerTrait {
     def calculateArea(p1: Point, p2: Point) = {
       var acc = 0 
       for (i <- p1.x + 1 to p2.x; j <- p1.y until math.min(p2.y, i)) {
-        distArray((i - 1) * i / 2 + j) = algoRunner.run(factory.getInstance(i),
+        distArray((i - 1) * i / 2 + j) = calcDistance(factory.getInstance(i),
             factory.getInstance(j))
         acc += 1
       }
