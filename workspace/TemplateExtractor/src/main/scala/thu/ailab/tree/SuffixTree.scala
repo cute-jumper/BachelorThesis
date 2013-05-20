@@ -482,60 +482,67 @@ SuffixTree[String](html, "\0", "$0", verbose) {
       usefulEdges.size != 0
     }
     findAllRepetitionsImpl(root, IndexedSeq[String](), 0)
-    rangeMap.groupBy(_._2._2).map { x =>
-      (x._1, x._2.map { y =>
-        (y._1 - y._2._1, y._1)
-      }.toSeq.sortBy(_._1))
+    rangeMap.map { x =>
+      (x._1 - x._2._1, x._1) -> x._2._2
     }
   }
 }
 
 object HTMLSuffixTree {
-  def stripRepetitions[T <% String](tagSeq: Array[T]) = {
-    val suffixTree = new HTMLSuffixTree(tagSeq.map(_.toString), verbose = false)
+  object ArrayElementOp extends Enumeration {
+    type TreeNodeOp = Value
+    val RESERVE, REMOVE, MERGE = Value
+  }
+  import ArrayElementOp._
+  def stripRepetitions(elementSeq: Array[TreeNode]) = {
+    val suffixTree = new HTMLSuffixTree(elementSeq.map(_.toString), verbose = false)
     val rangeMap = suffixTree.findAllRepetitions
+    rangeMap.foreach(x => println(x._1 + " -> " + x._2.name))
     val (singleRanges, longRanges) = rangeMap.partition{x =>
-      (x._2(0)._2 - x._2(0)._1) == 1}
-    val reserveSeq, removeSeq = new ArrayBuffer[(Int, Int)]
+      (x._1._2 - x._1._1) == 1}
+    val flagSeq = Array.fill(elementSeq.length)(RESERVE)
+    val singleRangeKeys = singleRanges.keys.toList.sortBy(_._1)
+    var head: Option[(Int, Int)] = None
+    for (key <- singleRangeKeys) {
+      if (head.isEmpty) {
+        head = Some(key)
+      } else {
+        val curNode = singleRanges(head.get) 
+      }
+    }
     for ((key, seq) <- singleRanges) {
       var (head, headIndex, len) = (seq(0), 0, 1)
       for (i <- 1 to seq.length) {
-        if (i == seq.length) {
+        if (i == seq.length || seq(i)._1 - head._1 != i - headIndex) {
           if (len > 1) {
-            removeSeq += ((head._2, seq(i - 1)._2))
-          } else {
-            reserveSeq += ((head._2, seq(i - 1)._2))
+            assert(len == 2)
+            elementSeq(head._1) = new TreeNode(elementSeq(head._1), true)
+            flagSeq(head._2) = REMOVE
           }
-        } else if (seq(i)._1 - head._1 != i - headIndex) {
-          if (len > 1) {
-            removeSeq += ((head._2, seq(i - 1)._2))
-          } else {
-            reserveSeq += ((head._2, seq(i - 1)._2))
+          if (i < seq.length) {
+            head = seq(i)
+            headIndex = i
+            len = 1
           }
-          head = seq(i)
-          headIndex = i
-          len = 1
         } else {
           len += 1
         }
       }
     }
-    for ((node, seq) <- longRanges) {
-      reserveSeq += seq(0)
-      removeSeq ++= seq.slice(1, seq.length)
-    }
-    if (removeSeq.size == 0)
-      tagSeq.toIndexedSeq
-    else (for (i <- 0 to removeSeq.size) yield {
-      if (i == 0) {
-        tagSeq.slice(0, removeSeq(i)._1)
-      } else if (i == removeSeq.length) {
-        tagSeq.slice((removeSeq(i - 1)._2), tagSeq.length)
-      } else {
-        tagSeq.slice(removeSeq(i - 1)._2, removeSeq(i)._1)
+    for (seq <- longRanges.values) {
+      val (start, end) = seq(0)
+      elementSeq(start) = TreeNode.merge(elementSeq.slice(start, end))
+      flagSeq(start) = MERGE
+      for (i <- start + 1 until end) {
+        flagSeq(i) = REMOVE
       }
-    }).flatten
-  }  
+      for (range <- seq.slice(1, seq.length))
+        if (!flagSeq.slice(range._1, range._2).exists(_ == MERGE))
+          for (i <- range._1 until range._2)
+            flagSeq(i) = REMOVE
+    }
+    for ((node, flag) <- elementSeq zip flagSeq if flag != REMOVE) yield node
+  }
 }
 
 object TestSuffixTree extends App {
@@ -545,13 +552,17 @@ object TestSuffixTree extends App {
   val fn = System.getProperty("user.home") + "/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_000173770100g2g7.html"
   //val tagSeq = new TreeBuilder(fn).getTagSequence.map{_.toString}.toArray
   //tagSeq.foreach(print)
-  val tagSeq = Array("html1", "body2", "a3", "body2", "a3")
-//  val tagSeq = Array("html1", "head2", "meta3", "meta3", 
-//      "body2", "div3", "a4", "div4", "img5", "div3", "a4", "div4", "img5",
-//      "div3", "a4", "div4", "img5", "div3", "div3")
+  //val tagSeq = Array("html1", "body2", "a3", "body2", "a3")
+  val tagSeq = Array("html1", "head2", "meta3", "meta3", 
+      "body2", "div2", "div3", "div2", "div3", "div2", "div3", "a4", "div4", "img5", "div3", "a4", "div4", "img5",
+      "div3", "a4", "div4", "img5").map { x =>
+    val (depthString, name) = x.partition(_.isDigit)
+    new TreeNode(name, depthString.toInt)
+  }
   //val html = Array("body2", "div3", "a4", "div4", "img5", "div3", "a4", "div4", "img5", "div3")
   //val html = Array("body1", "head2", "div3", "a4", "p4", "a4", "p4", "div3", "ul4", "li5", "li5", "li5")
-  //val tree = new HTMLSuffixTree(html, verbose = true)
-   val newTagSeq = HTMLSuffixTree.stripRepetitions(tagSeq)
-   println(newTagSeq.mkString)
+  val tree = new HTMLSuffixTree(tagSeq.map(_.toString), verbose = false)
+  tree.translateToAscii
+  val newTagSeq = HTMLSuffixTree.stripRepetitions(tagSeq, TreeNode.merge)
+  println(newTagSeq mkString " ")
 }
