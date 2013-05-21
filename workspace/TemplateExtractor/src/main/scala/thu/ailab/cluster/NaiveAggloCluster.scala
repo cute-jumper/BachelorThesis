@@ -99,12 +99,23 @@ class NaiveAggloCluster extends LoggerTrait {
       "Cluster Center: %s\n".format(factory.getFilename(centerId)) +
       cps.map(c => factory.getFilename(c.id)).mkString("\n")
     }
+    def toXML() = {
+    <cluster center={factory.getFilename(centerId)}>
+      {for (cp <- cps) yield <point>{factory.getFilename(cp.id)}</point>}
+    </cluster>
+    }
   }
   import thu.ailab.utils.Tools.withPrintWriter  
-  def writeFile(filename: String) = {
+  def writeClusterFile(filename: String) = {
     withPrintWriter(filename){ pw =>
-      clusters.foreach(pw.println)
+      clusters.foreach(x => pw.println(x._1 + "\n" + x._2))
     }
+  }
+  def writeClusterXML(filename: String) = {
+    xml.XML.save(filename, 
+        <clusters>
+        {for (c <- clusters) yield c._2.toXML}
+        </clusters>)
   }
 }
 
@@ -112,6 +123,5 @@ object TestNaiveAggloCluster extends AppEntry {
   import thu.ailab.utils.Tools.timeIt
   val naive = new NaiveAggloCluster
   println(timeIt(naive.clustering)._2)
-  naive.writeFile(MyConfigFactory.getValue[String]("output.clusterFile"))
+  naive.writeClusterXML(MyConfigFactory.getValue[String]("output.clusterFile"))
 }
-

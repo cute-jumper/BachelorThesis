@@ -45,6 +45,17 @@ class TreeNode(val nameArray: Array[String],
     else
       nameArray.zip(depthArray).map(x => x._1 + x._2).mkString
   }
+  
+  def toXML() = {
+    <TreeNode allowMultiple={allowMultiple.toString}>
+      <names>
+      {for (name <- nameArray) yield <name>{name}</name>}
+      </names>
+      <depths>
+      {for (depth <- depthArray) yield <depth>{depth}</depth>}
+      </depths>
+    </TreeNode>
+  }
 }
 
 object TreeNode {

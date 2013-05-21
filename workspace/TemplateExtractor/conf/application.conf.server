@@ -1,17 +1,21 @@
 logger {
-       filepath="~/log/example.log"
+       filepath="~/tmp/example.log"
 }
 document {
        blogdir="~/Data/blog1000"
        newsdir="~/Data/news1000"
 }
+preprocess {
+       blogdir="~/Data/blog1000_preprocess"
+       newsdir="~/Data/news1000_preprocess"
+}
 output {
-       distFile="~/log/distFile"
-       clusterFile="~/log/clusterFile"
-       id2filename="~/log/id2filename"
+       distFile="~/tmp/distFile"
+       clusterFile="~/tmp/clusterFile"
+       id2filename="~/tmp/id2filename"
 }
 actor {
-       nrOfWorkers=2
+       nrOfWorkers=10
        pieceLength=100      
 }
 cluster {

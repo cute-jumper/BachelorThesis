@@ -17,6 +17,7 @@ object MyConfigFactory {
         filepath
     simpleExpansion(conf.getString(path))
   }
+  def hasValue(name: String) = conf.hasPath(name)
   /**
    * A generic method using Manifest
    */

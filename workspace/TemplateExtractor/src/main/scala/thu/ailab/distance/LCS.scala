@@ -43,13 +43,12 @@ extends LCSArray(seq_1, seq_2) {
         directionMap(i - 1)(j - 1) = DIAGONAL
       } else if (table(i - 1)(j) > table(i)(j - 1)) {
         table(i)(j) = table(i - 1)(j)
-        directionMap(i - 1)(j - 1) = DOWN
+        directionMap(i - 1)(j - 1) = RIGHT
       } else {
         table(i)(j) = table(i)(j - 1)
-        directionMap(i - 1)(j - 1) = RIGHT
+        directionMap(i - 1)(j - 1) = DOWN
       }
     }
-    println("similarity: " + table(len1)(len2))
     (similarityToDistance(table(len1)(len2)), backtraceLCS(directionMap))
   }
   /**
@@ -62,10 +61,7 @@ extends LCSArray(seq_1, seq_2) {
         directionMap(x)(y) match {
           case DOWN => helper(x, y - 1, acc)
           case RIGHT => helper(x - 1, y, acc)
-          case DIAGONAL => {
-            println(seq1(x))
-            helper(x - 1, y - 1, seq1(x) :: acc)
-          }
+          case DIAGONAL => helper(x - 1, y - 1, seq1(x) :: acc)
         }
       } else {
         (seq1(x) :: acc).toArray
@@ -155,10 +151,10 @@ extends Algorithm[List[T]] with LoggerTrait {
         directionMap(i - 1)(j - 1) = DIAGONAL
       } else if (table(i - 1)(j) > table(i)(j - 1)) {
         table(i)(j) = table(i - 1)(j)
-        directionMap(i - 1)(j - 1) = DOWN
+        directionMap(i - 1)(j - 1) = RIGHT
       } else {
         table(i)(j) = table(i)(j - 1)
-        directionMap(i - 1)(j - 1) = RIGHT
+        directionMap(i - 1)(j - 1) = DOWN
       }
     }
     (table, directionMap)

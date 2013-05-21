@@ -8,8 +8,8 @@ seq(SbtStartScript.startScriptForClassesSettings: _*)
 
 name := "TemplateExtractor"
 
-scalacOptions += "-deprecation"
+scalacOptions ++= Seq("-deprecation", "-unchecked")
 
-unmanagedSourceDirectories in Compile <+= baseDirectory{ _ / "conf"}
+unmanagedResourceDirectories in Compile <+= baseDirectory{ _ / "conf"}
 
 mainClass in (Compile, run) := Some("thu.ailab.cluster.TestNaiveAggloCluster")
