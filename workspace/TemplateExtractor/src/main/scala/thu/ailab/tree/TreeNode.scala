@@ -15,7 +15,7 @@ class TreeNode(val nameArray: Array[String],
   private val isDuplicate = !hashCodePairs.exists(_ != hashCodePairs(0))
   val name = if (isDuplicate) nameArray(0) else nameArray.mkString
   val minDepth = depthArray(0)
-  val maxDepth = depthArray(depthArray.length - 1)
+  val maxDepth = depthArray.max
   val depth = minDepth
   /**
    * object equality methods
@@ -41,9 +41,9 @@ class TreeNode(val nameArray: Array[String],
   
   override val toString = {
     if (isDuplicate)
-      name + depth
+      name + "." + depth
     else
-      nameArray.zip(depthArray).map(x => x._1 + x._2).mkString
+      nameArray.zip(depthArray).map(x => x._1 + "." + x._2).mkString("-")
   }
   
   def toXML() = {

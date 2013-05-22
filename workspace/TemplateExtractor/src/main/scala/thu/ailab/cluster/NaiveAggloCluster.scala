@@ -1,6 +1,6 @@
 package thu.ailab.cluster
 
-import thu.ailab.factory._
+import thu.ailab.document.TagSeqFactory
 import thu.ailab.tree._
 import thu.ailab.global._
 import scala.collection.mutable.ArrayBuffer
@@ -11,15 +11,17 @@ import scala.collection.mutable.{HashSet => MHashSet, HashMap => MHashMap}
  * because I try to minimize all the
  * overhead to make it run faster.
  */
-class NaiveAggloCluster extends LoggerTrait {
-  val id2filename = scala.io.Source.fromFile(MyConfigFactory.getValue[String]("output.id2filename")).getLines.toArray
+class NaiveAggloCluster extends Clustering with LoggerTrait {
+  val id2filename = scala.io.Source.fromFile(
+      MyConfigFactory.getValue[String]("output.id2filename")).getLines.toArray
   val factory = new TagSeqFactory(id2filename)
   val distArray = new Array[Double]((factory.size - 1) * factory.size / 2)
   for ((line, idx) <- scala.io.Source.fromFile(
       MyConfigFactory.getValue[String]("output.distFile")).getLines.zipWithIndex) {
     distArray(idx) = line.toDouble
   }
-  val clusterThreshold = MyConfigFactory.getValue[Double]("cluster.NaiveAggloCluster.clusterThreshold")
+  val clusterThreshold = MyConfigFactory.getValue[Double](
+      "cluster.NaiveAggloCluster.clusterThreshold")
   val clusters = new MHashMap[Int, Cluster]
   var minDist = Double.MaxValue
   var minPair = (0, 0)
@@ -99,9 +101,11 @@ class NaiveAggloCluster extends LoggerTrait {
       "Cluster Center: %s\n".format(factory.getFilename(centerId)) +
       cps.map(c => factory.getFilename(c.id)).mkString("\n")
     }
-    def toXML() = {
+    def toXML(verbose: Boolean = true) = {
     <cluster center={factory.getFilename(centerId)}>
-      {for (cp <- cps) yield <point>{factory.getFilename(cp.id)}</point>}
+      {if (verbose)
+        for (cp <- cps) yield <point>{factory.getFilename(cp.id)}</point>
+      else for (cp <- cps) yield <point>{cp.id}</point>}
     </cluster>
     }
   }
@@ -114,7 +118,7 @@ class NaiveAggloCluster extends LoggerTrait {
   def writeClusterXML(filename: String) = {
     xml.XML.save(filename, 
         <clusters>
-        {for (c <- clusters) yield c._2.toXML}
+        {for (c <- clusters) yield c._2.toXML(false)}
         </clusters>)
   }
 }

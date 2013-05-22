@@ -1,6 +1,6 @@
-package thu.ailab.factory
+package thu.ailab.document
 
-abstract class MyDocumentFactory[T](protected val id2filename: Array[String]) {
+abstract class MyDocFactory[T](protected val id2filename: Array[String]) {
   final val size = id2filename.length
   def getFilename(id: Int) = id2filename(id)
   def getInstance(id: Int):T

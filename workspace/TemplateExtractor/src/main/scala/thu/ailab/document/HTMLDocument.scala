@@ -1,8 +1,7 @@
-package thu.ailab.preprocess
+package thu.ailab.document
 
+import thu.ailab.global.{LoggerTrait, MyConfigFactory}
 import thu.ailab.utils.CharsetDetector
-import thu.ailab.factory.MyConfigFactory
-import thu.ailab.global.LoggerTrait
 
 /**
  * Document class, representing one HTML document, with some useful information. 
@@ -16,7 +15,7 @@ import thu.ailab.global.LoggerTrait
  *  - simplifiedContent(strippedLines)
  */
 
-class RawDocument(val filename: String) extends LoggerTrait {
+class HTMLDocument(val filename: String) extends LoggerTrait {
   /**
    *  Since we mainly deal with Chinese documents, default is gb18030
    */ 
@@ -92,11 +91,11 @@ class RawDocument(val filename: String) extends LoggerTrait {
   }
 }
 
-object RawDocument {
+object HTMLDocument {
   private val fileLoaded = Array[Boolean]()
   def main(args: Array[String]) {
     MyConfigFactory
-    val foo = new RawDocument("../../Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f2e45101017icv.html")
+    val foo = new HTMLDocument("../../Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f2e45101017icv.html")
     //foo.test()
   }
 }

@@ -6,14 +6,14 @@ import org.jsoup.nodes.Element
 import org.jsoup.select.NodeVisitor
 import org.jsoup.nodes._
 import scala.collection.mutable.ListBuffer
-import thu.ailab.preprocess.RawDocument
+import thu.ailab.document.HTMLDocument
 
 import thu.ailab.global._
 import thu.ailab.distance.LCSArraySpaceOptimized
 
 class TreeBuilder(filename: String) {
-  val rawDoc = new RawDocument(filename)
-  val doc = Jsoup.parse(rawDoc.simplifiedContent, rawDoc.charset)
+  val htmlDoc = new HTMLDocument(filename)
+  val doc = Jsoup.parse(htmlDoc.simplifiedContent, htmlDoc.charset)
   val elem = doc.getElementsByTag("strong")
   def printTree = {
     doc.traverse(new NodeVisitor() {

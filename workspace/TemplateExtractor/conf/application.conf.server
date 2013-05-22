@@ -23,3 +23,6 @@ cluster {
                           clusterThreshold=0.5
         }
 }
+template {
+        shingleLength=20
+}
