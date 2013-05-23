@@ -14,10 +14,11 @@ class Shingle(val treeNodeArray: Array[TreeNode], val father: TreeNode) {
     }
   }
   override val hashCode = {
-    treeNodeArray.foldLeft(1)((acc, node) => 41 * acc + node.hashCode)
+    41 * treeNodeArray.foldLeft(1)((acc, node) => 41 * acc + node.hashCode) + 
+    father.hashCode
   }
   def canEqual(that: Any) = that.isInstanceOf[Shingle]
   override def toString() = {
-    treeNodeArray mkString " "
+    (treeNodeArray mkString " ") + "--> father: " + father
   }
 }

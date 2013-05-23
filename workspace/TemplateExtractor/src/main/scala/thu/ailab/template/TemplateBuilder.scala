@@ -3,7 +3,7 @@ package thu.ailab.template
 import scala.collection.mutable.{HashMap => MHashMap}
 
 import thu.ailab.global.MyConfigFactory
-import thu.ailab.tree.TreeNode
+import thu.ailab.tree._
 import thu.ailab.document.TagSeqFactory
 
 class TemplateBuilder {
@@ -25,7 +25,10 @@ class TemplateBuilder {
       for (shingle <- tss.shingles)
         shingleMap(shingle) = shingleMap.getOrElse(shingle, 0) + 1
     }
-    for (shingle <- tssArray(util.Random.nextInt(tssArray.length)).shingles) {
+    val chooseId = 3
+    println(tagSeqFactory.getFilename(chooseId))
+    println(new TreeBuilder(tagSeqFactory.getFilename(chooseId)).getTagSequence.mkString(" "))
+    for (shingle <- tssArray(chooseId).shingles) {
       println("%4d : %s".format(shingleMap(shingle), shingle))
     }
   }
