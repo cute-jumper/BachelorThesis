@@ -24,11 +24,10 @@ extends Algorithm[Array[TreeNode]] with LoggerTrait {
   val (seq1, seq2) = (seq_1.filter(_.depth <= maxDepth), seq_2.filter(_.depth <= maxDepth))
   val (len1, len2) = (seq1.length, seq2.length)
   protected def getCostFromDepth(depth: Int) = maxDepth - depth
-  protected def sumCost(seq: Array[TreeNode]) = {
-    seq.foldLeft(0)((acc, node) => acc + getCostFromDepth(node.depth))
-  }
+  protected def sumCost(seq: Array[Int]) = seq.map(getCostFromDepth).sum
   protected def similarityToDistance(similarity: Int) = {
-    1 - 1.0 * similarity / math.max(sumCost(seq1), sumCost(seq2))
+    1 - 1.0 * similarity / math.max(sumCost(seq1.map(_.depth)),
+        sumCost(seq2.map(_.depth)))
   }
 }
 

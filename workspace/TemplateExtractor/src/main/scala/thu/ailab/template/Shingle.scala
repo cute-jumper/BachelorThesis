@@ -9,7 +9,7 @@ class Shingle(val treeNodeArray: Array[TreeNode], val father: TreeNode) {
   override def equals(other: Any) = {
     other match {
       case that: Shingle =>
-        (that canEqual this) && this.hashCode == that.hashCode
+        (that canEqual this) && this.hashCode == that.hashCode && super.equals(that)
       case _ => false
     }
   }

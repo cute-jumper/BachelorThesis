@@ -20,7 +20,7 @@ object Preprocess {
           new TreeBuilder(fn).getTagSequence.toArray)
       val node = 
         <TreeNodeArray>
-        {for (node <- compactTagSeq) yield node.toXML}
+        {compactTagSeq.map(_.toXML)}
         </TreeNodeArray>
       xml.XML.save(fn.replace(blogdir, prepBlogdir), node)
     }

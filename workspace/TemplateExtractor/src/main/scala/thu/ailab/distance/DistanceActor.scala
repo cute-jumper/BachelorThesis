@@ -30,7 +30,7 @@ object TextSimilarities extends AppEntry with LoggerTrait {
     new LCSArraySpaceOptimized(seq1, seq2).getDistance()
   } 
   
-  val distArray = new Array[Double](factory.size * (factory.size - 1) / 2)
+  val distArray = new Array[Double](factory.getSize * (factory.getSize - 1) / 2)
   
   class Worker extends Actor {
     def receive = {
@@ -42,8 +42,9 @@ object TextSimilarities extends AppEntry with LoggerTrait {
     def calculateArea(p1: Point, p2: Point) = {
       var acc = 0 
       for (i <- p1.x + 1 to p2.x; j <- p1.y until math.min(p2.y, i)) {
-        distArray((i - 1) * i / 2 + j) = calcDistance(factory.getInstance(i),
-            factory.getInstance(j))
+        distArray((i - 1) * i / 2 + j) = calcDistance(
+            factory.getInstance(i).flatMap(_.getSeparateNodes),
+            factory.getInstance(j).flatMap(_.getSeparateNodes))
         acc += 1
       }
       acc
@@ -56,7 +57,7 @@ object TextSimilarities extends AppEntry with LoggerTrait {
     val workerRouter = context.actorOf(
       Props[Worker].withRouter(RoundRobinRouter(nrOfWorkers)), 
       name = "workRouter")
-    val nrOfHSplit = (factory.size - 2) / pieceLength + 1
+    val nrOfHSplit = (factory.getSize - 2) / pieceLength + 1
     val nrOfMessages = (nrOfHSplit + 1) * nrOfHSplit / 2
     logger.info("Total area count: %d".format(nrOfMessages))
     var finishedCount = 0
@@ -67,8 +68,8 @@ object TextSimilarities extends AppEntry with LoggerTrait {
           logger.info("Start %d worker".format(acc))
           acc += 1
           workerRouter ! AreaSplit(Point(i * pieceLength, j * pieceLength), 
-              Point(math.min((i + 1) * pieceLength, factory.size - 1),
-                  math.min((j + 1) * pieceLength, factory.size - 1)))
+              Point(math.min((i + 1) * pieceLength, factory.getSize - 1),
+                  math.min((j + 1) * pieceLength, factory.getSize - 1)))
         }
       case AreaFinished => 
         finishedCount += 1
@@ -94,7 +95,7 @@ object TextSimilarities extends AppEntry with LoggerTrait {
     def writeDistFile(filename: String) = {
       withPrintWriter(filename) {pw =>
         var idx = 0
-        for (i <- 0 until factory.size; j <- 0 until i) {
+        for (i <- 0 until factory.getSize; j <- 0 until i) {
           pw.println("%f".format(distArray(idx)))
           idx += 1
         }

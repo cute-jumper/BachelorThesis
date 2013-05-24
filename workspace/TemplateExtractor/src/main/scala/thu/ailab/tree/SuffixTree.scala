@@ -33,8 +33,7 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
    * occurs in the subsequence before
    */
   val inputSeq =
-    if (rawInputSeq.indexOf(
-        rawInputSeq(rawInputSeq.length - 1)) < rawInputSeq.length - 1)
+    if (rawInputSeq.indexOf(rawInputSeq.last) < rawInputSeq.length - 1)
       rawInputSeq :+ canonicalEnd
     else rawInputSeq
     
@@ -108,7 +107,7 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
     }
     def toDot() = {
       val compactString = getEdgeString split " " map { s =>
-        "%c%c".format(s(0), s(s.length - 1))
+        "%c%c".format(s(0), s.last)
       } mkString " "
       "\t" + parentNode.name + "->" + endNode.name + 
       "[label=\"%s\"];".format(compactString)
@@ -185,8 +184,8 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
         edges.values.headOption.get.toAscii(prefixPadding + "  ", maxEdgeLength)
       }
       else {
-        (for ((edge, idx) <- edges.values.toList.sortBy(
-            edge => -edge.getEdgeSeqLength).zipWithIndex) yield {
+        (for ((edge, idx) <- edges.values.toSeq.sortBy(-_.getEdgeSeqLength).
+            zipWithIndex) yield {
           if (idx == 0) {
             RenderChars.TJunctionDown + RenderChars.HorizontalLine + 
             edge.toAscii(prefixPadding + RenderChars.VerticalLine + " ", maxEdgeLength)

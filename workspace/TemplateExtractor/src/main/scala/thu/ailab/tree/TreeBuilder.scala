@@ -62,7 +62,7 @@ object TestTreeBuilder extends AppEntry with LoggerTrait {
       new TreeBuilder(_).getTagSequence.toArray
     }
     val results =
-      (for (i <- 0 until ts.length; j <- i + 1 until ts.length) yield {
+      (for (i <- ts.indices; j <- i + 1 until ts.length) yield {
         (timeIt(calcDistance(ts(i), ts(j))), (filenames(i), filenames(j)))
       }).toList
     val (resList, filenamePairList) = results.unzip
@@ -92,7 +92,7 @@ object TestTreeBuilder extends AppEntry with LoggerTrait {
     val ts = filenames.map {
       new TreeBuilder(_).getTagSequence.toArray
     }
-    for (i <- 0 until ts.length; j <- i + 1 until ts.length) {
+    for (i <- ts.indices; j <- i + 1 until ts.length) {
       println(filenames(i), filenames(j))
       println(timeIt(calcDistance(ts(i), ts(j))))
     }

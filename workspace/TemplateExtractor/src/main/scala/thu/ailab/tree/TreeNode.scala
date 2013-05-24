@@ -17,6 +17,7 @@ class TreeNode(val nameArray: Array[String],
   val minDepth = depthArray(0)
   val maxDepth = depthArray.max
   val depth = minDepth
+  val innerSize = if (isDuplicate) 1 else nameArray.size
   /**
    * object equality methods
    */
@@ -24,7 +25,7 @@ class TreeNode(val nameArray: Array[String],
   override def equals(other: Any) = {
     other match {
       case that: TreeNode => 
-        (that canEqual this) && this.hashCode == that.hashCode
+        (that canEqual this) && this.hashCode == that.hashCode && super.equals(that)
 //        name == that.name &&
 //        depth == that.depth
       case _ => false
@@ -38,6 +39,12 @@ class TreeNode(val nameArray: Array[String],
   }
   def canEqual(that: Any) = that.isInstanceOf[TreeNode]
   // Ends here
+  
+  def getSeparateNodes() = {
+    nameArray zip depthArray map { x =>
+      new TreeNode(x._1, x._2)
+    }
+  }
   
   override val toString = {
     if (isDuplicate)

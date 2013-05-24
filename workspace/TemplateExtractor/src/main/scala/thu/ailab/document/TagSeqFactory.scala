@@ -7,9 +7,8 @@ import thu.ailab.tree.{TreeNode, TreeBuilder, HTMLSuffixTree}
 
 class TagSeqFactory(id2filename: Array[String]) 
 extends MyDocFactory[Array[TreeNode]](id2filename) {
-  override val documentCache = new Array[Array[TreeNode]](size)
+  override val documentCache = new Array[Array[TreeNode]](factorySize)
   private def fileIsLoaded(id: Int): Boolean = documentCache(id) != null
-  implicit def treeNode2String(treeNode: TreeNode) = treeNode.toString
   
   private val blogdir = MyConfigFactory.getValue[String]("document.blogdir")
   private val prepBlogdir = MyConfigFactory.getValue[String]("preprocess.blogdir")
@@ -30,5 +29,9 @@ extends MyDocFactory[Array[TreeNode]](id2filename) {
       documentCache(id) = tagArray
     }
     documentCache(id)
+  }
+  
+  def getAllInstances() = {
+    (0 until factorySize).toArray map getInstance
   }
 }
