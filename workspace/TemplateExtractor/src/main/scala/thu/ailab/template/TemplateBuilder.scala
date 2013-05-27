@@ -13,10 +13,11 @@ class TemplateBuilder {
   def ClusterFileReader() = {
     val clusterXML = xml.XML.loadFile(
         MyConfigFactory.getValue[String]("output.clusterFile"))
-    for (c <- clusterXML \ "cluster") yield c \ "point" map (_.text.toInt)
+    for (c <- clusterXML \ "cluster") yield 
+    (c.attributes("center").text.toInt, c \ "point" map (_.text.toInt))
   }
   val clusterFileIds = ClusterFileReader()
-  def getClusterTemplate(fileIds: Seq[Int]) = {
+  def getClusterTemplate(centerId: Int, fileIds: Seq[Int]) = {
     val shingleMap = new MHashMap[Shingle, Int]
     val tssArray = fileIds.map { id =>
       new TagSeqShingles(tagSeqFactory.getInstance(id))
@@ -32,7 +33,7 @@ class TemplateBuilder {
       println("%4d : %s".format(shingleMap(shingle), shingle))
     }
   }
-  getClusterTemplate(clusterFileIds(2))
+  Function.tupled(getClusterTemplate _)(clusterFileIds(2))
 }
 
 object TestTemplateBuilder extends App {

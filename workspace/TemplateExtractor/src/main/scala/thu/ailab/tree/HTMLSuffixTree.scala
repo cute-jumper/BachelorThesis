@@ -66,14 +66,16 @@ object HTMLSuffixTree {
     type InternalNode = suffixTree.InternalNode
     val rangeMap = suffixTree.findAllRepetitions
     val sortedRanges = rangeMap.keys.toSeq.sortBy(-_._1)
-    val fatherMap = new MHashMap[TreeNode, List[(Int, Int)]]
+    val fatherMap = new MHashMap[(TreeNode, Int), List[(Int, Int)]]
     val flagArray = Array.fill(elementSeq.length)(RESERVE)
     for (range <- sortedRanges) {
       val curDepth = elementSeq(range._1).depth
-      val father = elementSeq((range._1 to 0 by -1).iterator.dropWhile{
+      val fatherIndex = (range._1 to 0 by -1).iterator.dropWhile{
         elementSeq(_).depth >= curDepth
-      }.next)
-      fatherMap(father) = range :: fatherMap.getOrElse(father, Nil)
+      }.next
+      val fatherNode = elementSeq(fatherIndex)
+      fatherMap((fatherNode, fatherIndex)) = range :: 
+      fatherMap.getOrElse((fatherNode, fatherIndex), Nil)
     }
     for (rangeList <- fatherMap.values if rangeList.length > 1) {
       val rangeCount = new MHashMap[InternalNode, Int]

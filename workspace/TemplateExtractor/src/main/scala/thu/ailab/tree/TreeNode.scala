@@ -25,7 +25,7 @@ class TreeNode(val nameArray: Array[String],
   override def equals(other: Any) = {
     other match {
       case that: TreeNode => 
-        (that canEqual this) && this.hashCode == that.hashCode && super.equals(that)
+        (that canEqual this) && this.hashCode == that.hashCode
 //        name == that.name &&
 //        depth == that.depth
       case _ => false
@@ -39,7 +39,15 @@ class TreeNode(val nameArray: Array[String],
   }
   def canEqual(that: Any) = that.isInstanceOf[TreeNode]
   // Ends here
-  
+
+  def shallowEquals(other: Any) = {
+    other match {
+      case that: TreeNode =>
+        (that canEqual this) && this.hashCode == that.hashCode
+      case _ => false
+    }
+  }
+
   def getSeparateNodes() = {
     nameArray zip depthArray map { x =>
       new TreeNode(x._1, x._2)
@@ -73,4 +81,12 @@ object TreeNode {
     }
     new TreeNode(paramPair._1, paramPair._2, true)
   }
+}
+
+object TestTreeNode extends App {
+  import scala.collection.immutable.HashMap
+  val m = HashMap[TreeNode, Int](new TreeNode("div", 3) -> 2)
+  m.keys.foreach(x => println(x.hashCode))
+  println(new TreeNode("div", 3).hashCode)
+  println(m.contains(new TreeNode("div", 3)))
 }

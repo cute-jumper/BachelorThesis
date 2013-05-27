@@ -5,7 +5,7 @@ import akka.routing.RoundRobinRouter
 import akka.util.Duration
 import akka.util.duration._
 import akka.event.Logging
-import thu.ailab.document.TagSeqFactory
+import thu.ailab.document.{TagSequence, TagSeqFactory}
 import thu.ailab.utils.Point
 import thu.ailab.distance._
 import thu.ailab.tree.TreeNode
@@ -26,7 +26,7 @@ object TextSimilarities extends AppEntry with LoggerTrait {
   }
   val factory = new TagSeqFactory(id2filename)
 
-  def calcDistance(seq1: Array[TreeNode], seq2: Array[TreeNode]) = {
+  def calcDistance(seq1: TagSequence, seq2: TagSequence) = {
     new LCSArraySpaceOptimized(seq1, seq2).getDistance()
   } 
   
@@ -43,8 +43,8 @@ object TextSimilarities extends AppEntry with LoggerTrait {
       var acc = 0 
       for (i <- p1.x + 1 to p2.x; j <- p1.y until math.min(p2.y, i)) {
         distArray((i - 1) * i / 2 + j) = calcDistance(
-            factory.getInstance(i).flatMap(_.getSeparateNodes),
-            factory.getInstance(j).flatMap(_.getSeparateNodes))
+            factory.getInstance(i),
+            factory.getInstance(j))
         acc += 1
       }
       acc

@@ -5,9 +5,11 @@ import java.io.File
 import thu.ailab.global.MyConfigFactory
 import thu.ailab.tree.{TreeNode, TreeBuilder, HTMLSuffixTree}
 
-class TagSeqFactory(id2filename: Array[String]) 
-extends MyDocFactory[Array[TreeNode]](id2filename) {
-  override val documentCache = new Array[Array[TreeNode]](factorySize)
+class TagSeqFactory(id2filename: Array[String]) {
+  final val factorySize = id2filename.length
+  def getSize() = factorySize
+  def getFilename(id: Int) = id2filename(id)
+  val documentCache = new Array[TagSequence](factorySize)
   private def fileIsLoaded(id: Int): Boolean = documentCache(id) != null
   
   private val blogdir = MyConfigFactory.getValue[String]("document.blogdir")
@@ -15,16 +17,15 @@ extends MyDocFactory[Array[TreeNode]](id2filename) {
   
   def getPrepFilename(filename: String) = filename.replace(blogdir, prepBlogdir) 
   
-  override def getInstance(id: Int) = {
+  def getInstance(id: Int) = {
     if (documentCache(id) == null) {
       val filename = id2filename(id)
       val prepFilename = getPrepFilename(filename)
-      val tagArray: Array[TreeNode] = {
+      val tagArray: TagSequence = {
         if (new File(prepFilename).exists)
-          Preprocess.readCompactNodeArray(prepFilename)
+          new TagSequence(Preprocess.readCompactNodeArray(prepFilename), true)
         else
-          HTMLSuffixTree.stripDuplicates(
-              new TreeBuilder(id2filename(id)).getTagSequence.toArray).toArray
+          new TagSequence(new TreeBuilder(id2filename(id)).getTagSequence.toArray, false)
       }
       documentCache(id) = tagArray
     }

@@ -6,8 +6,8 @@ import org.jsoup.nodes.Element
 import org.jsoup.select.NodeVisitor
 import org.jsoup.nodes._
 import scala.collection.mutable.ListBuffer
-import thu.ailab.document.HTMLDocument
 
+import thu.ailab.document.{TagSequence, HTMLDocument}
 import thu.ailab.global._
 import thu.ailab.distance.LCSArraySpaceOptimized
 
@@ -50,7 +50,7 @@ class TreeBuilder(filename: String) {
 object TestTreeBuilder extends AppEntry with LoggerTrait {
     import thu.ailab.utils.Tools._
     import java.io.{File, FilenameFilter}
-  def calcDistance(seq1: Array[TreeNode], seq2: Array[TreeNode]) = {
+  def calcDistance(seq1: TagSequence, seq2: TagSequence) = {
     new LCSArraySpaceOptimized(seq1, seq2).getDistance()
   }
   def foo1 = {
@@ -58,8 +58,8 @@ object TestTreeBuilder extends AppEntry with LoggerTrait {
     val filenames = new File("../../Data/blog1000/").listFiles(new FilenameFilter() {
       def accept(dir: File, name: String) = name.endsWith(".html")
     }).slice(0, MAX_FILE_COUNT).map(_.getAbsolutePath)
-    val ts = filenames.map {
-      new TreeBuilder(_).getTagSequence.toArray
+    val ts = filenames.map { f =>
+      new TagSequence(new TreeBuilder(f).getTagSequence.toArray, false)
     }
     val results =
       (for (i <- ts.indices; j <- i + 1 until ts.length) yield {
@@ -89,8 +89,8 @@ object TestTreeBuilder extends AppEntry with LoggerTrait {
       "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_0000c9a20100bqd6.html",
       "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_002b5d980100smle.html",
       "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fmain_v5%2Fria%2F%2520http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_562792630102dwmp.html")
-    val ts = filenames.map {
-      new TreeBuilder(_).getTagSequence.toArray
+    val ts = filenames.map { f =>
+      new TagSequence(new TreeBuilder(f).getTagSequence.toArray, false)
     }
     for (i <- ts.indices; j <- i + 1 until ts.length) {
       println(filenames(i), filenames(j))
@@ -100,9 +100,10 @@ object TestTreeBuilder extends AppEntry with LoggerTrait {
   def foo3 = {
     val (fn1, fn2) = ("/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_000173770100g2g7.html",
     "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_002b5d980100sf47.html")
-    val (t1, t2) = (new TreeBuilder(fn1).getTagSequence.toArray, new TreeBuilder(fn2).getTagSequence.toArray)
-    println(t1 mkString " ")
-    println(t2 mkString " ")
+    val (t1, t2) = (new TagSequence(new TreeBuilder(fn1).getTagSequence.toArray, false),
+        new TagSequence(new TreeBuilder(fn2).getTagSequence.toArray, false))
+    println(t1.getSeparate mkString " ")
+    println(t2.getSeparate mkString " ")
     println(timeIt(calcDistance(t1, t2)))
   }
   foo3
