@@ -3,7 +3,7 @@
 # Author: qjp
 # Date: <2013-05-21 Tue>
 
-SERVER_ADDRESS="qiujunpeng@166.111.138.18"
+SERVER_ADDRESS="qiujunpeng@118.192.65.79"
 SERVER_HOME="/home/qiujunpeng"
 SERVER_PROJECT_DIR="$SERVER_HOME/workspace/TemplateExtractor"
 SERVER_ONE_JAR_PATH="$SERVER_PROJECT_DIR/target/scala-2.9.2/templateextractor_2.9.2-0.1-SNAPSHOT-one-jar.jar"

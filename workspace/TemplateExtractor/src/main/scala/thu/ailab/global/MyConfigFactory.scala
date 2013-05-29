@@ -21,14 +21,15 @@ object MyConfigFactory {
   /**
    * A generic method using Manifest
    */
-  def getValue[T](name: String)(implicit mf: Manifest[T]): T = {
+  import scala.reflect.ClassTag
+  def getValue[T](name: String)(implicit ct: ClassTag[T]): T = {
     val dispatch = Map(
         classOf[String] -> getConfString _,
         classOf[Double] -> conf.getDouble _,
         classOf[Int] -> conf.getInt _
         )
     //(dispatch.find(_._1 == mf.erasure).map(_._2).get)(name).asInstanceOf[T]
-    (dispatch.find(_._1 isAssignableFrom mf.erasure).map(_._2).get)(name).asInstanceOf[T]
+    (dispatch.find(_._1 isAssignableFrom ct.runtimeClass).map(_._2).get)(name).asInstanceOf[T]
   }
   def getValue1[T: Manifest](name: String): T = {
     ((manifest[T].toString match { // or manifest[T].erasure.getName match {
