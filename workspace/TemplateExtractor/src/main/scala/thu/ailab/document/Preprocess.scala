@@ -2,7 +2,7 @@ package thu.ailab.document
 
 import java.io.File
 
-import thu.ailab.global.MyConfigFactory
+import thu.ailab.global.{AppEntry, MyConfigFactory}
 import thu.ailab.tree.{TreeNode, TreeBuilder, HTMLSuffixTree}
 import thu.ailab.utils.Tools.withPrintWriter
 
@@ -37,7 +37,7 @@ object Preprocess {
   }
 }
 
-object TestPreprocess extends App {
+object TestPreprocess extends AppEntry {
 //  val nodeArray = Preprocess.readCompactNodeArray(System.getProperty("user.home") + 
 //      "/Programs/BachelorThesis/Data/blog1000_preprocess/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f2e45101017a26.html")
 //  println(nodeArray.mkString(" "))
@@ -45,5 +45,5 @@ object TestPreprocess extends App {
 //  for (filename <- new File(prepBlogdir).listFiles().map(_.getAbsolutePath)) {
 //    Preprocess.readCompactNodeArray(filename)
 //  }
-  Preprocess.HTMLToCompactNodeArray
+	Preprocess.HTMLToCompactNodeArray
 }

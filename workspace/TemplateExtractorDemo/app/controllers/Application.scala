@@ -11,20 +11,20 @@ object Application extends Controller {
     Ok(views.html.index("Your new application is ready."))
   }
   
-  def blog(url: String) = Action { implicit request =>
+  def blog(url: String) = Action { implicit request =>  
     Async {
-      val req = WS.url(url)
-      req.withHeaders(("user-agent",
-          "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:21.0) Gecko/20100101 Firefox/21.0"))          
-      req.get().map { response =>
-        val r = if (response.body.contains("gb2312"))
-          new String(response.body.toCharArray.map(_.toByte), "utf-8")
-        else
-          response.body
-        val f = new java.io.PrintWriter("/home/qjp/tmp/r.html")
-        f.write(r)
-        f.close
-        Ok(r).as("text/html")
+      WS.url(url).get().map { response =>
+        val re = """.*charset=([^ "/>]*)""".r
+        val r = re findFirstIn response.header("content-type").get match {
+          case Some(re(charset)) => response.body //TODO 
+          case _ => re findFirstIn response.body match {
+            case Some(re(contentCharset)) => 
+              new String(response.body.toCharArray.map(_.toByte), contentCharset)
+            case _ => response.body
+          }
+        }
+        println(response.header("content-type"))
+        Ok(r).as(HTML)
       }
     }
   }

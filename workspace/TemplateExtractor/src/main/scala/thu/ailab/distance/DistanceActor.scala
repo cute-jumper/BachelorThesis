@@ -2,8 +2,7 @@ package thu.ailab.distance
 
 import akka.actor._
 import akka.routing.RoundRobinRouter
-import akka.util.Duration
-import akka.util.duration._
+import scala.concurrent.duration._
 import akka.event.Logging
 import thu.ailab.document.{TagSequence, TagSeqFactory}
 import thu.ailab.utils.Point

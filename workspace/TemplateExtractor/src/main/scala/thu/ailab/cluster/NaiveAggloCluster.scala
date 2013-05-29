@@ -103,7 +103,8 @@ class NaiveAggloCluster extends Clustering with LoggerTrait {
       cps.map(c => tagSeqFactory.getFilename(c.id)).mkString("\n")
     }
     def toXML(verbose: Boolean = true) = {
-    <cluster center={tagSeqFactory.getFilename(centerId)}>
+    <cluster center={if (verbose) tagSeqFactory.getFilename(centerId) 
+      else centerId.toString}>
       {if (verbose)
         for (cp <- cps) yield <point>{tagSeqFactory.getFilename(cp.id)}</point>
       else for (cp <- cps) yield <point>{cp.id}</point>}

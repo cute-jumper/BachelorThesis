@@ -5,8 +5,8 @@
 
 PROJECT_DIR=$(dirname $0 | sed 's|/tools||')
 CONF_DIR=$PROJECT_DIR/conf
-JAR_PATH="$PROJECT_DIR/target/scala-2.9.2/templateextractor_2.9.2-0.1-SNAPSHOT.jar"
-ONE_JAR_PATH="$PROJECT_DIR/target/scala-2.9.2/templateextractor_2.9.2-0.1-SNAPSHOT-one-jar.jar"
+JAR_PATH="$PROJECT_DIR/target/scala-2.10/templateextractor_2.10-0.1-SNAPSHOT.jar"
+ONE_JAR_PATH="$PROJECT_DIR/target/scala-2.10/templateextractor_2.10-0.1-SNAPSHOT-one-jar.jar"
 
 if [ $# -lt 1 ]; then
     echo "Error! You must supply the main class!"
