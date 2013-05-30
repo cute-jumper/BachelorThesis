@@ -2,7 +2,11 @@ package thu.ailab.template
 
 import thu.ailab.tree.TreeNode
 
-class Shingle(val treeNodeArray: Array[TreeNode], val father: TreeNode) {
+class Shingle(val treeNodeArray: Seq[TreeNode], 
+    val before: Option[TreeNode], 
+    val after: Option[TreeNode]) {
+  def getNeighbor() = (before, after)
+  def getMain() = treeNodeArray
   /**
    * object equality methods: equals, canEqual, hashCode
    */
@@ -15,10 +19,10 @@ class Shingle(val treeNodeArray: Array[TreeNode], val father: TreeNode) {
   }
   override val hashCode = {
     41 * treeNodeArray.foldLeft(1)((acc, node) => 41 * acc + node.hashCode) + 
-    father.hashCode
+    (41 * before.hashCode + after.hashCode)
   }
   def canEqual(that: Any) = that.isInstanceOf[Shingle]
   override def toString() = {
-    (treeNodeArray mkString " ") + "--> father: " + father
+    (treeNodeArray mkString " ") + " --> " + ("before: " + before) + (" after: ") + after
   }
 }

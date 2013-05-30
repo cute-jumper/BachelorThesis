@@ -18,6 +18,7 @@ class TemplateBuilder {
   }
   val clusterFileIds = ClusterFileReader()
   def getClusterTemplate(centerId: Int, fileIds: Seq[Int]) = {
+    /*
     val shingleMap = new MHashMap[Shingle, Int]
     val tssArray = fileIds.map { id =>
       new TagSeqShingles(tagSeqFactory.getInstance(id))
@@ -32,6 +33,8 @@ class TemplateBuilder {
     for (shingle <- tssArray(chooseId).shingles) {
       println("%4d : %s".format(shingleMap(shingle), shingle))
     }
+    */
+    new CenterMethod(centerId, fileIds)
   }
   Function.tupled(getClusterTemplate _)(clusterFileIds(2))
 }

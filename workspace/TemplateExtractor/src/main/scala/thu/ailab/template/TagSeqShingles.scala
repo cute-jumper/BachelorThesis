@@ -14,6 +14,7 @@ class TagSeqShingles (tagSeq: TagSequence) {
   private val shingleBuffer = new ArrayBuffer[Shingle]
   private val fatherArray = new ArrayBuffer[TreeNode]
   private var curFather = treeNodeArray.head
+  /*
   for (tn <- treeNodeArray) {
     if (tn.depth > preDepth) {
       nodeStack += tn
@@ -36,6 +37,7 @@ class TagSeqShingles (tagSeq: TagSequence) {
       new Shingle(x.toArray, curFather)
     }
   }
+  */
   val shingles = shingleBuffer.toArray
   override def toString() = {
     shingles mkString " | "

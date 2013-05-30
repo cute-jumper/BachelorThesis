@@ -8,11 +8,11 @@ SERVER_HOME="/home/qiujunpeng"
 SERVER_PROJECT_DIR="$SERVER_HOME/workspace/TemplateExtractor"
 SERVER_ONE_JAR_PATH="$SERVER_PROJECT_DIR/target/scala-2.10/templateextractor_2.10-0.1-SNAPSHOT-one-jar.jar"
 CLIENT_PROJECT_DIR="$HOME/Programs/BachelorThesis/workspace/TemplateExtractor"
-CLIENT_RSYNC_SRCS="src/
-conf/
-lib/
-tools/
-build.sbt"
+CLIENT_RSYNC_EXCLUDE="bin
+project
+target
+scratch.sc
+.*"
 
 if [ $# -lt 1 ]; then
     echo "Error! You must supply the main class!"
@@ -22,23 +22,18 @@ fi
 mainClass=$1
 
 rsync_source() {
-    for i in $CLIENT_RSYNC_SRCS
+    exclude=""
+    for i in $CLIENT_RSYNC_EXCLUDE
     do
-        rsync -azv --delete -e ssh $CLIENT_PROJECT_DIR/$i $SERVER_ADDRESS:$SERVER_PROJECT_DIR/$i 
+        exclude="$exclude --exclude=$i"
     done
+    rsync -azv --delete -e ssh $exclude $CLIENT_PROJECT_DIR/ $SERVER_ADDRESS:$SERVER_PROJECT_DIR/
 }
 
-server_compile() {
-    ssh $SERVER_ADDRESS -t "$SERVER_PROJECT_DIR/tools/make_jar.sh $mainClass"
-}
-
-server_run() {
-    ssh $SERVER_ADDRESS -t "java -jar $SERVER_ONE_JAR_PATH"
+server_compile_and_run() {
+    ssh $SERVER_ADDRESS -t "$SERVER_PROJECT_DIR/tools/make_jar.sh $mainClass &&\
+java -jar $SERVER_ONE_JAR_PATH"
 }
 
 rsync_source
-server_compile
-
-if [ $# -eq 2 ]; then
-    server_run
-fi
+server_compile_and_run

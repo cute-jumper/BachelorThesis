@@ -27,15 +27,15 @@ class TagSequence(inputArray: Array[TreeNode], isCompact: Boolean) {
     }
     ret
   }
-  def getNormalizeLCS(indices: List[Int]) = {
+  def getNormalizeLCS(indices: Seq[Int]) = {
     val counts = new Array[Int](compactArray.size)
     for (i <- indices) {
       counts(sepToCom(i)) += 1
     }
-    counts.zipWithIndex filter { x =>
+    new TagSequence(counts.zipWithIndex filter { x =>
       compactArray(x._2).innerSize == x._1
     } map { x =>
       compactArray(x._2)
-    }
+    }, true)
   }
 }
