@@ -7,14 +7,15 @@ import thu.ailab.global.MyConfigFactory
 import thu.ailab.sequence._
 import thu.ailab.tree.TreeNode
 import thu.ailab.distance.LCSWithPath
-import thu.ailab.cluster.NaiveAggloCluster
+import thu.ailab.cluster.TSNaiveAggloCluster
 
 class CenterMethod(centerId: Int, fileIds: Seq[Int]) {
   val id2filename = scala.io.Source.fromFile(
       MyConfigFactory.getValue[String]("output.id2filename")).getLines.toArray
   val tagSeqFactory = new TagSeqFactory(id2filename)
   val centerTagSeq = tagSeqFactory.getInstance(centerId)
-  val clcs = findLCSInAll(centerTagSeq, fileIds.filter(_ != centerId).iterator)
+  val clcs = findLCSInAll(centerTagSeq, fileIds.filter(_ != centerId).iterator, 
+      tagSeqFactory.getInstance)
   println(clcs.getCompact.mkString(" "))
   val clcsLen = clcs.getCompact.length
   val tagSegMap = new MHashMap[(Int, Int), Array[TagSegment]]
@@ -32,14 +33,26 @@ class CenterMethod(centerId: Int, fileIds: Seq[Int]) {
       }
       prevIndex = curIndex
     }
-    if (otherTagSeq.separateLength - 1 > prevIndex._2) {
+    if (otherTagSeq.compactLength - 1 > prevIndex._2) {
       val tagSeg = new TagSegment(otherTagSeq, prevIndex._2,
-          otherTagSeq.separateLength, id)
-      val range = (prevIndex._1, clcs.separateLength)
+          otherTagSeq.compactLength, id)
+      val range = (prevIndex._1, clcs.compactLength)
       tagSegMap(range) = tagSegMap.getOrElse(range, Array()) :+ tagSeg
     }
   }
   for ((range, tss) <- tagSegMap) {
+    println("=" * 80)
+    println(range)
+    println(tss.size)
+    val naive = new TSNaiveAggloCluster(tss)
+    naive.clustering
+    println("cluster count: " + naive.clusters.size)
+    println(naive.clusters.map(c => c._2.cps.size).mkString(" "))
+    val (centerId, cluster) = naive.clusters.maxBy(x => x._2.cps.size)
+    val initTs = tss(centerId).getTagSeq
+    println("average length: " + cluster.cps.map(x => tss(x.id).getTagSeq.compactLength).sum / cluster.cps.size)
+    println(findLCSInAll(initTs, cluster.cps.map(_.id).filter(_ != centerId).iterator,
+        (id: Int) => tss(id).getTagSeq).getCompact.mkString(" "))
 //    val shingleCount = new MHashMap[Shingle, Int]
 //    for (ts <- tss; shingle <- ts.shingles) {
 //      shingleCount(shingle) = shingleCount.getOrElse(shingle, 0) + 1
@@ -49,8 +62,6 @@ class CenterMethod(centerId: Int, fileIds: Seq[Int]) {
 //    if (ks.exists(_.before == None) && ks.exists(_.after == None)) {
 //      val pf = new PathFinder(ks.toSet)
 //    }
-//    println("=" * 80)
-//    println(range)
 //    for ((ts, idx) <- tss.zipWithIndex) {
 //      println(
 //          ts.shingles.map { s => 
@@ -64,14 +75,15 @@ class CenterMethod(centerId: Int, fileIds: Seq[Int]) {
 //        .map(k => "%4d:".format(shingleCount(k)) + k.getNext + " | " + k.getMain.mkString(" "))
 //        .mkString("\n")).mkString("\n++++++\n"))
   }
-  def findLCSInAll(initTs: TagSequence, fileIdIterator: Iterator[Int]) = {
+  def findLCSInAll(initTs: TagSequence, fileIdIterator: Iterator[Int],
+      getSequence: (Int) => TagSequence) = {
     @tailrec
     def helper(lcs: TagSequence, it: Iterator[Int]): TagSequence = {
       if (it.hasNext) {
         val id = it.next
-        val otherTagSeq = tagSeqFactory.getInstance(id)
-        val indices = new LCSWithPath(lcs, otherTagSeq).getCommonIndices
-        helper(lcs.getNormalizeLCS(indices.unzip._1), it)
+        val otherTagSeq = getSequence(id)
+        val indices = new LCSWithPath(lcs, otherTagSeq).getCommonIndices.unzip._1
+        helper(lcs.makeTagSequence(indices), it)
       } else {
         lcs
       }

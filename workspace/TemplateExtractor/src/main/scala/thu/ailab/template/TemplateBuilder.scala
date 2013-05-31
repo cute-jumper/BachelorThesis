@@ -1,8 +1,7 @@
 package thu.ailab.template
 
 import scala.collection.mutable.{HashMap => MHashMap}
-
-import thu.ailab.global.MyConfigFactory
+import thu.ailab.global._
 import thu.ailab.tree._
 import thu.ailab.sequence.TagSeqFactory
 
@@ -36,9 +35,9 @@ class TemplateBuilder {
     */
     new CenterMethod(centerId, fileIds)
   }
-  Function.tupled(getClusterTemplate _)(clusterFileIds(2))
+  for (ids <- clusterFileIds) Function.tupled(getClusterTemplate _)(ids)
 }
 
-object TestTemplateBuilder extends App {
+object TestTemplateBuilder extends AppEntry {
   new TemplateBuilder
 }

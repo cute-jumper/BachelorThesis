@@ -9,7 +9,8 @@ class TagSegment(tagSeqInput: TagSequence,
     val beginIndex: Int,
     val endIndex: Int,
     val fileId: Int) {
-  val tagSeq = tagSeqInput.getNormalizeLCS(beginIndex + 1 until endIndex)
+  val tagSeq = tagSeqInput.makeTagSequence(beginIndex + 1 until endIndex)
+  def getTagSeq() = tagSeq
   lazy val shingles = {
     val compact = tagSeq.getCompact
     val end = compact.size

@@ -19,8 +19,11 @@ actor {
        pieceLength=100      
 }
 cluster {
-        NaiveAggloCluster {
+        DocNaiveAggloCluster {
                           clusterThreshold=0.5
+        }
+        TSNaiveAggloCluster {
+                          clusterThreshold=0.2
         }
 }
 template {

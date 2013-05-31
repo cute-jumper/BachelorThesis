@@ -13,8 +13,11 @@ class TagSequence(inputArray: Array[TreeNode], isCompact: Boolean) {
   }
   def getCompact() = compactArray
   val compactLength = compactArray.length
-  //def getSeparate() = separateArray
-  val separateLength = separateArray.length
+  def makeTagSequence(indices: Seq[Int]) = {
+    new TagSequence(indices.map(compactArray(_)).toArray, true)
+  }
+  private def getSeparate() = separateArray
+  private val separateLength = separateArray.length
   private val sepToCom = {
     val ret = new Array[Int](separateArray.size)
     var start = 0
@@ -27,7 +30,7 @@ class TagSequence(inputArray: Array[TreeNode], isCompact: Boolean) {
     }
     ret
   }
-  def getNormalizeLCS(sepIndices: Seq[Int]) = {
+  private def getNormalizeLCS(sepIndices: Seq[Int]) = {
     val counts = new Array[Int](compactArray.size)
     for (i <- sepIndices) {
       counts(sepToCom(i)) += 1
@@ -38,7 +41,7 @@ class TagSequence(inputArray: Array[TreeNode], isCompact: Boolean) {
       compactArray(x._2)
     }, true)
   }
-  def getCompactFromSeparate(sepIndices: Seq[Int]) = {
+  private def getCompactFromSeparate(sepIndices: Seq[Int]) = {
     sepIndices.map(x => compactArray(sepToCom(x)))
   }
 }
