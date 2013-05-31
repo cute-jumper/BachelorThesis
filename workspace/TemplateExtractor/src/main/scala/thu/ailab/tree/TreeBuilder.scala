@@ -7,7 +7,8 @@ import org.jsoup.select.NodeVisitor
 import org.jsoup.nodes._
 import scala.collection.mutable.ListBuffer
 
-import thu.ailab.document.{TagSequence, HTMLDocument}
+import thu.ailab.sequence.TagSequence
+import thu.ailab.document.HTMLDocument
 import thu.ailab.global._
 import thu.ailab.distance.LCSArraySpaceOptimized
 
@@ -102,8 +103,8 @@ object TestTreeBuilder extends AppEntry with LoggerTrait {
     "/home/cutejumper/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_002b5d980100sf47.html")
     val (t1, t2) = (new TagSequence(new TreeBuilder(fn1).getTagSequence.toArray, false),
         new TagSequence(new TreeBuilder(fn2).getTagSequence.toArray, false))
-    println(t1.getSeparate mkString " ")
-    println(t2.getSeparate mkString " ")
+    println(t1.getCompact mkString " ")
+    println(t2.getCompact mkString " ")
     println(timeIt(calcDistance(t1, t2)))
   }
   foo3

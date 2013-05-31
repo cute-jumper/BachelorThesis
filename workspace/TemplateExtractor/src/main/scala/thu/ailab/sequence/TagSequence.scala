@@ -1,4 +1,4 @@
-package thu.ailab.document
+package thu.ailab.sequence
 
 import scala.collection.mutable.{HashMap => MHashMap}
 import thu.ailab.tree.TreeNode
@@ -13,7 +13,7 @@ class TagSequence(inputArray: Array[TreeNode], isCompact: Boolean) {
   }
   def getCompact() = compactArray
   val compactLength = compactArray.length
-  def getSeparate() = separateArray
+  //def getSeparate() = separateArray
   val separateLength = separateArray.length
   private val sepToCom = {
     val ret = new Array[Int](separateArray.size)
@@ -27,9 +27,9 @@ class TagSequence(inputArray: Array[TreeNode], isCompact: Boolean) {
     }
     ret
   }
-  def getNormalizeLCS(indices: Seq[Int]) = {
+  def getNormalizeLCS(sepIndices: Seq[Int]) = {
     val counts = new Array[Int](compactArray.size)
-    for (i <- indices) {
+    for (i <- sepIndices) {
       counts(sepToCom(i)) += 1
     }
     new TagSequence(counts.zipWithIndex filter { x =>
@@ -37,5 +37,8 @@ class TagSequence(inputArray: Array[TreeNode], isCompact: Boolean) {
     } map { x =>
       compactArray(x._2)
     }, true)
+  }
+  def getCompactFromSeparate(sepIndices: Seq[Int]) = {
+    sepIndices.map(x => compactArray(sepToCom(x)))
   }
 }

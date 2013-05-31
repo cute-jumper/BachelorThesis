@@ -1,9 +1,10 @@
-package thu.ailab.document
+package thu.ailab.sequence
 
 import java.io.File
 
 import thu.ailab.global.MyConfigFactory
 import thu.ailab.tree.{TreeNode, TreeBuilder, HTMLSuffixTree}
+import thu.ailab.document.Preprocess
 
 class TagSeqFactory(id2filename: Array[String]) {
   final val factorySize = id2filename.length
@@ -36,3 +37,4 @@ class TagSeqFactory(id2filename: Array[String]) {
     (0 until factorySize).toArray map getInstance
   }
 }
+

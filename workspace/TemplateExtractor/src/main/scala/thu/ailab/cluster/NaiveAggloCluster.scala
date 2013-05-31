@@ -1,7 +1,5 @@
 package thu.ailab.cluster
 
-import thu.ailab.document.TagSeqFactory
-import thu.ailab.tree._
 import thu.ailab.global._
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.{HashSet => MHashSet, HashMap => MHashMap}
@@ -11,41 +9,15 @@ import scala.collection.mutable.{HashSet => MHashSet, HashMap => MHashMap}
  * because I try to minimize all the
  * overhead to make it run faster.
  */
-class NaiveAggloCluster extends Clustering with LoggerTrait {
-  val id2filename = scala.io.Source.fromFile(
-      MyConfigFactory.getValue[String]("output.id2filename")).getLines.toArray
-  val tagSeqFactory = new TagSeqFactory(id2filename)
-  val distArray = new Array[Double]((tagSeqFactory.getSize - 1) * 
-      tagSeqFactory.getSize / 2)
-  for ((line, idx) <- scala.io.Source.fromFile(
-      MyConfigFactory.getValue[String]("output.distFile")).getLines.zipWithIndex) {
-    distArray(idx) = line.toDouble
-  }
+abstract class NaiveAggloCluster extends LoggerTrait {
   val clusterThreshold = MyConfigFactory.getValue[Double](
       "cluster.NaiveAggloCluster.clusterThreshold")
-  val clusters = new MHashMap[Int, Cluster]
+  val clusters = clustersInit()
   var minDist = Double.MaxValue
   var minPair = (0, 0)
-  for (i <- 0 until tagSeqFactory.getSize) {
-    clusters += i -> new Cluster(new ClusterPoint(i))
-  }
-  def clustering() = {
-    import scala.annotation.tailrec
-    @tailrec
-    def tailrecClustering(clusters: MHashMap[Int, Cluster]) {
-       val (minPairId, minDist) = findNearest
-       if (minDist > clusterThreshold) {
-         logger.info("minDist: %f ".format(minDist) + minPairId)
-         return
-       }
-       val newCluster = clusters(minPairId._1).mergeCluster(clusters(minPairId._2))
-       clusters.remove(minPairId._1)
-       clusters.remove(minPairId._2)
-       clusters(newCluster.centerId) = newCluster
-       tailrecClustering(clusters)
-    }
-    tailrecClustering(clusters)
-  }
+  def clustersInit(): MHashMap[Int, Cluster]  
+  def clustering()
+  def getDistance(id1: Int, id2: Int): Double
   /**
    * May have bugs
    */
@@ -65,10 +37,6 @@ class NaiveAggloCluster extends Clustering with LoggerTrait {
     }
     (minPairId, minDist)
   }
-  def getIndex(id1: Int, id2: Int) = {
-    if (id1 < id2) (id2 - 1) * id2 / 2 + id1
-    else (id1 - 1) * id1 / 2 + id2
-  }
   class ClusterPoint(val id: Int) {
     var distSum: Double = 0.0
   }
@@ -77,7 +45,7 @@ class NaiveAggloCluster extends Clustering with LoggerTrait {
     val cps = ArrayBuffer[ClusterPoint](cp)
     def mergeCluster(that: Cluster) = {
       for (i <- this.cps; j <- that.cps) {
-        val dist = distArray(getIndex(i.id, j.id))
+        val dist = getDistance(i.id, j.id) 
         i.distSum += dist
         j.distSum += dist
       }
@@ -95,39 +63,7 @@ class NaiveAggloCluster extends Clustering with LoggerTrait {
       }
       centerId
     }
-    def distFrom(that: Cluster) = 
-      distArray(getIndex(this.centerId, that.centerId))
+    def distFrom(that: Cluster) = getDistance(this.centerId, that.centerId)
     def size = cps.size
-    override def toString = {
-      "Cluster Center: %s\n".format(tagSeqFactory.getFilename(centerId)) +
-      cps.map(c => tagSeqFactory.getFilename(c.id)).mkString("\n")
-    }
-    def toXML(verbose: Boolean = true) = {
-    <cluster center={if (verbose) tagSeqFactory.getFilename(centerId) 
-      else centerId.toString}>
-      {if (verbose)
-        for (cp <- cps) yield <point>{tagSeqFactory.getFilename(cp.id)}</point>
-      else for (cp <- cps) yield <point>{cp.id}</point>}
-    </cluster>
-    }
   }
-  import thu.ailab.utils.Tools.withPrintWriter  
-  def writeClusterFile(filename: String) = {
-    withPrintWriter(filename){ pw =>
-      clusters.foreach(x => pw.println(x._1 + "\n" + x._2))
-    }
-  }
-  def writeClusterXML(filename: String) = {
-    xml.XML.save(filename, 
-        <clusters>
-        {for (c <- clusters) yield c._2.toXML(false)}
-        </clusters>)
-  }
-}
-
-object TestNaiveAggloCluster extends AppEntry {
-  import thu.ailab.utils.Tools.timeIt
-  val naive = new NaiveAggloCluster
-  println(timeIt(naive.clustering)._2)
-  naive.writeClusterXML(MyConfigFactory.getValue[String]("output.clusterFile"))
 }

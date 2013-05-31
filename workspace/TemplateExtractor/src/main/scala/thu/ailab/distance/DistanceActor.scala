@@ -4,7 +4,7 @@ import akka.actor._
 import akka.routing.RoundRobinRouter
 import scala.concurrent.duration._
 import akka.event.Logging
-import thu.ailab.document.{TagSequence, TagSeqFactory}
+import thu.ailab.sequence.{TagSequence, TagSeqFactory}
 import thu.ailab.utils.Point
 import thu.ailab.distance._
 import thu.ailab.tree.TreeNode

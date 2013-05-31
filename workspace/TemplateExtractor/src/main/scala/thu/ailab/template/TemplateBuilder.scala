@@ -4,7 +4,7 @@ import scala.collection.mutable.{HashMap => MHashMap}
 
 import thu.ailab.global.MyConfigFactory
 import thu.ailab.tree._
-import thu.ailab.document.TagSeqFactory
+import thu.ailab.sequence.TagSeqFactory
 
 class TemplateBuilder {
   val id2filename = io.Source.fromFile(MyConfigFactory.getValue[String](

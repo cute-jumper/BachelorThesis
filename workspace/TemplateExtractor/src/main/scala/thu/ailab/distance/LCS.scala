@@ -6,7 +6,7 @@ import scala.annotation.tailrec
 import thu.ailab.global._
 import thu.ailab.tree.TreeNode
 import thu.ailab.tree.HTMLSuffixTree
-import thu.ailab.document.TagSequence
+import thu.ailab.sequence.TagSequence
 
 object Direction extends Enumeration {
   type Direction = Value
@@ -42,7 +42,7 @@ abstract class LCS extends Algorithm {
 
 abstract class LCSTagSequence(ts_1: TagSequence, ts_2: TagSequence)
 extends LCS with LoggerTrait {
-  val (seq1, seq2) = (ts_1.getSeparate, ts_2.getSeparate)
+  val (seq1, seq2) = (ts_1.getCompact, ts_2.getCompact)
   val maxDepth = math.max(seq1.maxBy(_.depth).depth, seq2.maxBy(_.depth).depth)
   val (len1, len2) = (seq1.length, seq2.length)
   protected def getCostFromDepth(depth: Int) = maxDepth - depth
@@ -111,8 +111,8 @@ object TestLCS extends App {
   val lcs = new LCSWithPath(tagSeq1, tagSeq2)
   println(lcs.getDistance)
   println(lcs.getCommonIndices.length)
-  println(tagSeq1.getSeparate.mkString(" "))
-  println(tagSeq2.getSeparate.mkString(" "))
+  println(tagSeq1.getCompact.mkString(" "))
+  println(tagSeq2.getCompact.mkString(" "))
   def getAlignedString(indexPool: Set[Int], ts: Array[TreeNode]) = {
     for (i <- ts.indices) yield {
       if (indexPool.contains(i)) {
@@ -124,5 +124,5 @@ object TestLCS extends App {
     }
   }
   val indexPool = lcs.getCommonIndices.unzip._1.toSet
-  println(getAlignedString(indexPool, tagSeq1.getSeparate) mkString " ")
+  println(getAlignedString(indexPool, tagSeq1.getCompact) mkString " ")
 }

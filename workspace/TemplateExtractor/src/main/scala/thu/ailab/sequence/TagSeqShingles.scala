@@ -1,13 +1,12 @@
-package thu.ailab.template
+package thu.ailab.sequence
 
 import scala.collection.mutable.ArrayBuffer
 
 import thu.ailab.tree.TreeNode
 import thu.ailab.global.MyConfigFactory
-import thu.ailab.document.TagSequence
 
 class TagSeqShingles (tagSeq: TagSequence) {
-  val treeNodeArray = tagSeq.getSeparate
+  val treeNodeArray = tagSeq.getCompact
   val shingleLength = MyConfigFactory.getValue[Int]("template.shingleLength")
   private var preDepth = -1
   private val nodeStack = new ArrayBuffer[TreeNode]
