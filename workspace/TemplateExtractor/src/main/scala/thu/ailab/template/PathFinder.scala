@@ -4,15 +4,38 @@ import thu.ailab.tree.TreeNode
 
 case class PathTuple(val before: Option[TreeNode],
     val current: Option[TreeNode],
-    val after: Option[TreeNode])
-    
-class PathFinder(val head: PathTuple, 
-    pathTupleSet: Set[PathTuple],
-    val tail: PathTuple) {
-  def findAllPath(pathTupleSet: Set[PathTuple], curPath: Array[PathTuple]) {
-    val prevTuple = curPath.last
-    val nextTuples = pathTupleSet.collect { x => 
-      x.before == prevTuple.current && x.current == prevTuple.after 
-    }
+    val after: Option[TreeNode]) {
+  def this(shingle: Shingle) = {
+    this(shingle.before, shingle.getMain.headOption, shingle.after)
   }
+  def isBefore(that: PathTuple) = {
+    current == that.before && after == that.current
+  }
+  def isAfter(that: PathTuple) = that.isBefore(this)
+}
+    
+class PathFinder(val shingleSet: Set[Shingle]) {
+  val firstShingle = shingleSet.find(_.before == None).get
+  val lastShingle = shingleSet.find(_.after == None).get
+  val pathTupleSet = 
+    for (shingle <- (shingleSet - firstShingle - lastShingle)) 
+      yield new PathTuple(shingle)
+  val firstTuple = new PathTuple(firstShingle)
+  val lastTuple = new PathTuple(lastShingle)
+  val allPaths = {
+    def findAllPaths(pathTupleSet: Set[PathTuple], curPath: Array[PathTuple]): Set[Array[PathTuple]] = {
+      if (pathTupleSet.isEmpty) {
+        Set(curPath)
+      } else {
+        val prevTuple = curPath.last
+        val nextTupleSet = pathTupleSet filter { x => x.isAfter(prevTuple) }
+        (for (next <- nextTupleSet) yield {
+          findAllPaths(pathTupleSet - next, curPath :+ next)
+        }).flatten
+      }
+    }
+    findAllPaths(pathTupleSet, Array(firstTuple))
+  }  
+  val longestPath = allPaths.maxBy(_.length)
+  println(longestPath.mkString(" --> "))
 }

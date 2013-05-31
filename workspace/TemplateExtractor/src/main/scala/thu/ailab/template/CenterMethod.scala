@@ -44,14 +44,19 @@ class CenterMethod(centerId: Int, fileIds: Seq[Int]) {
     for (ts <- tss; shingle <- ts.shingles) {
       shingleCount(shingle) = shingleCount.getOrElse(shingle, 0) + 1
     }
-    println("=" * 80)
-    println(segment)
+    val minShingleCount = 500
+    val ks = shingleCount.filter(_._2 > minShingleCount).keySet
+    if (ks.exists(_.before == None) && ks.exists(_.after == None)) {
+      val pf = new PathFinder(ks.toSet)
+    }
+//    println("=" * 80)
+//    println(segment)
 //    println(shingleCount.keys.toSeq.sortBy(shingleCount(_)).map(
-//        x => "%4d:%s".format(shingleCount(x), x)).mkString("\n"))
-    println(shingleCount.groupBy(x => x._1.getNeighbor.hashCode).map(
-        m => m._2.keys.toSeq.sortBy(x => -shingleCount(x))
-        .map(k => "%4d:".format(shingleCount(k)) + k.getNeighbor + " | " + k.getMain.mkString(" "))
-        .mkString("\n")).mkString("\n++++++\n"))
+//        x => "%4d:%s".format(shingleCount(x), x)).mkString("\n"))    
+//    println(shingleCount.groupBy(x => x._1.getNeighbor).map(
+//        m => m._2.keys.toSeq.sortBy(x => -shingleCount(x))
+//        .map(k => "%4d:".format(shingleCount(k)) + k.getNeighbor + " | " + k.getMain.mkString(" "))
+//        .mkString("\n")).mkString("\n++++++\n"))
   }
   def findLCSInAll(initTs: TagSequence, fileIdIterator: Iterator[Int]) = {
     @tailrec
