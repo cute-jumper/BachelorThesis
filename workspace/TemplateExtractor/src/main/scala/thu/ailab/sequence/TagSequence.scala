@@ -6,16 +6,28 @@ import thu.ailab.distance.LCSWithPath
 import thu.ailab.tree.HTMLSuffixTree
 
 class TagSequence(inputArray: Array[TreeNode], isCompact: Boolean) {
-  val (compactArray, separateArray) = if (isCompact) {
-    (inputArray, inputArray flatMap (_.getSeparateNodes))
-  } else {
-    (HTMLSuffixTree.stripDuplicates(inputArray), inputArray)
-  }
+  val (compactArray, separateArray) =
+    if (isCompact) {
+      (inputArray, inputArray flatMap (_.getSeparateNodes))
+    } else {
+      (HTMLSuffixTree.stripDuplicates(inputArray), inputArray)
+    }
   def getCompact() = compactArray
   val compactLength = compactArray.length
   def makeTagSequence(indices: Seq[Int]) = {
     new TagSequence(indices.map(compactArray(_)).toArray, true)
   }
+  override def toString() = {
+    compactArray.mkString(" ")
+  }
+  def toXML() = {
+    <tagsequence>
+    {compactArray.map(_.toXML)}
+    </tagsequence>
+  }
+  /**
+   * Useless
+   */
   private def getSeparate() = separateArray
   private val separateLength = separateArray.length
   private val sepToCom = {
@@ -44,4 +56,10 @@ class TagSequence(inputArray: Array[TreeNode], isCompact: Boolean) {
   private def getCompactFromSeparate(sepIndices: Seq[Int]) = {
     sepIndices.map(x => compactArray(sepToCom(x)))
   }
+}
+
+object TagSequence {
+  def fromXML(node: scala.xml.Node) = {
+    new TagSequence((node \ "treenode" map (TreeNode.fromXML(_))).toArray, true)
+  }  
 }

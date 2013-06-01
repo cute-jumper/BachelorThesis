@@ -117,6 +117,14 @@ object TestHTMLSuffixTree extends App {
 //    val splits = x.split("\\.")
 //    new TreeNode(splits(0), splits(1).toInt)
 //  }
+//  val tagSeq = Array("div.6", "div.7", "div.8", "span.9", "div.8", "div.9", "div.10", 
+//      "div.11", "a.12", "span.13", "div.10", "span.11", "a.12", "div.8", 
+//      "div.7", "div.8", "span.9", "div.8", "div.9", "div.10", "div.10", "span.11", 
+//      "a.12", "div.8", "div.7", "div.8", "span.9", "span.9", "div.8", "div.9", 
+//      "div.8", "div.6", "div.7", "div.8").map { x => 
+//    val splits = x.split("\\.")
+//    new TreeNode(splits(0), splits(1).toInt)
+//  }
   //val html = Array("body2", "div3", "a4", "div4", "img5", "div3", "a4", "div4", "img5", "div3")
   //val html = Array("body1", "head2", "div3", "a4", "p4", "a4", "p4", "div3", "ul4", "li5", "li5", "li5")
   val newTagSeq = HTMLSuffixTree.stripDuplicates(tagSeq)

@@ -45,9 +45,9 @@ extends LCS with LoggerTrait {
   val (seq1, seq2) = (ts_1.getCompact, ts_2.getCompact)
   val maxDepth = math.max(seq1.maxBy(_.depth).depth, seq2.maxBy(_.depth).depth)
   val (len1, len2) = (seq1.length, seq2.length)
-  protected def getCostFromDepth(depth: Int) = maxDepth - depth
+  protected def getCostFromDepth(depth: Int) = maxDepth - depth + 1
   protected def sumCost(seq: Seq[Int]) = seq.map(getCostFromDepth).sum
-  protected def similarityToDistance(similarity: Int) = {
+  protected def similarityToDistance(similarity: Double) = {
     1 - 1.0 * similarity / math.max(sumCost(seq1.map(_.depth)),
         sumCost(seq2.map(_.depth)))
   }
@@ -56,7 +56,7 @@ extends LCS with LoggerTrait {
 class LCSWithPath(ts_1: TagSequence, ts_2: TagSequence)
 extends LCSTagSequence(ts_1, ts_2) {
   def getLCSAndPath() = { 
-    val table = Array.ofDim[Int](len1 + 1, len2 + 1)
+    val table = Array.ofDim[Double](len1 + 1, len2 + 1)
     val directionMap = Array.ofDim[Direction](len1, len2)
     for ((e1, i)  <- seq1.zipWithIndex; (e2, j) <- seq2.zipWithIndex) {
       if (e1.shallowEquals(e2)) {

@@ -1,6 +1,5 @@
 package thu.ailab.utils
 
-
 /**
  * Class stand for a point
  */

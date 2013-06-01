@@ -3,14 +3,7 @@ package thu.ailab.tree
 import scala.collection.mutable.{HashMap => MHashMap, ArrayBuffer}
 import scala.annotation.tailrec
 import thu.ailab.utils.Tools.withPrintWriter
-
-object RenderChars {
-  val TJunctionDown  = "┬";
-  val HorizontalLine = "─";
-  val VerticalLine   = "│";
-  val TJunctionRight = "├";
-  val CornerRight    = "└";
-}
+import thu.ailab.utils.RenderChars
 
 /**
  * This is an implementation of the Suffix Tree in order to find out the
@@ -20,7 +13,7 @@ object RenderChars {
  * http://stackoverflow.com/questions/9452701/ukkonens-suffix-tree-algorithm-in-plain-english
  * 
  * There two ways to display the result tree:
- * 1. toAscii: an ASCII tree
+ * 1. toASCII: an ASCII tree
  * 2. toDot: translate to a dot file. Use `dot -Tpng input.dot -o output.png'
  *    to generate a PNG image.  
  */
@@ -97,11 +90,11 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
     def getEdgeString = inputSeq.slice(beginIndex, getEndIndex).mkString(" ")
     def getEdgeStringLength = getEdgeString.length
     
-    def toAscii(prefix: String, maxEdgeLength: Int) = {
+    def toASCII(prefix: String, maxEdgeLength: Int) = {
       getEdgeString + (endNode match {
         case node: InternalNode =>
           RenderChars.HorizontalLine * (maxEdgeLength - getEdgeStringLength + 1) + 
-          node.toAscii(prefix + " " * (maxEdgeLength + 1))
+          node.toASCII(prefix + " " * (maxEdgeLength + 1))
         case _ => ""
       })
     }
@@ -173,7 +166,7 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
     /**
      * For display purposes
      */
-    def toAscii(prefix: String): String = {
+    def toASCII(prefix: String): String = {
       val nodeLabel = getNodeLabel + (
           if (suffixLink.isDefined) "->" + suffixLink.get.getNodeLabel 
           else "")
@@ -181,22 +174,22 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       val prefixPadding = prefix + " " * nodeLabel.length
       nodeLabel + (if (edges.size == 1) {
         RenderChars.HorizontalLine * 2 +
-        edges.values.headOption.get.toAscii(prefixPadding + "  ", maxEdgeLength)
+        edges.values.headOption.get.toASCII(prefixPadding + "  ", maxEdgeLength)
       }
       else {
         (for ((edge, idx) <- edges.values.toSeq.sortBy(-_.getEdgeSeqLength).
             zipWithIndex) yield {
           if (idx == 0) {
             RenderChars.TJunctionDown + RenderChars.HorizontalLine + 
-            edge.toAscii(prefixPadding + RenderChars.VerticalLine + " ", maxEdgeLength)
+            edge.toASCII(prefixPadding + RenderChars.VerticalLine + " ", maxEdgeLength)
           }
           else if (idx == edges.size - 1) {
             prefixPadding + RenderChars.CornerRight + RenderChars.HorizontalLine +
-            edge.toAscii(prefixPadding + "  ", maxEdgeLength)
+            edge.toASCII(prefixPadding + "  ", maxEdgeLength)
           }
           else 
             prefixPadding + RenderChars.TJunctionRight + RenderChars.HorizontalLine +
-            edge.toAscii(prefixPadding + RenderChars.VerticalLine + " ", maxEdgeLength)
+            edge.toASCII(prefixPadding + RenderChars.VerticalLine + " ", maxEdgeLength)
         }).mkString("\n")
       })
     }
@@ -426,6 +419,6 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
     }
   }
   def translateToAscii() {
-    println(root.toAscii(""))
+    println(root.toASCII(""))
   }
 }

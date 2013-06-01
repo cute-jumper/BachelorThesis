@@ -24,7 +24,7 @@ abstract class NaiveAggloCluster extends LoggerTrait {
    * variables
    */
   val distArray = initDistArray()
-  val clusters = new MHashMap[Int, Cluster]
+  protected val clusters = new MHashMap[Int, Cluster]
   (0 until initSize).foreach { i =>
     clusters += i -> new Cluster(new ClusterPoint(i))
   }  
@@ -33,6 +33,8 @@ abstract class NaiveAggloCluster extends LoggerTrait {
   /**
    * Functions and classes' definitions begin
    */
+  def getClusters = clusters
+
   def getIndex(id1: Int, id2: Int) = {
     if (id1 < id2) (id2 - 1) * id2 / 2 + id1
     else (id1 - 1) * id1 / 2 + id2
@@ -81,7 +83,7 @@ abstract class NaiveAggloCluster extends LoggerTrait {
   }
   class Cluster(cp: ClusterPoint) {
     var centerId: Int = cp.id
-    val cps = ArrayBuffer[ClusterPoint](cp)
+    protected val cps = ArrayBuffer[ClusterPoint](cp)
     def mergeCluster(that: Cluster) = {
       for (i <- this.cps; j <- that.cps) {
         val dist = getDistance(i.id, j.id) 
@@ -103,7 +105,8 @@ abstract class NaiveAggloCluster extends LoggerTrait {
       centerId
     }
     def distFrom(that: Cluster) = getDistance(this.centerId, that.centerId)
-    def size = cps.size
+    def getPoints() = cps 
+    def getPointCount() = cps.size
     def toStr(verbose: Boolean = true) = {
       val show = composeShow(verbose)
       "Cluster Center: %s\n".format(show(centerId)) + 

@@ -4,7 +4,6 @@ import java.io.File
 
 import thu.ailab.global.MyConfigFactory
 import thu.ailab.tree.{TreeNode, TreeBuilder, HTMLSuffixTree}
-import thu.ailab.document.Preprocess
 
 class TagSeqFactory(id2filename: Array[String]) {
   final val factorySize = id2filename.length
@@ -23,10 +22,12 @@ class TagSeqFactory(id2filename: Array[String]) {
       val filename = id2filename(id)
       val prepFilename = getPrepFilename(filename)
       val tagArray: TagSequence = {
-        if (new File(prepFilename).exists)
-          new TagSequence(Preprocess.readCompactNodeArray(prepFilename), true)
-        else
-          new TagSequence(new TreeBuilder(id2filename(id)).getTagSequence.toArray, false)
+        if (new File(prepFilename).exists) {
+          val tagSeqXML = scala.xml.XML.loadFile(prepFilename)
+          TagSequence.fromXML(tagSeqXML)
+        } else {
+          new TagSequence(new TreeBuilder(filename).getTagSequence.toArray, false)
+        }
       }
       documentCache(id) = tagArray
     }

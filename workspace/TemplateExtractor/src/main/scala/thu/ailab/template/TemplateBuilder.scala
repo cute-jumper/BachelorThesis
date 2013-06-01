@@ -5,10 +5,11 @@ import thu.ailab.global._
 import thu.ailab.tree._
 import thu.ailab.sequence.TagSeqFactory
 
-class TemplateBuilder {
-  val id2filename = io.Source.fromFile(MyConfigFactory.getValue[String](
-      "output.id2filename")).getLines.toArray
+class TemplateBuilder {    
+  val id2filename = io.Source.fromFile(
+      MyConfigFactory.getValue[String]("output.id2filename")).getLines.toArray
   val tagSeqFactory = new TagSeqFactory(id2filename)
+  val templateFile = MyConfigFactory.getValue[String]("template.templateFile")
   def ClusterFileReader() = {
     val clusterXML = xml.XML.loadFile(
         MyConfigFactory.getValue[String]("output.clusterFile"))
@@ -17,25 +18,14 @@ class TemplateBuilder {
   }
   val clusterFileIds = ClusterFileReader()
   def getClusterTemplate(centerId: Int, fileIds: Seq[Int]) = {
-    /*
-    val shingleMap = new MHashMap[Shingle, Int]
-    val tssArray = fileIds.map { id =>
-      new TagSeqShingles(tagSeqFactory.getInstance(id))
-    }
-    for (tss <- tssArray) {
-      for (shingle <- tss.shingles)
-        shingleMap(shingle) = shingleMap.getOrElse(shingle, 0) + 1
-    }
-    val chooseId = 3
-    println(tagSeqFactory.getFilename(chooseId))
-    println(new TreeBuilder(tagSeqFactory.getFilename(chooseId)).getTagSequence.mkString(" "))
-    for (shingle <- tssArray(chooseId).shingles) {
-      println("%4d : %s".format(shingleMap(shingle), shingle))
-    }
-    */
-    new CenterMethod(centerId, fileIds)
+    val tnArray = new ClusterMethod(centerId, fileIds).getTemplateNodeArray
+    val tp = new Template(tnArray)
+    tp
   }
-  for (ids <- clusterFileIds) Function.tupled(getClusterTemplate _)(ids)
+  scala.xml.XML.save(templateFile,
+      <templates>{for (ids <- clusterFileIds) yield 
+    (Function.tupled(getClusterTemplate _)(ids).toXML)}
+      </templates>)
 }
 
 object TestTemplateBuilder extends AppEntry {

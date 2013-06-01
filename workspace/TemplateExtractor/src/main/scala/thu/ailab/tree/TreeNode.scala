@@ -62,14 +62,14 @@ class TreeNode(val nameArray: Array[String],
   }
   
   def toXML() = {
-    <TreeNode allowMultiple={allowMultiple.toString}>
+    <treenode allowMultiple={allowMultiple.toString}>
       <names>
       {for (name <- nameArray) yield <name>{name}</name>}
       </names>
       <depths>
       {for (depth <- depthArray) yield <depth>{depth}</depth>}
       </depths>
-    </TreeNode>
+    </treenode>
   }
 }
 
@@ -80,6 +80,12 @@ object TreeNode {
       (acc._1 ++ x.nameArray, acc._2 ++ x.depthArray)
     }
     new TreeNode(paramPair._1, paramPair._2, true)
+  }
+  def fromXML(node: scala.xml.Node) = {
+    val nameArray = (node \ "names" \ "name" map (_.text)).toArray
+    val depthArray = (node \ "depths" \ "depth" map (_.text.toInt)).toArray
+    val allowMultiple = node.attribute("allowMultiple").get.text.toBoolean
+    new TreeNode(nameArray, depthArray, allowMultiple)
   }
 }
 

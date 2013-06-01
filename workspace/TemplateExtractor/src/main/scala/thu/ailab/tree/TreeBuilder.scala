@@ -22,7 +22,7 @@ class TreeBuilder(filename: String) {
       def tail(node: Node, depth: Int) = println(depth + " Leaving " + node.nodeName())
     })
   }
-  def getTagSequence = {
+  def getTagSequence() = {
     val visitor = new TagVisitor
     doc.traverse(visitor)
     visitor.tagSeq.toList

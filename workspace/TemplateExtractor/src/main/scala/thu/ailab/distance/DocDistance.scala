@@ -36,5 +36,4 @@ object TestDocDistance extends AppEntry {
    * DO ALL THE WORK!
    */
   DocDistance.doCalculation()
-  print("Hello World")
 }
