@@ -106,8 +106,8 @@ object TestLCS extends App {
   val fnPrefix = System.getProperty("user.home") + "/Programs/BachelorThesis/Data/blog1000/"
   val fn1 = fnPrefix + "http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_002b5d980100sf47.html"
   val fn2 = fnPrefix + "http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f2e4510101714i.html"
-  val tagSeq1 = new TagSequence(new TreeBuilder(fn1).getTagSequence.toArray, false)
-  val tagSeq2 = new TagSequence(new TreeBuilder(fn2).getTagSequence.toArray, false)
+  val tagSeq1 = TagSequence.fromNodeArray(new TreeBuilder(fn1).getTagSequence.toArray, false)
+  val tagSeq2 = TagSequence.fromNodeArray(new TreeBuilder(fn2).getTagSequence.toArray, false)
   val lcs = new LCSWithPath(tagSeq1, tagSeq2)
   println(lcs.getDistance)
   println(lcs.getCommonIndices.length)

@@ -75,9 +75,9 @@ class HTMLDocument(val filename: String) extends LoggerTrait {
     }
   }
 
-  private val pairedTags = List("script", "style", "p", "li", "ul", "ol", "td", "tr", "tbody", "table")
+  private val pairedTags = List("script", "style")
   private val singleTags = List("link", "input", "br", "img", "meta", "wbr")
-  private val uselessTags = List("strong", "em", "font", "b")
+  private val uselessTags = List("strong", "em", "font", "b", "p", "li", "ul", "ol", "td", "tr", "tbody", "table")
   private val uselessPatterns = List("""(?is)<!--.*?-->""")
   /**
    * Compose all the removal functions into one
@@ -94,9 +94,7 @@ class HTMLDocument(val filename: String) extends LoggerTrait {
   }
 }
 
-object HTMLDocument {
+object HTMLDocument extends thu.ailab.global.AppEntry {
   private val fileLoaded = Array[Boolean]()
-  def main(args: Array[String]) {
-    val foo = new HTMLDocument("../../Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f2e45101017icv.html")
-  }
+  val foo = new HTMLDocument("../../Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f2e45101017icv.html")
 }

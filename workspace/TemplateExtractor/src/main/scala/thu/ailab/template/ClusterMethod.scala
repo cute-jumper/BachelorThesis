@@ -20,8 +20,33 @@ class ClusterMethod(centerId: Int, fileIds: Seq[Int]) {
   println("%sEssential Nodes%s\n".format("-" * 20, "-" * 20) +
     docCenter.getCompact.mkString(" "))
   def getTemplateNodeArray() = {
-    val posToOpNode = ClusterMethod.calculate(getTagSegMap,
+    val tagSegMap = ClusterMethod.getTagSegMap(docCenter,
+        fileIds.iterator,
+        tagSeqFactory.getInstance)
+    val posToOpNode = ClusterMethod.calculate(tagSegMap,
       (c: Int) => 1.0 * c / docClusterSize)
+    ClusterMethod.composeTemplateNodeArray(docCenter, tagSegMap, posToOpNode)
+  }
+}
+
+object ClusterMethod {
+  import akka.actor._
+  import akka.routing.RoundRobinRouter
+  import scala.concurrent.duration._
+
+  sealed trait Message
+  case object StartCalculation extends Message
+  case class AllFinished(duration: Duration) extends Message
+  case class TaskBegins(taskId: Int,
+    tss: Array[TagSegment],
+    toConfidence: (Int) => Double) extends Message
+  case class TaskEnds(taskId: Int, opNodeOption: Option[OptionalNode]) extends Message
+
+  val minConfidence = MyConfigFactory.getValue[Double]("template.optionalConfidence")
+
+  def composeTemplateNodeArray(docCenter: TagSequence,
+      tagSegMap: MHashMap[(Int, Int), Array[TagSegment]],
+      posToOpNode: MHashMap[Int, OptionalNode]) = {    
     val tns = new ArrayBuffer[TemplateNode]
     val sortedPos = posToOpNode.keys.toSeq.sorted
     var prevPos = 0
@@ -36,12 +61,16 @@ class ClusterMethod(centerId: Int, fileIds: Seq[Int]) {
     }
     tns.toArray
   }
-  def getTagSegMap() = {
+  
+  def getTagSegMap(docCenter: TagSequence, 
+      idIterator: Iterator[Int],
+      getSequence: (Int) => TagSequence) = {
     val tagSegMap = new MHashMap[(Int, Int), Array[TagSegment]]
     val centerLen = docCenter.compactLength
-    for (id <- fileIds) {
-      val ts = tagSeqFactory.getInstance(id)
+    for (id <- idIterator) {
+      val ts = getSequence(id)
       val commonIndices = new LCSWithPath(docCenter, ts).getCommonIndices
+      println(centerLen + " + " + commonIndices.length)
       assert(centerLen == commonIndices.length)
       var prevIndex = (-1, -1)
       for (curIndex <- commonIndices) {
@@ -61,23 +90,6 @@ class ClusterMethod(centerId: Int, fileIds: Seq[Int]) {
     }
     tagSegMap
   }
-}
-
-object ClusterMethod {
-  import akka.actor._
-  import akka.routing.RoundRobinRouter
-  import scala.concurrent.duration._
-
-  sealed trait Message
-  case object StartCalculation extends Message
-  case class AllFinished(duration: Duration) extends Message
-  case class TaskBegins(taskId: Int,
-    tss: Array[TagSegment],
-    toConfidence: (Int) => Double) extends Message
-  case class TaskEnds(taskId: Int, opNodeOption: Option[OptionalNode]) extends Message
-
-  val minConfidence = MyConfigFactory.getValue[Double]("template.optionalConfidence")
-
   def clusterTagSegment(tss: Array[TagSegment],
     toConfidence: (Int) => Double): Option[OptionalNode] = {
     def getSequence(id: Int) = tss(id).getTagSeq

@@ -26,7 +26,7 @@ class TagSeqFactory(id2filename: Array[String]) {
           val tagSeqXML = scala.xml.XML.loadFile(prepFilename)
           TagSequence.fromXML(tagSeqXML)
         } else {
-          new TagSequence(new TreeBuilder(filename).getTagSequence.toArray, false)
+          TagSequence.fromNodeArray(new TreeBuilder(filename).getTagSequence.toArray, false)
         }
       }
       documentCache(id) = tagArray

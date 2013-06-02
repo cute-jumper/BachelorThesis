@@ -30,3 +30,6 @@ template {
         optionalConfidence=0.1
         templateFile="~/tmp/templateFile"
 }
+debug {
+        debugFile="~/tmp/debug"
+}

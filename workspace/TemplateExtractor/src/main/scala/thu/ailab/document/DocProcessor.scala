@@ -17,7 +17,7 @@ object DocProcessor {
       f.mkdir()
     }
     for (fn <- blogFilenames) {
-      val tagSeq = new TagSequence(new TreeBuilder(fn).getTagSequence.toArray, false)
+      val tagSeq = TagSequence.fromNodeArray(new TreeBuilder(fn).getTagSequence.toArray, false)
       xml.XML.save(fn.replace(blogdir, prepBlogdir), tagSeq.toXML)
     }
   }

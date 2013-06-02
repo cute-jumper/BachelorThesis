@@ -92,7 +92,54 @@ object HTMLSuffixTree {
           if (flagArray(start) == REMOVE && preRange._2 > start)
             preRange._1 until start foreach {flagArray(_) = RESERVE}
           flagArray(start) = MERGE
-          elementSeq(start) = TreeNode.merge(elementSeq.slice(start, end))
+          elementSeq(start) = elementSeq(start).merge(elementSeq.slice(start + 1, end))
+          start + 1 until end foreach {flagArray(_) = REMOVE}
+        }
+        preRange = range
+      }
+    }
+    for ((node, flag) <- elementSeq zip flagArray if flag != REMOVE) yield node
+  }
+  def stripDuplicates(elementSeq: Array[VerboseTreeNode]) = {
+    val suffixTree = new HTMLSuffixTree(elementSeq.map(_.toString), 
+        verbose = false)
+    type InternalNode = suffixTree.InternalNode
+    val rangeMap = suffixTree.findAllRepetitions
+    val sortedRanges = rangeMap.keys.toSeq.sortBy(-_._1)
+    val fatherMap = new MHashMap[(VerboseTreeNode, Int), List[(Int, Int)]]
+    val flagArray = Array.fill(elementSeq.length)(RESERVE)
+    for (range <- sortedRanges) {
+      val curDepth = elementSeq(range._1).depth
+      val fatherIndex = (range._1 to 0 by -1).iterator.dropWhile{
+        elementSeq(_).depth >= curDepth
+      }.next
+      val fatherNode = elementSeq(fatherIndex)
+      fatherMap((fatherNode, fatherIndex)) = range :: 
+      fatherMap.getOrElse((fatherNode, fatherIndex), Nil)
+    }
+    for (rangeList <- fatherMap.values if rangeList.length > 1) {
+      val rangeCount = new MHashMap[InternalNode, Int]
+      for (range <- rangeList; node = rangeMap(range))
+        rangeCount(node) = rangeCount.getOrElse(node, 0) + 1
+      val nodeOccursBefore = new MHashSet[InternalNode]
+      var preRange = (0, 0)
+      val mergeTable = new MHashMap[InternalNode, Int]
+      for (range <- rangeList; node = rangeMap(range) if rangeCount(node) > 1;
+      (start, end) = range) {
+        if (nodeOccursBefore.contains(node)) {
+          start until end foreach {flagArray(_) = REMOVE}
+          val mergeNode = elementSeq(mergeTable(node))
+          mergeNode.addRelatedRoot(elementSeq(start))
+        } else {
+          nodeOccursBefore += node
+          if (flagArray(start) == REMOVE && preRange._2 > start) {
+            preRange._1 until start foreach {flagArray(_) = RESERVE}
+            val prevMergeNode = elementSeq(mergeTable(rangeMap(preRange)))
+            prevMergeNode.removeLastRelatedRoot
+          }
+          flagArray(start) = MERGE
+          mergeTable += node -> start
+          elementSeq(start) = elementSeq(start).merge(elementSeq.slice(start + 1, end))
           start + 1 until end foreach {flagArray(_) = REMOVE}
         }
         preRange = range

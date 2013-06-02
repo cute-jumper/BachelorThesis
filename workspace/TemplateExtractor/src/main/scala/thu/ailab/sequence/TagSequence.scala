@@ -4,18 +4,14 @@ import scala.collection.mutable.{HashMap => MHashMap}
 import thu.ailab.tree.TreeNode
 import thu.ailab.distance.LCSWithPath
 import thu.ailab.tree.HTMLSuffixTree
+import thu.ailab.tree.VerboseTreeNode
 
-class TagSequence(inputArray: Array[TreeNode], isCompact: Boolean) {
-  val (compactArray, separateArray) =
-    if (isCompact) {
-      (inputArray, inputArray flatMap (_.getSeparateNodes))
-    } else {
-      (HTMLSuffixTree.stripDuplicates(inputArray), inputArray)
-    }
+class TagSequence private (compactArray: Array[TreeNode]) {
+  val separateArray = compactArray flatMap (_.getSeparateNodes)
   def getCompact() = compactArray
   val compactLength = compactArray.length
   def makeTagSequence(indices: Seq[Int]) = {
-    new TagSequence(indices.map(compactArray(_)).toArray, true)
+    TagSequence.fromNodeArray(indices.map(compactArray(_)).toArray, true)
   }
   override def toString() = {
     compactArray.mkString(" ")
@@ -47,7 +43,7 @@ class TagSequence(inputArray: Array[TreeNode], isCompact: Boolean) {
     for (i <- sepIndices) {
       counts(sepToCom(i)) += 1
     }
-    new TagSequence(counts.zipWithIndex filter { x =>
+    TagSequence.fromNodeArray(counts.zipWithIndex filter { x =>
       compactArray(x._2).innerSize == x._1
     } map { x =>
       compactArray(x._2)
@@ -59,7 +55,19 @@ class TagSequence(inputArray: Array[TreeNode], isCompact: Boolean) {
 }
 
 object TagSequence {
+  def fromNodeArray(_inputArray: Array[VerboseTreeNode], isCompact: Boolean) = {
+    val inputArray = 
+      if (isCompact) _inputArray 
+      else HTMLSuffixTree.stripDuplicates(_inputArray)
+    new TagSequence(inputArray.map(_.asInstanceOf[TreeNode]))
+  }
+  def fromNodeArray(_inputArray: Array[TreeNode], isCompact: Boolean) = {
+    val inputArray = 
+      if (isCompact) _inputArray 
+      else HTMLSuffixTree.stripDuplicates(_inputArray)
+    new TagSequence(inputArray)
+  }
   def fromXML(node: scala.xml.Node) = {
-    new TagSequence((node \ "treenode" map (TreeNode.fromXML(_))).toArray, true)
+    TagSequence.fromNodeArray((node \ "treenode" map (TreeNode.fromXML(_))).toArray, true)
   }  
 }

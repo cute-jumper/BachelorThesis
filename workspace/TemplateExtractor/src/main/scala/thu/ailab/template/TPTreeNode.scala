@@ -7,15 +7,22 @@ import thu.ailab.tree.TreeNode
 import thu.ailab.utils.RenderChars
 
 class TPTreeNode(val treeNode: TreeNode, val father: Option[TPTreeNode]) {
+  val name = treeNode.toString
   val depth = treeNode.depth
   val children = new ArrayBuffer[TPTreeNode]
   def addChild(tpTreeNode: TPTreeNode) = {
     children += tpTreeNode
   }
-  private val EDGE_LINE = RenderChars.HorizontalLine * 3
+  private var _isVisited = false
+  def isVisited() = _isVisited
+  def setVisited(value: Boolean) {
+    _isVisited = true
+  }
+  private val EDGE_LINE = RenderChars.HorizontalLine * 2
   private val EDGE_BLANK = " " * EDGE_LINE.length()
-  def toASCII(prefix: String): String = {
-    val nodeLabel = treeNode.toString
+  def toASCII(prefix: String = ""): String = {
+    val nodeLabel = treeNode.toString + 
+    (if (treeNode.allowMultiple) "M" else "S") 
     val prefixPadding = prefix + " " * nodeLabel.length
     val nextPrefix =  prefixPadding + "%s " + EDGE_BLANK
     nodeLabel +
@@ -43,17 +50,29 @@ class TPTreeNode(val treeNode: TreeNode, val father: Option[TPTreeNode]) {
 
 object TPTreeNode {
   def makeTPTree(tnArray: Array[TreeNode], posToOpNode: Map[Int, OptionalNode]) = {
-    @tailrec
+    //@tailrec
     def getAncestor(curNode: TPTreeNode, step: Int): TPTreeNode = {
       if (step == 0) curNode
-      else getAncestor(curNode.father.get, step - 1)
+      else {
+        try {
+          getAncestor(curNode.father.get, step - 1)
+        } catch {
+          case x: Exception => 
+            println("name: " + curNode.name);
+            println("father: " + curNode.father)
+            println("step: " + step); throw x 
+        }
+      }
     }
     val root = new TPTreeNode(tnArray.head, None)
     var curNode = root
     for ((tn, idx) <- tnArray.tail.zip (1 until tnArray.length)) {
+//      println("curNode: " + curNode.name)
+//      println("tn: " + tn)
       val father =
         if (tn.depth <= curNode.depth) getAncestor(curNode, curNode.depth - tn.depth + 1)
         else curNode
+//      println("father: " + father.name)
       val child = new TPTreeNode(tn, Some(father))
       father.addChild(child)
       curNode = child

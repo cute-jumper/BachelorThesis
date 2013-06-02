@@ -5,11 +5,19 @@ import akka.routing.RoundRobinRouter
 import scala.concurrent.duration._
 import akka.event.Logging
 import thu.ailab.sequence.{TagSequence, TagSeqFactory}
-import thu.ailab.utils.Point
 import thu.ailab.distance._
 import thu.ailab.tree.TreeNode
 import thu.ailab.global._
 import thu.ailab.utils.Tools.timeIt
+
+/**
+ * Class stand for a point
+ */
+class Point(val x: Int, val y: Int) extends Tuple2[Int, Int](x, y)
+
+object Point {
+  def apply(x: Int, y: Int) = new Point(x, y)
+}
 
 abstract class CalcDistance extends LoggerTrait {
   /**

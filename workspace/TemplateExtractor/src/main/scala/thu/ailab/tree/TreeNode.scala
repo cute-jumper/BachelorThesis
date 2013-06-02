@@ -1,8 +1,13 @@
 package thu.ailab.tree
 
+import org.jsoup.nodes._
+import scala.collection.mutable.ArrayBuffer
+import thu.ailab.template.ExType._
+
 class TreeNode(val nameArray: Array[String],
     val depthArray: Array[Int], 
-    val allowMultiple: Boolean) {
+    val allowMultiple: Boolean,
+    val exType: ExType = MAGIC) {
   def this(name: String, depth: Int, allowMultiple: Boolean = false) = {
     this(Array[String](name), Array[Int](depth), allowMultiple)
   }
@@ -18,27 +23,6 @@ class TreeNode(val nameArray: Array[String],
   val maxDepth = depthArray.max
   val depth = minDepth
   val innerSize = if (isDuplicate) 1 else nameArray.size
-  /**
-   * object equality methods
-   */
-  // Starts here
-  override def equals(other: Any) = {
-    other match {
-      case that: TreeNode => 
-        (that canEqual this) && this.hashCode == that.hashCode
-//        name == that.name &&
-//        depth == that.depth
-      case _ => false
-    }
-  }
-  override val hashCode = {
-    if (isDuplicate)
-      hashCodePairs(0)
-    else
-      hashCodePairs.foldLeft(1)((acc, x) => 41 * acc + x)
-  }
-  def canEqual(that: Any) = that.isInstanceOf[TreeNode]
-  // Ends here
 
   def shallowEquals(other: Any) = {
     other match {
@@ -54,6 +38,34 @@ class TreeNode(val nameArray: Array[String],
     }
   }
   
+  def merge(treeNodeArray: Array[TreeNode]) = {
+    val startValue = (this.nameArray, this.depthArray)
+    val paramPair = treeNodeArray.foldLeft(startValue){(acc, x) => 
+      (acc._1 ++ x.nameArray, acc._2 ++ x.depthArray)
+    }
+    new TreeNode(paramPair._1, paramPair._2, true)
+  }  
+  
+  /**
+   * object equality methods
+   */
+  // Starts here
+  override def equals(other: Any) = {
+    other match {
+      case that: TreeNode => 
+        (that canEqual this) && this.hashCode == that.hashCode
+      case _ => false
+    }
+  }
+  override val hashCode = {
+    if (isDuplicate)
+      hashCodePairs(0)
+    else
+      hashCodePairs.foldLeft(1)((acc, x) => 41 * acc + x)
+  }
+  def canEqual(that: Any) = that.isInstanceOf[TreeNode]
+  // Ends here
+  
   override val toString = {
     if (isDuplicate)
       name + "." + depth
@@ -62,7 +74,7 @@ class TreeNode(val nameArray: Array[String],
   }
   
   def toXML() = {
-    <treenode allowMultiple={allowMultiple.toString}>
+    <treenode allowMultiple={allowMultiple.toString} exType={exType.toString}>
       <names>
       {for (name <- nameArray) yield <name>{name}</name>}
       </names>
@@ -74,18 +86,37 @@ class TreeNode(val nameArray: Array[String],
 }
 
 object TreeNode {
-  def merge(treeNodeArray: Array[TreeNode]) = {
-    val startValue = (Array[String](), Array[Int]())
-    val paramPair = treeNodeArray.foldLeft(startValue){(acc, x) => 
-      (acc._1 ++ x.nameArray, acc._2 ++ x.depthArray)
-    }
-    new TreeNode(paramPair._1, paramPair._2, true)
-  }
   def fromXML(node: scala.xml.Node) = {
     val nameArray = (node \ "names" \ "name" map (_.text)).toArray
     val depthArray = (node \ "depths" \ "depth" map (_.text.toInt)).toArray
     val allowMultiple = node.attribute("allowMultiple").get.text.toBoolean
-    new TreeNode(nameArray, depthArray, allowMultiple)
+    val exTypeOption = node.attribute("exType")
+    val exType = 
+      if (exTypeOption.isDefined) withName(exTypeOption.get.text)
+      else MAGIC
+    new TreeNode(nameArray, depthArray, allowMultiple, exType)
+  }
+}
+
+class VerboseTreeNode(override val nameArray: Array[String], 
+    override val depthArray: Array[Int], 
+    override val allowMultiple: Boolean,
+    val relatedRoots: ArrayBuffer[Node]) extends TreeNode(nameArray, depthArray, allowMultiple) {
+  def this(name: String, depth: Int, relatedRoot: Node) = {
+    this(Array(name), Array(depth), false, ArrayBuffer(relatedRoot))
+  }
+  def merge(treeNodeArray: Array[VerboseTreeNode]) = {
+    val startValue = (this.nameArray, this.depthArray)
+    val paramPair = treeNodeArray.foldLeft(startValue){(acc, x) => 
+      (acc._1 ++ x.nameArray, acc._2 ++ x.depthArray)
+    }
+    new VerboseTreeNode(paramPair._1, paramPair._2, true, this.relatedRoots)
+  }
+  def addRelatedRoot(that: VerboseTreeNode) = {
+    relatedRoots ++= that.relatedRoots
+  }
+  def removeLastRelatedRoot() = {
+    relatedRoots.trimEnd(1)
   }
 }
 
