@@ -13,6 +13,10 @@ resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/release
 libraryDependencies +=
 "com.typesafe.akka" %% "akka-actor" % "2.1.4"
 
+libraryDependencies += "org.jsoup" % "jsoup" % "1.7.2"
+
+libraryDependencies += "com.ibm.icu" % "icu4j" % "51.1"
+
 seq(SbtStartScript.startScriptForClassesSettings: _*)
 
 name := "TemplateExtractor"

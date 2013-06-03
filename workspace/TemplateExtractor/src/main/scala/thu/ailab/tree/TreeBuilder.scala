@@ -7,15 +7,18 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.{HashMap => MHashMap}
 import scala.collection.JavaConversions._
 import thu.ailab.sequence.TagSequence
-import thu.ailab.document.HTMLDocument
+import thu.ailab.document.LocalHTMLDocument
 import thu.ailab.global._
 import thu.ailab.distance.LCSArraySpaceOptimized
 import thu.ailab.template.TPTreeNode
 
-class TreeBuilder(filename: String) {
-  val htmlDoc = new HTMLDocument(filename)
-  val doc = Jsoup.parse(htmlDoc.simplifiedContent, htmlDoc.charset)
-  //val doc =Jsoup.parse(new java.io.File(filename), "gbk")  
+class TreeBuilder(doc: Document) {
+  def this(filename: String) = {
+    this(((filename: String) => {
+      val htmlDoc = new LocalHTMLDocument(filename)
+      Jsoup.parse(htmlDoc.simplifiedContent, htmlDoc.charset)
+    })(filename))
+  }
   def printTree = {
     doc.traverse(new NodeVisitor() {
       def head(node: Node, depth: Int) = println(depth + " Entering " + node.nodeName())

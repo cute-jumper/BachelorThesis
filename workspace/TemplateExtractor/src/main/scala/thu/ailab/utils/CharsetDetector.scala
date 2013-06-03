@@ -1,6 +1,8 @@
 package thu.ailab.utils
 
 import com.twitter.logging.Logger
+import java.io.{BufferedInputStream, FileInputStream}
+import com.ibm.icu.text.{CharsetMatch, CharsetDetector}
 
 /**
  * Simple wrapper of icu4j, which can used to automatically detect
@@ -13,21 +15,27 @@ import com.twitter.logging.Logger
  * Possible character set with confidence not below than 50, wrapped
  * in an option type.
  */
-private[utils] object CharsetDetector {
+object MyCharsetDetector {
   private val logger = Logger.get(getClass)
-  def apply(filename: String): Option[String] = {
-    import java.io.{BufferedInputStream, FileInputStream}
-    import com.ibm.icu.text.{CharsetMatch, CharsetDetector}
-    val detector = new CharsetDetector
+  val detector = new CharsetDetector
+  def detectFile(filename: String): Option[String] = {
     val buf = new BufferedInputStream(new FileInputStream(filename))
     detector.setText(buf)
-    val result = detector.detect()
+    val charset = getCharset()
     buf.close()
+    charset
+  }
+  def detectString(str: String): Option[String] = {
+    detector.setText(str.getBytes())
+    getCharset()
+  }
+  private def getCharset() = {
+  	val result = detector.detect()    
     if (result.getConfidence() < 50) {
       logger.error("Poor confidence of %s: %d", result.getName, result.getConfidence)
       None
     } else {
       Some(result.getName)
     }
-  }
+  } 
 }

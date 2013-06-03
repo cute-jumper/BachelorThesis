@@ -1,9 +1,8 @@
 package thu.ailab.document
 
 import scala.annotation.tailrec
-
 import thu.ailab.global.{ LoggerTrait, MyConfigFactory }
-import thu.ailab.utils.CharsetDetector
+import thu.ailab.utils.MyCharsetDetector
 
 /**
  * Document class, representing one HTML document, with some useful information.
@@ -17,21 +16,14 @@ import thu.ailab.utils.CharsetDetector
  *  - simplifiedContent(strippedLines)
  */
 
-class HTMLDocument(val filename: String) extends LoggerTrait {
+abstract class HTMLDocument {
   /**
-   *  Since we mainly deal with Chinese documents, default is gb18030
+   * Abstract members
    */
-  import thu.ailab.utils.Tools.getFileCharset
-  val charset = getFileCharset(filename).getOrElse("gb18030")
-  val url = java.net.URLDecoder.decode(filename, charset)
-  logger.debug("%s Charset: %s", filename, charset)
-
-  /**
-   * Get full content, with blank lines stripped
-   */
-  val allLines = io.Source.fromFile(filename)(scala.io.Codec(charset)).getLines
-  val fullContent = allLines map (_.trim) filter (_.length != 0) mkString "\n"
-
+  val charset: String 
+  val fullContent: String
+    
+	val defaultCharset = "gb18030"
   /**
    * Remove tags according to the regular expression generator
    */
@@ -86,15 +78,31 @@ class HTMLDocument(val filename: String) extends LoggerTrait {
     removePairedTags(pairedTags)_,
     removeOnlyTags(uselessTags)_,
     removePatterns(uselessPatterns)_) reduce (_ compose _)
-  val strippedLines = removeAll(fullContent) split "\n" map (_.trim) filter (_.length != 0)
-  val simplifiedContent = strippedLines mkString "\n"
+  lazy val strippedLines = removeAll(fullContent) split "\n" map (_.trim) filter (_.length != 0)
+  lazy val simplifiedContent = strippedLines mkString "\n"
+}
 
-  def test() = {
-    println(simplifiedContent)
-  }
+class LocalHTMLDocument(val filename: String) extends HTMLDocument with LoggerTrait  {
+  /**
+   *  Since we mainly deal with Chinese documents, default is gb18030
+   */
+  val charset = MyCharsetDetector.detectFile(filename).getOrElse(defaultCharset)
+  val url = java.net.URLDecoder.decode(filename, charset)
+  logger.debug("%s Charset: %s", filename, charset)
+    /**
+   * Get full content, with blank lines stripped
+   */
+  val allLines = io.Source.fromFile(filename)(scala.io.Codec(charset)).getLines
+  val fullContent = allLines map (_.trim) filter (_.length != 0) mkString "\n"  
+}
+
+class WebHTMLDocument(val html: String) extends HTMLDocument {
+	val charset = MyCharsetDetector.detectString(html).getOrElse(defaultCharset)
+  val fullContent = html
 }
 
 object HTMLDocument extends thu.ailab.global.AppEntry {
   private val fileLoaded = Array[Boolean]()
-  val foo = new HTMLDocument("../../Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f2e45101017icv.html")
+  val foo = new LocalHTMLDocument("../../Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f2e45101017icv.html")
+  println(foo.simplifiedContent)
 }

@@ -15,14 +15,7 @@ object Tools {
     val start = System.nanoTime()
     val ret = method
     (ret, (System.nanoTime() - start) / 1e9)    
-  }
-  /**
-   * @param filename
-   * 
-   * @return character set's option
-   */
-  def getFileCharset(filename: String) = CharsetDetector(filename)
-  
+  }  
   /**
    * new control structure to use PrintWriter
    */
