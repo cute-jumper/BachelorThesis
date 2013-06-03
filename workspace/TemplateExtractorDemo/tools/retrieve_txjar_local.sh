@@ -7,4 +7,5 @@ PROJECT_DIR="$HOME/Programs/BachelorThesis/workspace/TemplateExtractorDemo"
 TX_PROJECT_DIR="$HOME/Programs/BachelorThesis/workspace/TemplateExtractor"
 TX_JAR_PATH="$TX_PROJECT_DIR/target/scala-2.10/templateextractor_2.10-0.1-SNAPSHOT.jar"
 
+cd $TX_PROJECT_DIR && sbt one-jar
 cp $TX_JAR_PATH $PROJECT_DIR/lib

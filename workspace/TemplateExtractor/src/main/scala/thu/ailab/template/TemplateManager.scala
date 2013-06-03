@@ -1,12 +1,17 @@
 package thu.ailab.template
 
 import thu.ailab.global.MyConfigFactory
-import thu.ailab.sequence.TagSeqFactory
+import thu.ailab.sequence._
+import thu.ailab.distance.LCSWithPath
 
 
 class TemplateManager private(val templates: Seq[Template]) {
-	def chooseTemplate(thatTagSeq) = {
-	  
+	def chooseTemplate(thatTagSeq: TagSequence): Option[Template] = {
+	  for (t <- templates) {
+	    if (t.isMatched(thatTagSeq))
+	      return Some(t)
+	  }
+	  None
 	}
 }
 
@@ -24,10 +29,11 @@ object TemplateManager {
     val clusterFileIds = ClusterFileReader()
     def getClusterTemplate(centerId: Int, fileIds: Seq[Int]) = {
       val tnArray = new ClusterMethod(centerId, fileIds).getTemplateNodeArray
-      val tp = new Template(tnArray)
+      val tp = new Template(tnArray, centerId)
       tp
     }
-    val templates = clusterFileIds.map(ids => Function.tupled(getClusterTemplate _)(ids))
+    val templates = clusterFileIds.map(ids => 
+      Function.tupled(getClusterTemplate _)(ids)).sortBy(-_.getETagSeqLength)
     scala.xml.XML.save(templateFile,
       <templates>
         {
@@ -39,6 +45,7 @@ object TemplateManager {
   def recoverTemplates() = {
     val templateFile = MyConfigFactory.getValue[String]("template.templateFile")
     val templatesXML = scala.xml.XML.loadFile(templateFile)
-    new TemplateManager(templatesXML \ "template" map (Template.fromXML(_)))
+    new TemplateManager((templatesXML \ "template" map (Template.fromXML(_))).
+        sortBy(_.getETagSeqLength)(Ordering[Int].reverse))
   }
 }

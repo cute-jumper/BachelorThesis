@@ -8,23 +8,26 @@ import org.jsoup.select.NodeVisitor
 import thu.ailab.global._
 import thu.ailab.sequence._
 import thu.ailab.tree._
-import thu.ailab.distance.LCSWithPath
+import thu.ailab.distance.{LCSArraySpaceOptimized, LCSWithPath}
 import thu.ailab.utils.Tools.withPrintWriter
 import ExType._
+import thu.ailab.distance.LCSArraySpaceOptimized
 
-class Template(val tnArray: Array[TemplateNode]) {
-  val essentialNodes = tnArray.filter(_.isEssential).map(_.asInstanceOf[EssentialNode])
-  val eTreeNodes = essentialNodes.flatMap(_.getTreeNodes)
-  val exPatternEss = eTreeNodes.zipWithIndex.filter(_._1.exType != MAGIC).map(x =>
+class Template(val tnArray: Array[TemplateNode], val centerId: Int) {
+  val eNodes = tnArray.filter(_.isEssential).map(_.asInstanceOf[EssentialNode])
+  val eTagSeq = TagSequence.fromNodeArray(eNodes.flatMap(_.getTreeNodes), true)
+  val exPatternEss = eTagSeq.getCompact.zipWithIndex.filter(_._1.exType != MAGIC).map(x =>
     x._2 -> x._1.exType).toMap
-  val essentialTagSeq = TagSequence.fromNodeArray(eTreeNodes, true)
-  val optionalNodes = tnArray.filter(_.isOptional).map(_.asInstanceOf[OptionalNode])
-  val posArray = essentialNodes.scanLeft(0)((acc, x) => acc + x.getTreeNodeCount)
-  val posToOpNode = optionalNodes.zipWithIndex.map { x =>
+  val oNodes = tnArray.filter(_.isOptional).map(_.asInstanceOf[OptionalNode])
+  val posArray = eNodes.scanLeft(0)((acc, x) => acc + x.getTreeNodeCount)
+  val posToOpNode = oNodes.zipWithIndex.map { x =>
     posArray(x._2) -> x._1
   }.toMap
+  def getETagSeqLength() = {
+    eTagSeq.getCompact.length
+  }
   def makeEssentialTree() = {
-    TPTreeNode.makeTPTree(essentialTagSeq.getCompact, posToOpNode)
+    TPTreeNode.makeTPTree(eTagSeq.getCompact, posToOpNode)
   }
   def extract(thatTagSeq: TagSequence) = {
     val (matchedNodes, exPattern) = getMatchedNodesAndExPattern(thatTagSeq)
@@ -38,6 +41,16 @@ class Template(val tnArray: Array[TemplateNode]) {
       println(exType)
       println(getNodeText(node, nodePool))
     }
+  }
+  private val clusterThreshold = MyConfigFactory.getValue[Double](
+      "cluster.DocNaiveAggloCluster.clusterThreshold")
+  private val id2filename = scala.io.Source.fromFile(
+          MyConfigFactory.getValue[String]("output.id2filename")).
+          getLines.toArray
+  private val centerTagSeq = new TagSeqFactory(id2filename).getInstance(centerId) 
+  def isMatched(thatTagSeq: TagSequence) = {
+    val dist = new LCSArraySpaceOptimized(centerTagSeq, thatTagSeq).getDistance
+    dist < clusterThreshold
   }
   def getMatchedNodesAndExPattern(thatTagSeq: TagSequence) = {
     def finalNormalize(tnArray: Array[TreeNode]): Array[TreeNode] = {
@@ -66,14 +79,14 @@ class Template(val tnArray: Array[TemplateNode]) {
       }
       None
     }
-    val lcs = new LCSWithPath(essentialTagSeq, thatTagSeq)
+    val lcs = new LCSWithPath(eTagSeq, thatTagSeq)
     val ci = lcs.getCommonIndices.unzip
     val ciMap = lcs.getCommonIndices.toMap
     val exPattern = new MHashMap[Node, ExType]
     exPattern ++= exPatternEss.flatMap(x =>
       thatTagSeq.getCompact()(ciMap(x._1)).asInstanceOf[VerboseTreeNode].relatedRoots.map(_ -> x._2))
     val clcs = thatTagSeq.makeTagSequence(ci._2)
-    assert(clcs.compactLength == essentialTagSeq.compactLength)
+    assert(clcs.compactLength == eTagSeq.compactLength)
     val foo = new LCSWithPath(clcs, thatTagSeq)
     println("clcs length: " + clcs.compactLength)
     println(clcs)
@@ -122,7 +135,7 @@ class Template(val tnArray: Array[TemplateNode]) {
     tnArray.mkString("\n")
   }
   def toXML() = {
-    <template>
+    <template centerId={centerId.toString}>
       { tnArray.map(_.toXML) }
     </template>
   }
@@ -130,16 +143,21 @@ class Template(val tnArray: Array[TemplateNode]) {
 
 object Template {
   def fromXML(node: scala.xml.Node) = {
-    new Template((node \ "templatenode" map (TemplateNode.fromXML(_))).toArray)
+    new Template((node \ "templatenode" map (TemplateNode.fromXML(_))).toArray,
+        node.attribute("centerId").get.text.toInt)
   }
 }
 
 object TestTemplate extends AppEntry {
   val fn = sys.props("user.home") + "/Data/blog/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_3d09ff700102dy0u.html"
-  val vnodeArray = new TreeBuilder(fn).getVerboseTagSequence.toArray
-  val thatTagSeq = TagSequence.fromNodeArray(vnodeArray, false)
+  val vtnArray = new TreeBuilder(fn).getVerboseTagSequence.toArray
+  val thatTagSeq = TagSequence.fromNodeArray(vtnArray, false)
   val templateArray = TemplateManager.recoverTemplates()
-  val tp = templateArray.last
-  println(tp)
-  tp.extract(thatTagSeq)
+  val tpOption = templateArray.chooseTemplate(thatTagSeq)
+  if (tpOption.isDefined) {
+    val tp = tpOption.get
+    tp.extract(thatTagSeq)
+  } else {
+    
+  }
 }

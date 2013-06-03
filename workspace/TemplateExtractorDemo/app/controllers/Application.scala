@@ -6,25 +6,30 @@ import play.api.libs.ws.WS
 import play.api.libs.concurrent.Execution.Implicits._
 
 object Application extends Controller {
-  
+
   def index = Action {
     Ok(views.html.index("Your new application is ready."))
   }
-  
-  def blog(url: String) = Action { implicit request =>  
+
+  def blog(url: String) = Action { implicit request =>
     Async {
       WS.url(url).get().map { response =>
         val re = """.*charset=([^ "/>]*)""".r
-        val r = re findFirstIn response.header("content-type").get match {
-          case Some(re(charset)) => response.body //TODO 
-          case _ => re findFirstIn response.body match {
-            case Some(re(contentCharset)) => 
-              new String(response.body.toCharArray.map(_.toByte), contentCharset)
-            case _ => response.body
+        val htmlString =
+          re findFirstIn response.header("content-type").get match {
+            case Some(re(charset)) => response.body //TODO 
+            case _ => re findFirstIn response.body match {
+              case Some(re(contentCharset)) =>
+                new String(response.body.toCharArray.map(_.toByte), contentCharset)
+              case _ => response.body
+            }
           }
-        }
         println(response.header("content-type"))
-        Ok(r).as(HTML)
+        val renderHTML = TemplateExtractor.feed(htmlString)
+        if (renderHTML.isDefined)
+          Ok(renderHTML.get).as(HTML)
+        else
+          Ok("No Template!").as(HTML)
       }
     }
   }
