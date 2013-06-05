@@ -7,3 +7,4 @@ workspace/.*
 workspace/TemplateExtractor/.*
 bin/
 target/
+.predictive/
