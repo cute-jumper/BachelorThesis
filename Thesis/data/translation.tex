@@ -1,8 +1,8 @@
 
 \chapter{书面翻译}
 \label{chap:translation}
-\begin{center}
-\Large{文档结构相似性算法调研}
+\begin{center}  
+  \Large{文档结构相似性算法调研}
 \end{center}
 
 \section*{摘要}
@@ -237,10 +237,9 @@ c(D_i,D_j)=\frac{S(D_i,w)\cap S(D_j,w)}{S(D_i,w)}
 每个度量方法都用来度量两个文本之间距离。文档根据这些距离通过开$k-means$进行聚类。
 通过每种度量得到的聚类与树编辑距离得到的聚类进行比较，计算一个错误估计。结果显示
 在Table I中。
-\begin{center}
+{\centering
   \includegraphics[width=\textwidth]{translationTable1}
-\end{center}
-
+}
 我们测试了最多6个聚类，因为这个数据集中根据书籍的作者数量，有6个自然的聚类。我们
 期望加权标签度量有较低的错误率，因为这些数据之间的结构差异只有\texttt{author}这
 个标签出现的次数。
@@ -251,9 +250,9 @@ c(D_i,D_j)=\frac{S(D_i,w)\cap S(D_j,w)}{S(D_i,w)}
 （由MD5签名决定）被移除了，每个站点的快照集合取样20份页面。一样的聚类算法用在这
 些文档上，只有这次我们有一个预定义好的聚类（通过网站），并且可以将每个算法同这些
 预定义好的聚类进行比较。结果显示在Table II中。
-\begin{center}
+{\centering
 \includegraphics[width=\textwidth]{translationTable2}
-\end{center}
+}
 
 这个错误率好像异常地高，特别是对于我们在其他测试中用来当做基准的树编辑距离算法。
 我们推测这个错误率是由于HTML的结构中用来呈现给用户内容的词汇相对较小。路径和路
@@ -268,17 +267,17 @@ c(D_i,D_j)=\frac{S(D_i,w)\cap S(D_j,w)}{S(D_i,w)}
 着时间变化的时候很有用。我们选择\texttt{my.yahoo.com}因为里面的内容会定期发生变
 化，但是结构上随着时间的变化很缓慢（比如，当一个新的图片被加入到一些特点的假日）。
 我们再次把使用近似算法和树编辑距离产生的聚类进行比较。
-\begin{center}
+{\centering
   \includegraphics[width=\textwidth]{translationTable3}
-\end{center}
+}
 
 我们观察到除了FFT以外的大部分近似算法在小的聚类大小上都有非常低的错误率，但是错误
 率在聚类的规模变大时会激增。观察一下描述树编辑距离聚类和FFT聚类以及路径/路径
 shingle聚类之间映射变化的矩阵是有意义的。Table IV描述了FFT聚类和树编辑距离聚类的
 不同，Table V描述了路径聚类和树编辑距离聚类之间的不同。
-\begin{center}
+{\centering
   \includegraphics[width=\textwidth]{translationTable4}
-\end{center}
+}
 
 从这两个矩阵我们可以推导出FFT度量会倾向于将所有的数据点聚成一个类别，因此不提供一
 个有效的分辨相似网页的能力。在另一方面，路径度量（路径shingle和加权标签度量实际是

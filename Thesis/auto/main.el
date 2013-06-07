@@ -10,6 +10,7 @@
      "bachelor"
      "nofonts"
      "data/cover"
+     "data/denotation"
      "data/intro01"
      "data/framework02"
      "data/suffixtree03"
