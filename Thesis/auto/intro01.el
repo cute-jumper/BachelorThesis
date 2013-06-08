@@ -11,5 +11,7 @@
      "intro:fig:django-hard"
      "sec:mainwork"
      "sec:relatedwork"
+     "sec:relatedwork:sim"
+     "sec:relatedwork:template"
      "sec:summaryintro")))
 

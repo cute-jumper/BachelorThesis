@@ -4,5 +4,18 @@
      "IEEE-1363"
      "bigdata-info"
      "weibo-info1"
-     "weibo-info2")))
+     "weibo-info2"
+     "tai1979tree"
+     "reisauto"
+     "zhang1989simple"
+     "dubiner1994faster"
+     "touzet2005linear"
+     "buttler2004short"
+     "GottronCluster"
+     "KimText"
+     "joshi2003bag"
+     "fft"
+     "arasu2003extracting"
+     "carlson2008bootstrapping"
+     "cai2003vips")))
 
