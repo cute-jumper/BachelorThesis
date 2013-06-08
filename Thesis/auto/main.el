@@ -2,6 +2,9 @@
  (lambda ()
     (LaTeX-add-bibliographies
      "ref/refs")
+    (TeX-add-symbols
+     '("reftbl" 1)
+     '("reffig" 1))
     (TeX-run-style-hooks
      "thutils"
      "latex2e"
