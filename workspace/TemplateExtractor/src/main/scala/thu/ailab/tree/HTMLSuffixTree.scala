@@ -147,10 +147,11 @@ object HTMLSuffixTree {
 
 object TestHTMLSuffixTree extends App {
   import thu.ailab.utils.Tools.timeIt
-  //val s = "dedododeeodo"
-  //val t1 = new SuffixTree[Char](s, '\0', '$')
-  val fn = System.getProperty("user.home") + "/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_002b5d980100szxu.html"
-  val tagSeq = new TreeBuilder(fn).getTagSequence.toArray
+  val s = "BANANA"
+  val t1 = new SuffixTree[Char](s, '\0', '$')
+  t1.translateToDot(sys.props("user.home") + "/tmp/st.dot")
+  //val fn = System.getProperty("user.home") + "/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_002b5d980100szxu.html"
+  //val tagSeq = new TreeBuilder(fn).getTagSequence.toArray
   //println(tagSeq mkString " ")
   //tagSeq.foreach(print)
   //val tagSeq = Array("html1", "body2", "a3", "body2", "a3")
@@ -170,6 +171,6 @@ object TestHTMLSuffixTree extends App {
 //  }
   //val html = Array("body2", "div3", "a4", "div4", "img5", "div3", "a4", "div4", "img5", "div3")
   //val html = Array("body1", "head2", "div3", "a4", "p4", "a4", "p4", "div3", "ul4", "li5", "li5", "li5")
-  val newTagSeq = HTMLSuffixTree.stripDuplicates(tagSeq)
-  println(newTagSeq mkString " ")
+//  val newTagSeq = HTMLSuffixTree.stripDuplicates(tagSeq)
+//  println(newTagSeq mkString " ")
 }

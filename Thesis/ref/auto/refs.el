@@ -17,5 +17,7 @@
      "fft"
      "arasu2003extracting"
      "carlson2008bootstrapping"
-     "cai2003vips")))
+     "cai2003vips"
+     "weiner1973linear"
+     "ukkonen1995line")))
 

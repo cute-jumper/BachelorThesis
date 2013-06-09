@@ -103,7 +103,7 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
         "%c%c".format(s(0), s.last)
       } mkString " "
       "\t" + parentNode.name + "->" + endNode.name + 
-      "[label=\"%s\"];".format(compactString)
+      "[label=\"%s\"];".format(getEdgeString/*compactString*/)
     }
     def accept(visitor: SuffixTreeVisitor) = {
       visitor.visit(Edge.this)
