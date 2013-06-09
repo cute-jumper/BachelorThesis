@@ -165,7 +165,7 @@
     #+LABEL: fig:1
     #+ATTR_LaTeX: width=20em,angle=0
     [[./framework.png]]
-#+begin_src dot :file framework.png :exports none
+#+begin_src dot :file framework.png :exports none :tangle framework.dot
   digraph G {
           subgraph cluster0 {
                   label="主体框架";

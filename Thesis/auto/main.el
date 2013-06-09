@@ -6,6 +6,7 @@
      '("reftbl" 1)
      '("reffig" 1))
     (TeX-run-style-hooks
+     "tikz"
      "thutils"
      "latex2e"
      "thuthesis10"
