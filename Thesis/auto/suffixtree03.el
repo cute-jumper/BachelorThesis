@@ -5,7 +5,9 @@
      "sec:suffixtreeintro"
      "suffixtree:fig:suffix-tree-apple"
      "sec:ukkonen"
-     "suffixtree:fig:suffix-tree-banana"
      "sec:multipldetect"
-     "sec:summarysuffixtree")))
+     "sec:summarysuffixtree")
+    (TeX-run-style-hooks
+     "data/suffixtree03-figures"
+     "data/suffixtree03-algo")))
 

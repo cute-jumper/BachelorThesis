@@ -1,0 +1,48 @@
+\begin{algorithm}
+  \caption{从根节点出发，找出所有的重复子序列\label{suffixtree:algo:fromroot}}
+  \begin{algorithmic}[1]
+    \Require 已经构建好的后缀树，根为$root$
+    \Ensure 该后缀树中所有的重复子序列
+    \State $//$从节点出发，寻找所有的重复子序列
+    \For{$edge \gets root.edges~\mathbf{if}~edge.endNode.isNotLeaf$}
+    \State $//$取后缀树根节点的每条边的第一个元素作为每个子树的根节点
+    \State $subTreeRoot := edge.firstElement$
+    \State $//$查找以该节点为根的所有重复子序列
+    \State findAllRepetitions$(root, \mathbf{nil}, subTreeRoot)$
+    \EndFor
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+  \caption{找出后缀树中经过某个内部节点的所有可能的重复子序列}
+  \label{suffixtree:algo:findrep}
+  \begin{algorithmic}[1]
+    \Require 一个内部节点$node$，当前已经找到的重复序列$prefix$，要找的
+    子树的根节点$subTreeRoot$
+    \Ensure 所有经过该内部节点的符合要求的重复序列
+    \Function {findAllRepetitions}{$node, prefix, subTreeRoot$}
+    \State $//$定义一个空集合
+    \State $results := Collection.empty$
+    \State $//$对于该内部节点的每一条不连接叶子节点的边
+    \For{$edge \gets node.edges~\mathbf{if}~edge.endNode.isNotLeaf$}
+    \State $//$依次取出该条边上元素的根节点可能为root的点
+    \State $seq := edge.takeWhile(element$ inSubTreeOf $subTreeRoot)$\label{suffixtree:code:equals}
+    \If {$seq.length == edge.length$}
+    \State $//$遍历完了该条边上所有元素，
+    \State $//$则取该条边连接的下一个内部节点进行递归查找
+    \State findAllRepetitions($edge.endNode, prefix + seq, subTreeRoot$)
+    \Else
+    \State $//$否则，将当前得到的序列加入到结果集合中
+    \State addToResults$(prefix + seq, results)$\label{suffixtree:code:add}
+    \EndIf
+    \EndFor
+    \State \Return{$results$}
+    \EndFunction
+    \State
+  \end{algorithmic}
+\end{algorithm}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "../main"
+%%% End: 

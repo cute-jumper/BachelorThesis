@@ -6,7 +6,9 @@
      '("reftbl" 1)
      '("reffig" 1))
     (TeX-run-style-hooks
-     "tikz"
+     "algpseudocode"
+     "algorithmicx"
+     "algorithm"
      "thutils"
      "latex2e"
      "thuthesis10"
@@ -14,7 +16,6 @@
      "bachelor"
      "nofonts"
      "data/cover"
-     "data/denotation"
      "data/intro01"
      "data/framework02"
      "data/suffixtree03"

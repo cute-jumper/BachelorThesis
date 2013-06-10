@@ -17,9 +17,12 @@
 
 % 所有其它可能用到的包都统一放到这里了，可以根据自己的实际添加或者删除。
 \usepackage{thutils}
-\usepackage{tikz}
-\usetikzlibrary{snakes,arrows,shapes}
-
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\floatname{algorithm}{算法}
+\renewcommand{\algorithmicrequire}{\textbf{输入:}}
+\renewcommand{\algorithmicensure}{\textbf{输出:}}
 % 你可以在这里修改配置文件中的定义，导言区可以使用中文。
 % \def\myname{薛瑞尼}
 \newcommand{\reffig}[1]{图~\ref{#1}}
@@ -43,7 +46,7 @@
 \tableofcontents
 
 % 符号对照表
-\input{data/denotation}
+% \input{data/denotation}
 
 
 %%% 正文部分

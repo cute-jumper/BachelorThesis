@@ -19,5 +19,6 @@
      "carlson2008bootstrapping"
      "cai2003vips"
      "weiner1973linear"
-     "ukkonen1995line")))
+     "ukkonen1995line"
+     "hewitt1973universal")))
 
