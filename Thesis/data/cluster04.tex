@@ -82,8 +82,9 @@ $500h$大约是21天左右，对于我们的实验来说，这个时间是不可
   \label{cluster:fig:actor}
 \end{figure}
 
-我们的系统中在实现中采用了基于Scala语言的Actor库Akka\footnote{网址为：akka.io}。
-接下来我们需要对计算任务进行分割，以便使用\texttt{Actor}模型来并行地进行计算。
+我们的系统中在实现中采用了基于Scala语言的Actor库Akka\footnote{网址
+  为：http://akka.io}。接下来我们需要对计算任务进行分割，以便使用\texttt{Actor}模
+型来并行地进行计算。
 
 对于一个文档集合，我们将计算其中两两文档之间的结构相似度的任务映射到几何平面上，
 相当于计算一个正方形按对角线分割的一个三角形区域，三角形区域的某个点$(i, j)$表示
@@ -131,11 +132,68 @@ Sim(D_1,D_2)=\frac{|elcs(S_1,S_2)|}{\max(\sum\limits_{n\in
 \]
 \section{聚类算法实现}
 \label{sec:clusteralgo}
+聚类的目的是为了将有明显差异的模板生成的网页分开，因此，我们可以认为需要分开的网
+页的结构相似度是比较低的。同时，在聚类之前我们并不清楚这些网页是由几种不同模板生
+成的，因此不能采用需要预先设置类别个数的聚类方法，比如$K-means$。在我们的系统中，
+为了实现高效的自动的聚类，我们采用了一个简单的自底向上的凝聚层次聚类算法。
 
+算法本身很简单：初始时，让每个文档实例都单独为一类，之后不断迭代，每次选择距离最
+近的两个类合并，直到任意两个类的距离都大于阈值时程序退出。这个聚类算法的结束条件
+由阈值决定，无需实现设定类的个数。具体的算法实现如伪代
+码~\ref{cluster:algo:clustering}所示。这里说明一下类中心点的更新方法：由于我们只
+有文档之间的结构相似度作为聚类的标准，每个文档实例本身没有合适的可度量的表示方法，
+不能求平均，因此类似$K-medoids$，我们选择到类中所有点距离之和最短的点作为类的中心
+点。
+\begin{algorithm}
+  \caption{简单的自底向上的凝聚层次聚类算法}
+  \label{cluster:algo:clustering}
+  \begin{algorithmic}[1]
+    \Require 所有的文档实例$instances$，已经存储下来的计算好的距离$distances$和
+    聚类的阈值$threshold$
+    \Ensure 聚类后的类的集合$clusters$
+    \Function{aggloClustering}{$instances, distances, threshold$}
+    \State $//$初始化类的集合为空
+    \State $clusters := Collection.empty$
+    \State $//$每一个文档实例单独看成一个聚类，加入到类集合中
+    \For{$inst \gets instances$}
+    \State $c := \mathbf{new}~Cluster(inst)$
+    \State $clusters.add(c)$
+    \EndFor
+    \State $//$不停迭代，直到最接近的两个聚类的距离大于设定的阈值为止
+    \While{true}
+    \State $//$从全部聚类中取出两个距离最近类
+    \State $(c_1,c_2) := getMinDistanceClusterPair(clusters)$
+    \State $//$如果距离已经大于预先设定的阈值，退出
+    \If{$distances(c_1,c_2) > threshold$}
+    \State $\mathbf{break;}$
+    \EndIf
+    \State $//$合并两个类，更新类中心，更新类集合
+    \State $c_{merge} := mergeCluster(c_1,c_2)$
+    \State $clusters.remove(c_1);clusters.remove(c_2);$
+    \State $clusters.add(c_{merge})$
+    \EndWhile
+    \State $//$返回聚类结果
+    \State \Return $clusters$
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+聚类过程可以用\reffig{cluser:fig:aggloclustering}简单表示。这个例子中一开始有5个
+类，每一步选择最近的两个类进行一次凝聚，最后聚成两个类。
+\begin{figure}
+  \centering
+  \includegraphics[width=0.6\textwidth]{cluster04/aggloclustering}
+  \caption{简单层次聚类方法图示}
+  \label{cluser:fig:aggloclustering}
+\end{figure}
 \section{本章总结}
 \label{sec:summarycluster}
-
-
+这一章我们先介绍了传统的最长公共子序列的计算方法，然后分别介绍了如何对原有的算法
+进行优化，包括空间、时间和计算方式上的优化。在时间优化的部分，我们引入
+了\texttt{Actor}作为我们并行计算的模型，并在系统中用\texttt{Actor}模型简单实现了
+我们文档结构相似度计算的模块。最后我们介绍了我们采用的凝聚层次聚类算法。通过设置
+合适的阈值，我们可以通过聚类算法将差异很大的模板生成的网页成功分开，之后这些聚类
+将作为下一个模块的输入，进行模板的提取。
 %%% Local Variables: 
 %%% mode: latex
 %%% TeX-master: "../main"

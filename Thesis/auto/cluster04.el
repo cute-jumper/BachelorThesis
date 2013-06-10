@@ -8,5 +8,7 @@
      "cluster:fig:actor"
      "cluster:fig:triangle"
      "sec:clusteralgo"
+     "cluster:algo:clustering"
+     "cluser:fig:aggloclustering"
      "sec:summarycluster")))
 
