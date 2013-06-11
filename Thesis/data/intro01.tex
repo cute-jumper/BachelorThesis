@@ -13,7 +13,7 @@
 性，如何有效对海量的数据进行处理，进而挖掘出我们所需要的内容逐渐成为一个重要的问
 题。近几年，“大数据”迅速成为计算机科学领域非常受关注研究方向。
 
-Doug Laney在\cite{3V}中，提出了“大数据”的3个特点：容量（volume）、速度
+Doug Laney在\onlinecite{3V}中，提出了“大数据”的3个特点：容量（volume）、速度
 （velocity）和多样性（variety）。容量是指数据的存储量非常大，通常在TB，甚至PB级别；
 速度是指数据的产生速度很快；多样性是指产生的数据多种多样，没有一个固定的类型，大
 部分都是以非结构化和半结构化数据的形式存在。这些是我们在面对大数据时所需要解决的
@@ -72,13 +72,13 @@ Doug Laney在\cite{3V}中，提出了“大数据”的3个特点：容量（vol
 \begin{figure}
   \begin{minipage}[t]{0.5\linewidth}
   \centering
-  \includegraphics[width=0.5\textwidth]{intro01/MVC-Process}
+  \includegraphics[width=0.8\textwidth]{intro01/MVC-Process}
   \caption{MVC模式}
   \label{intro:fig:mvc}
   \end{minipage}
   \begin{minipage}[t]{0.5\linewidth}
   \centering
-  \includegraphics[width=0.6\textwidth]{intro01/django}
+  \includegraphics[width=0.8\textwidth]{intro01/django}
   \caption{Django中的HTML模板示例}
   \label{intro:fig:django}
   \end{minipage}
@@ -125,8 +125,8 @@ Doug Laney在\cite{3V}中，提出了“大数据”的3个特点：容量（vol
 在模板表示和提取方面，我们将通过寻找结构相似网页中共同的结构特征提取出模板，并利
 用提取出的模板对其他网页进行信息抽取。我们希望可以提取出类似
 于\reffig{intro:fig:django}中一样的模板，其中动态生成的部分（对
-于\reffig{intro:fig:django}来说，即\texttt{\{\{\}\}}包含的Python表达式）我们用正
-则表达式\texttt{.*}代替。
+于\reffig{intro:fig:django}来说，即\texttt{\{\{\}\}}中包含的Python表达式）我们用
+正则表达式\texttt{.*}代替。
 \section{相关工作}
 \label{sec:relatedwork}
 
@@ -136,17 +136,16 @@ Doug Laney在\cite{3V}中，提出了“大数据”的3个特点：容量（vol
 是我们整个工作中非常重要的一部分。在这方面，已经有很多的相关的研究工作。
 
 早期的工作主要集中在HTML文档解析成的DOM Tree上，主要的度量方法是树编辑距离（Tree
-Edit Distance）。Tai和Kuo-Chung在\cite{tai1979tree}中提出了计算树编辑距离的方
-法，Reis等在\cite{reisauto}中说明了如何利用树编辑距离的方法自动抽取网页新闻。此外，
-还有一些优化树编辑距离计算时间的尝试，包
-括\cite{zhang1989simple}\cite{dubiner1994faster}\cite{touzet2005linear}等。树编辑
-距离的主要缺点是算法非常复杂，计算复杂度很高，有些时间上的优化的算法又依赖于各种
-各样的限制条件。由于我们要处理的数据量较大，采用复杂度很高树编辑距离算法进行计算
-是不现实的。
+Edit Distance）。Tai和Kuo-Chung在\onlinecite{tai1979tree}中提出了计算树编辑距离的
+方法，Reis等在\onlinecite{reisauto}中说明了如何利用树编辑距离的方法自动抽取网页新
+闻。此外，还有一些优化树编辑距离计算时间的尝试，包括\onlinecite{zhang1989simple,
+  dubiner1994faster,touzet2005linear}等。树编辑距离的主要缺点是算法非常复杂，计算
+复杂度很高，有些时间上的优化的算法又依赖于各种各样的限制条件。由于我们要处理的数
+据量较大，采用复杂度很高树编辑距离算法进行计算是不现实的。
 
-Gottron在\cite{GottronCluster}中介绍了几个基于HTML的标签（tag）集合的计算HTML文档
-结构相似度的方法。最简单的一种方法是计算两个HTML文档$D_i,D_{j}$的标签集合$T_i,
-T_j$的Jaccard相似度，即
+Gottron在\onlinecite{GottronCluster}中介绍了几个基于HTML的标签（tag）集合的计
+算HTML文档结构相似度的方法。最简单的一种方法是计算两个HTML文档$D_i,D_{j}$的标签集
+合$T_i, T_j$的Jaccard相似度，即
 \[
 Sim(D_i,D_j)=\frac{|T_i \cap T_j|}{|T_i \cup T_j|}
 \]
@@ -167,43 +166,44 @@ Sim(D_i,D_j)=\frac{LCS(S_i,S_j)}{max(|S_i|,|S_j|)}
 \]
 
 还有一类计算相似度的方法是基于路径集合。路径（Path）指的是从根节点到某个目标节点
-的标签所组成的序列。Joshi在\cite{joshi2003bag}中提出了利用路径集合来衡量文档的结
-构相似度。Buttler等人在\cite{buttler2004short}引入shingle技术，加上一些随机取样等
-优化手段，可以在常数时间内计算任意大小的文档之间的相似度。Kim在\cite{KimText}基于
-路径集合提出了一种以最小描述距离（Minimum Description Length）为优化目标、通
-过Minhash加快计算速度的计算方法。基于路径集合的方法将HTML的树形结构的相似度转化为
-序列集合的相似度，序列中标签的顺序仍然保留了原始DOM Tree的一些层次信息。这种方法
-与计算树编辑距离的方法相比，在不损失太多的结构信息的同时有效降低了复杂度，并且有
-多种优化的途径，是一种比较好的计算结构相似度的方法。
+的标签所组成的序列。Joshi在\onlinecite{joshi2003bag}中提出了利用路径集合来衡量文
+档的结构相似度。Buttler等人在\onlinecite{buttler2004short}引入shingle技术，加上一
+些随机取样等优化手段，可以在常数时间内计算任意大小的文档之间的相似
+度。Kim在\onlinecite{KimText}基于路径集合提出了一种以最小描述距离（Minimum
+Description Length）为优化目标、通过Minhash加快计算速度的计算方法。基于路径集合的
+方法将HTML的树形结构的相似度转化为序列集合的相似度，序列中标签的顺序仍然保留了原
+始DOM Tree的一些层次信息。这种方法与计算树编辑距离的方法相比，在不损失太多的结构
+信息的同时有效降低了复杂度，并且有多种优化的途径，是一种比较好的计算结构相似度的
+方法。
 
-Flesca在\cite{fft}中还提出了一种有趣的计算文档相似度的方法。他引入信号处理领域的
-快速傅里叶变换（FFT）用于处理文本。具体的方法是将文本的序列看成时序序列，利用快速
-傅里叶变换将其变换到频域，然后比较幅度的差别。尽管找不到一个可以与之对应的合理直
-观的解释，同时Buttler在\cite{buttler2004short}中做的相关的实验也显示这种方法的效
-果不是很好，不过就方法本身来说，还是非常有启发意义的。
+Flesca在\onlinecite{fft}中还提出了一种有趣的计算文档相似度的方法。他引入信号处理
+领域的快速傅里叶变换（FFT）用于处理文本。具体的方法是将文本的序列看成时序序列，利
+用快速傅里叶变换将其变换到频域，然后比较幅度的差别。尽管找不到一个可以与之对应的
+合理直观的解释，同时Buttler在\onlinecite{buttler2004short}中做的相关的实验也显示
+这种方法的效果不是很好，不过就方法本身来说，还是非常有启发意义的。
 
-在Buttler等人在\cite{buttler2004short}的实验中，还有一个值得注意的结果。虽然树编
-辑距离看上去是衡量两个文档结构距离的最好标准，但是在某些实验中却显示树编辑距离算
-法在HTML文档的聚类效果上不如一些简单的近似算法，比如加权的标签算法和基于路径集合
-的近似算法，而且算法在运行时间上远远大于这些近似算法。
+在Buttler等人在\onlinecite{buttler2004short}的实验中，还有一个值得注意的结果。虽
+然树编辑距离看上去是衡量两个文档结构距离的最好标准，但是在某些实验中却显示树编辑
+距离算法在HTML文档的聚类效果上不如一些简单的近似算法，比如加权的标签算法和基于路
+径集合的近似算法，而且算法在运行时间上远远大于这些近似算法。
 
 \subsection{模板检测与提取}
 \label{sec:relatedwork:template}
 在网页模板的检测和提取方面，也有很多的相关的研究成果。典型的无监督的方法是Arasu等
-人的\cite{arasu2003extracting}。这篇文章提出了一套模板推导引擎，通过比较不同网页
-间的相同点和不同点来自动生成网页模板。这种方法的特点是没有语义信息，需要人工后期
-指定相关的语义。
+人的\onlinecite{arasu2003extracting}。这篇文章提出了一套模板推导引擎，通过比较不
+同网页间的相同点和不同点来自动生成网页模板。这种方法的特点是没有语义信息，需要人
+工后期指定相关的语义。
 
 半监督的方法则往往同bootstrapping相结
-合。Calson在\cite{carlson2008bootstrapping}中，利用部分树对齐（partial tree
-alignment）的方式先对网页结构进行对齐，然后利用一些语义特征，对相似度进行打分，训
-练模型的时候采用了bootstrapping，减小了标注的工作量。这种方法的缺点是算法运行速度
-较慢，不适用于数据量较大的情况。
+合。Calson在\onlinecite{carlson2008bootstrapping}中，利用部分树对齐（partial
+tree alignment）的方式先对网页结构进行对齐，然后利用一些语义特征，对相似度进行打
+分，训练模型的时候采用了bootstrapping，减小了标注的工作量。这种方法的缺点是算法运
+行速度较慢，不适用于数据量较大的情况。
 
 还有一些工作并没有直接在HTML文档的DOM Tree的层次上进行，而是采用更符合人直观的网
-页视觉分块作为基础进行模板提取。Cai等人在\cite{cai2003vips}中提出一种利用HTML标签
-的视觉属性信息来检测网页中的视觉分块的方法。这种方法的计算方法比较复杂，而且目前
-主流的网页都已采用HTML+CSS架构，原文中布局信息的计算也需要做较大的修改。
+页视觉分块作为基础进行模板提取。Cai等人在\onlinecite{cai2003vips}中提出一种利
+用HTML标签的视觉属性信息来检测网页中的视觉分块的方法。这种方法的计算方法比较复杂，
+而且目前主流的网页都已采用HTML+CSS架构，原文中布局信息的计算也需要做较大的修改。
 \section{本章总结}
 \label{sec:summaryintro}
 本章最开始主要简单介绍了大数据的研究背景、结构化数据和HTML文档的模板。接着对本文

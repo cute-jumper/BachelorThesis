@@ -6,9 +6,10 @@ import thu.ailab.global._
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.{HashSet => MHashSet, HashMap => MHashMap}
 
-class DocNaiveAggloCluster extends {		
+class DocNaiveAggloCluster extends {
+  private val dataset = MyConfigFactory.getValue[String]("global.dataset") 
   val id2filename = scala.io.Source.fromFile(
-      MyConfigFactory.getValue[String]("output.id2filename")).getLines.toArray
+      MyConfigFactory.getValue[String](dataset, "output.id2filename")).getLines.toArray
   val tagSeqFactory = new TagSeqFactory(id2filename)  
   override val initSize = tagSeqFactory.getSize 
 } with NaiveAggloCluster {	
@@ -19,7 +20,7 @@ class DocNaiveAggloCluster extends {
     val ret = new Array[Double]((initSize - 1) * initSize / 2)
     for (
       (line, idx) <- scala.io.Source.fromFile(
-        MyConfigFactory.getValue[String]("output.distFile")).getLines.zipWithIndex
+        MyConfigFactory.getValue[String](dataset, "output.distFile")).getLines.zipWithIndex
     ) {
       ret(idx) = line.toDouble
     }
@@ -49,5 +50,6 @@ object TestDocNaiveAggloCluster extends AppEntry {
   import thu.ailab.utils.Tools.timeIt
   val naive = new DocNaiveAggloCluster
   println(timeIt(naive.clustering)._2)
-  naive.writeClusterXML(MyConfigFactory.getValue[String]("output.clusterFile"))
+  val dataset = MyConfigFactory.getValue[String]("global.dataset") 
+  naive.writeClusterXML(MyConfigFactory.getValue[String](dataset, "output.clusterFile"))
 }

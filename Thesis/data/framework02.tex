@@ -15,7 +15,7 @@
 
 \begin{figure}
   \centering
-  \includegraphics[width=\textwidth]{framework02/framework.pdf}
+  \includegraphics[width=\textwidth]{framework02/framework}
   \caption{系统整体框架示意}
   \label{framework:fig:framework}
 \end{figure}
@@ -106,8 +106,8 @@ Tree转化成一个标签序列，为了可以还原成原始的DOM Tree，我�
 板，其中的\texttt{news.comments}可能包含不定数目的元素，在比较由这个模板生成的两
 个不同网页的时候，应该将其中数目可能不一样的\texttt{<li>}的结构视为一样，否则将对
 后续的处理造成较大的误差。在网页的生成中，这种重复模式是大量存在的，因此，检测网
-页中的重复记录并做相应的简化是预处理过程中最重要的一个部分，我们将
-在~\ref{chap:suffixtree}中详细介绍。
+页中的重复记录并做相应的简化是预处理过程中最重要的一个部分，我们将在
+第~\ref{chap:suffixtree}章中详细介绍。
 \begin{figure}
   \begin{minipage}[t]{0.5\linewidth}
   \centering
@@ -135,13 +135,13 @@ Tree转化成一个标签序列，为了可以还原成原始的DOM Tree，我�
 在聚类子模块，有几个特点值得我们注意：
 \begin{itemize}
 \item 网页中的模板个数即最终聚类的个数事先是不知道的，因此我们不能采用一些类似
-  于k-means等需要预先设定聚类的个数的算法。
+  于K-means等需要预先设定聚类的个数的算法。
 \item 网页数量很大，需要有较快的执行速度。
 \item 我们可以利用的信息只有网页文档两两之间的结构相似度。
 \end{itemize}
 
 我们将采用简单的层次聚类的方法，通过设置阈值的方法控制聚类的类别个数。这个模块的
-具体实现将在~\ref{chap:cluster}中详细介绍。
+具体实现将在第~\ref{chap:cluster}章中详细介绍。
 \section{模板生成和内容提取模块}
 \label{sec:templateintro}
 这个模块是本次实验中最主要的部分，包括两个子模块：模板生成和内容提取。
@@ -157,7 +157,7 @@ Tree转化成一个标签序列，为了可以还原成原始的DOM Tree，我�
 内容提取子模块将利用之前训练得到的聚类信息和模板，选择合适的模板从新的网页中提取
 出我们需要的信息，并将这个信息以XML格式输出成结构化的数据。
 
-这个模块我们将在~\ref{chap:template}中进行详细介绍。
+这个模块我们将在第~\ref{chap:template}章中进行详细介绍。
 \section{本章小结}
 \label{sec:summaryframework}
 本章首先简单介绍了系统的整体框架，然后分别对每个模块的总体设计进行了说明。其中我

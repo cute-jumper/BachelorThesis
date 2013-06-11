@@ -9,6 +9,7 @@
      "algpseudocode"
      "algorithmicx"
      "algorithm"
+     "comment"
      "thutils"
      "latex2e"
      "thuthesis10"
@@ -24,6 +25,5 @@
      "data/experiment06"
      "data/future07"
      "data/ack"
-     "data/translation"
-     "data/resume")))
+     "data/translation")))
 

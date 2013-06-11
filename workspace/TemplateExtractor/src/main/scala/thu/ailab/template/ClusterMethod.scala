@@ -10,8 +10,9 @@ import thu.ailab.distance.LCSWithPath
 import thu.ailab.cluster.TSNaiveAggloCluster
 
 class ClusterMethod(centerId: Int, fileIds: Seq[Int]) {
+  private val dataset = MyConfigFactory.getValue[String]("global.dataset") 
   val id2filename = scala.io.Source.fromFile(
-    MyConfigFactory.getValue[String]("output.id2filename")).getLines.toArray
+    MyConfigFactory.getValue[String](dataset, "output.id2filename")).getLines.toArray
   val tagSeqFactory = new TagSeqFactory(id2filename)
   val docClusterSize = fileIds.size
   val docCenter = ClusterMethod.findLCSInAll(tagSeqFactory.getInstance(centerId),
@@ -42,7 +43,8 @@ object ClusterMethod {
     toConfidence: (Int) => Double) extends Message
   case class TaskEnds(taskId: Int, opNodeOption: Option[OptionalNode]) extends Message
 
-  val minConfidence = MyConfigFactory.getValue[Double]("template.optionalConfidence")
+  private val dataset = MyConfigFactory.getValue[String]("global.dataset")
+  val minConfidence = MyConfigFactory.getValue[Double](dataset, "template.optionalConfidence")
 
   def composeTemplateNodeArray(docCenter: TagSequence,
       tagSegMap: MHashMap[(Int, Int), Array[TagSegment]],

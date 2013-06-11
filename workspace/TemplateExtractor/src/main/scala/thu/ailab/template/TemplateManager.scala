@@ -17,13 +17,14 @@ class TemplateManager private(val templates: Seq[Template]) {
 
 object TemplateManager {
   def buildTemplates() = {
+    val dataset = MyConfigFactory.getValue[String]("global.dataset")
     val id2filename = io.Source.fromFile(
-      MyConfigFactory.getValue[String]("output.id2filename")).getLines.toArray
+      MyConfigFactory.getValue[String](dataset, "output.id2filename")).getLines.toArray
     val tagSeqFactory = new TagSeqFactory(id2filename)
-    val templateFile = MyConfigFactory.getValue[String]("template.templateFile")
+    val templateFile = MyConfigFactory.getValue[String](dataset, "template.templateFile")
     def ClusterFileReader() = {
       val clusterXML = xml.XML.loadFile(
-        MyConfigFactory.getValue[String]("output.clusterFile"))
+        MyConfigFactory.getValue[String](dataset, "output.clusterFile"))
       for (c <- clusterXML \ "cluster") yield (c.attributes("center").text.toInt, c \ "point" map (_.text.toInt))
     }
     val clusterFileIds = ClusterFileReader()
@@ -43,7 +44,8 @@ object TemplateManager {
     new TemplateManager(templates)
   }
   def recoverTemplates() = {
-    val templateFile = MyConfigFactory.getValue[String]("template.templateFile")
+    val dataset = MyConfigFactory.getValue[String]("global.dataset")
+    val templateFile = MyConfigFactory.getValue[String](dataset, "template.templateFile")
     val templatesXML = scala.xml.XML.loadFile(templateFile)
     new TemplateManager((templatesXML \ "template" map (Template.fromXML(_))).
         sortBy(_.getETagSeqLength)(Ordering[Int].reverse))

@@ -1,18 +1,47 @@
 logger {
        filepath="~/tmp/example.log"
 }
-document {
-       blogdir="~/Data/blog1000"
-       newsdir="~/Data/news1000"
+blog {
+     errorPageMaxLength=1000
+     pattern {
+            contentsPageUrlPattern=".*(?<!\\.html?)$"
+     }
+     document {
+            dir="~/Data/blog1000"
+     }
+     preprocess {
+            dir="~/Data/blog1000_preprocess"
+     }
+     output {
+            distFile="~/tmp/distFile_blog"
+            clusterFile="~/tmp/clusterFile_blog"
+            id2filename="~/tmp/id2filename_blog"
+     }     
+     template {
+            optionalConfidence=0.1
+            templateFile="~/tmp/templateFile_blog"
+     }
 }
-preprocess {
-       blogdir="~/Data/blog1000_preprocess"
-       newsdir="~/Data/news1000_preprocess"
-}
-output {
-       distFile="~/tmp/distFile"
-       clusterFile="~/tmp/clusterFile"
-       id2filename="~/tmp/id2filename"
+news {
+     errorPageMaxLength=1000
+     pattern {
+            contentsPageUrlPattern=".*(?<!\\.html?)$"
+     }
+     document {
+            dir="~/Data/news1000"
+     }
+     preprocess {
+            dir="~/Data/news1000_preprocess"
+     }
+     output {
+            distFile="~/tmp/distFile_news"
+            clusterFile="~/tmp/clusterFile_news"
+            id2filename="~/tmp/id2filename_news"
+     } 
+     template {
+            optionalConfidence=0.1
+            templateFile="~/tmp/templateFile_news"
+     }
 }
 actor {
        nrOfWorkers=10
@@ -25,10 +54,6 @@ cluster {
         TSNaiveAggloCluster {
                           clusterThreshold=0.2
         }
-}
-template {
-        optionalConfidence=0.1
-        templateFile="~/tmp/templateFile"
 }
 debug {
         debugFile="~/tmp/debug"

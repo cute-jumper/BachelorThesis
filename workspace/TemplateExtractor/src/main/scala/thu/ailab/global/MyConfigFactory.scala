@@ -22,7 +22,8 @@ object MyConfigFactory {
    * A generic method using Manifest
    */
   import scala.reflect.ClassTag
-  def getValue[T](name: String)(implicit ct: ClassTag[T]): T = {
+  def getValue[T](names: String*)(implicit ct: ClassTag[T]): T = {
+    val name = names.mkString(".")
     val dispatch = Map(
         classOf[String] -> getConfString _,
         classOf[Double] -> conf.getDouble _,
@@ -31,7 +32,7 @@ object MyConfigFactory {
     //(dispatch.find(_._1 == mf.erasure).map(_._2).get)(name).asInstanceOf[T]
     (dispatch.find(_._1 isAssignableFrom ct.runtimeClass).map(_._2).get)(name).asInstanceOf[T]
   }
-  def getValue1[T: Manifest](name: String): T = {
+  private def getValue1[T: Manifest](name: String): T = {
     ((manifest[T].toString match { // or manifest[T].erasure.getName match {
       case "java.lang.String" => getConfString _
       case "Int" => conf.getInt _
@@ -41,6 +42,6 @@ object MyConfigFactory {
 }
 
 object TestMyConfigFactory extends App {
-  println(MyConfigFactory.getValue1[String]("output.distFile"))
-  println(MyConfigFactory.getValue1[Int]("actor.nrOfWorkers") + 2)
+  println(MyConfigFactory.getValue[String]("output.distFile"))
+  println(MyConfigFactory.getValue[Int]("actor.nrOfWorkers") + 2)
 }

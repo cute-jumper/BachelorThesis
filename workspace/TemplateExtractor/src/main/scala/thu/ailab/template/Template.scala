@@ -44,8 +44,9 @@ class Template(val tnArray: Array[TemplateNode], val centerId: Int) {
   }
   private val clusterThreshold = MyConfigFactory.getValue[Double](
       "cluster.DocNaiveAggloCluster.clusterThreshold")
+  private val dataset = MyConfigFactory.getValue[String]("global.dataset")
   private val id2filename = scala.io.Source.fromFile(
-          MyConfigFactory.getValue[String]("output.id2filename")).
+          MyConfigFactory.getValue[String](dataset, "output.id2filename")).
           getLines.toArray
   private val centerTagSeq = new TagSeqFactory(id2filename).getInstance(centerId) 
   def isMatched(thatTagSeq: TagSequence) = {

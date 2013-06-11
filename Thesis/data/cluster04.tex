@@ -10,8 +10,8 @@
 为$len_1,len_2$，定义一个大小为$(len_1+1) * len(_2+1)$的二维表$T$，表的某个位
 置$t(i + 1,j + 1),i,j >= 0$表示$S_1$的前$i$个元素组成的子序列和$S_2$前$j$个元素组
 成的子序列的最长公共子序列长度。$T$的第一行和第一列的所有元素初始为0。根据$T$的定
-义，我们只要计算出$T$中$t(len_1+1, len_2+1)$位置的值即可得到$S_1$和$S_2$的最长公
-共子序列长度。
+义，我们只要计算出$T$中$t(len_1, len_2)$位置的值即可得到$S_1$和$S_2$的最长公共子
+序列长度。
 
 计算表格$T$我们有以下的递推公式：
 \begin{eqnarray}
@@ -59,21 +59,21 @@ $500h$大约是21天左右，对于我们的实验来说，这个时间是不可
 
 \subsection{时间优化}
 时间上的优化是我们这部分工作的重点。我们采用的策略是并行计算，具体实现中用到的并
-行计算编程模型为\texttt{Actor}。
+行计算编程模型为Actor。
 
-\texttt{Actor}模型是并行计算中常见的一种模型，早
-在1973年Hewitt就在\cite{hewitt1973universal}中就提出了\texttt{Actor}的概念，到目
-前已经有40年左右的历史了。现代的很多编程语言都内建了对\texttt{Actor}的支持，比较
-有名的有Erlang和Scala等。
+Actor模型是并行计算中常见的一种模型，早
+在1973年Hewitt就在\onlinecite{hewitt1973universal}中就提出了Actor的概念，
+到目前已经有40年左右的历史了。现代的很多编程语言都内建了对Actor的支持，
+比较有名的有Erlang和Scala等。
 
-\texttt{Actor}模型的基本哲学和面向对象编程的思想非常类似，即一切都
-是\texttt{Actor}。然而，和面向对象最大的不同在于：面向对象的程序是串行执行的，
-而\texttt{Actor}模型本质却是并行的。每个\texttt{Actor}都是一个独立的计算单元，可
-以接受并处理其他\texttt{Actor}发来的消息，也可以向其他的\texttt{Actor}发送消息，
-还能创建一些新的\texttt{Actor}。以上的这些行为都可以并行地进行，没有固定的顺
-序。\texttt{Actor}之间只能通过异步消息来进行信息传递，相互之间不共享状态，也不会
+Actor模型的基本哲学和面向对象编程的思想非常类似，即一切都
+是Actor。然而，和面向对象最大的不同在于：面向对象的程序是串行执行的，
+而Actor模型本质却是并行的。每个Actor都是一个独立的计算单元，可
+以接受并处理其他Actor发来的消息，也可以向其他的Actor发送消息，
+还能创建一些新的Actor。以上的这些行为都可以并行地进行，没有固定的顺
+序。Actor之间只能通过异步消息来进行信息传递，相互之间不共享状态，也不会
 在因为等待消息而堵塞，避免了由于同步和全局共享状态而导致的锁和其他问
-题。\texttt{Actor}模型的简单示意图如\reffig{cluster:fig:actor}所示。
+题。Actor模型的简单示意图如\reffig{cluster:fig:actor}所示。
 
 \begin{figure}
   \centering
@@ -83,20 +83,20 @@ $500h$大约是21天左右，对于我们的实验来说，这个时间是不可
 \end{figure}
 
 我们的系统中在实现中采用了基于Scala语言的Actor库Akka\footnote{网址
-  为：http://akka.io}。接下来我们需要对计算任务进行分割，以便使用\texttt{Actor}模
+  为：http://akka.io}。接下来我们需要对计算任务进行分割，以便使用Actor模
 型来并行地进行计算。
 
 对于一个文档集合，我们将计算其中两两文档之间的结构相似度的任务映射到几何平面上，
 相当于计算一个正方形按对角线分割的一个三角形区域，三角形区域的某个点$(i, j)$表示
 文档$D_i$和$D_j$之间的结构相似度。我们用等距的水平和垂直线分割这个三角形区域，把
 整个任务分成许多子任务，如\reffig{cluster:fig:triangle}所示。计算的时候，建立一个
-主\texttt{Actor}和一个监听\texttt{Actor}，主\texttt{Actor}负责根据配置创造新
-的\texttt{Actor}，并使用调度器（我们使用的是简单的\texttt{RoundRobin}调度算法）来
-向每个\texttt{Actor}动态分配任务。当主\texttt{Actor}创建的\texttt{Actor}都已经计
-算完毕，并且没有剩下的计算任务可以分配的时候，主\texttt{Actor}负责向监
-听\texttt{Actor}发送消息，告知任务完成，监听\texttt{Actor}则负责将整个系统关闭。
-这样一个计算的模式我们后面还会用到，因此我们将其做了封装，隐藏了底层
-的\texttt{Actor}模型的实现细节，便于后续的使用。
+主Actor和一个监听Actor，主Actor负责根据配置创造新的Actor，并使用调度器（我们使用
+的是简单的RoundRobin调度算法\footnote{这是一种经典的调度算法，可参
+  见http://en.wikipedia.org/wiki/Round-robin\_scheduling}）来向每个Actor动态分配任
+务。当主Actor创建的Actor都已经计算完毕，并且没有剩下的计算任务可以分配的时候，
+主Actor负责向监听Actor发送消息，告知任务完成，监听Actor则负责将整个系统关闭。这样
+一个计算的模式我们后面还会用到，因此我们将其做了封装，隐藏了底层的Actor模型的实现
+细节，便于后续的使用。
 \begin{figure}
   \centering
   \includegraphics[width=0.45\textwidth]{cluster04/triangle}
@@ -189,11 +189,11 @@ Sim(D_1,D_2)=\frac{|elcs(S_1,S_2)|}{\max(\sum\limits_{n\in
 \section{本章总结}
 \label{sec:summarycluster}
 这一章我们先介绍了传统的最长公共子序列的计算方法，然后分别介绍了如何对原有的算法
-进行优化，包括空间、时间和计算方式上的优化。在时间优化的部分，我们引入
-了\texttt{Actor}作为我们并行计算的模型，并在系统中用\texttt{Actor}模型简单实现了
-我们文档结构相似度计算的模块。最后我们介绍了我们采用的凝聚层次聚类算法。通过设置
-合适的阈值，我们可以通过聚类算法将差异很大的模板生成的网页成功分开，之后这些聚类
-将作为下一个模块的输入，进行模板的提取。
+进行优化，包括空间、时间和计算方式上的优化。在时间优化的部分，我们引入了Actor作为
+我们并行计算的模型，并在系统中用Actor模型简单实现了我们文档结构相似度计算的模块。
+最后我们介绍了我们采用的凝聚层次聚类算法。通过设置合适的阈值，我们可以通过聚类算
+法将差异很大的模板生成的网页成功分开，之后这些聚类将作为下一个模块的输入，进行模
+板的提取。
 %%% Local Variables: 
 %%% mode: latex
 %%% TeX-master: "../main"

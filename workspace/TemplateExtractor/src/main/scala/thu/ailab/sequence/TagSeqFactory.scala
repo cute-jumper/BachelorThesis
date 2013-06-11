@@ -12,10 +12,11 @@ class TagSeqFactory(id2filename: Array[String]) {
   val documentCache = new Array[TagSequence](factorySize)
   private def fileIsLoaded(id: Int): Boolean = documentCache(id) != null
   
-  private val blogdir = MyConfigFactory.getValue[String]("document.blogdir")
-  private val prepBlogdir = MyConfigFactory.getValue[String]("preprocess.blogdir")
+  private val dataset = MyConfigFactory.getValue[String]("global.dataset")
+  private val docDir = MyConfigFactory.getValue[String](dataset, "document.dir")
+  private val prepDir = MyConfigFactory.getValue[String](dataset, "preprocess.dir")
   
-  def getPrepFilename(filename: String) = filename.replace(blogdir, prepBlogdir) 
+  def getPrepFilename(filename: String) = filename.replace(docDir, prepDir) 
   
   def getInstance(id: Int) = {
     if (documentCache(id) == null) {
