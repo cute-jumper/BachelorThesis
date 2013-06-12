@@ -2,7 +2,7 @@ logger {
        filepath="~/tmp/example.log"
 }
 blog {
-     errorPageMaxLength=1000
+     errorPageMaxLength=6000
      pattern {
             contentsPageUrlPattern=".*(?<!\\.html?)$"
      }
@@ -23,9 +23,9 @@ blog {
      }
 }
 news {
-     errorPageMaxLength=1000
+     errorPageMaxLength=6000
      pattern {
-            contentsPageUrlPattern=".*(?<!\\.html?)$"
+            contentsPageUrlPattern=".*(?<!\\.shtml?)$"
      }
      document {
             dir="~/Data/news1000"

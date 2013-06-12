@@ -5,6 +5,7 @@
      "sec:wholeframework"
      "framework:fig:framework"
      "sec:filterintro"
+     "sec:filterintro-useless"
      "framework:fig:baidunews"
      "item:1"
      "item:2"

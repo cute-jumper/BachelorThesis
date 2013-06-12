@@ -69,7 +69,7 @@ abstract class HTMLDocument {
 
   private val pairedTags = List("script", "style")
   private val singleTags = List("link", "input", "br", "img", "meta", "wbr")
-  private val uselessTags = List("strong", "em", "font", "b", "p", "li", "ul", "ol", "td", "tr", "tbody", "table")
+  private val uselessTags = List("strong", "em", "font", "b", "p", "li", "ul", "ol", "td", "tr", "th", "tbody", "table")
   private val uselessPatterns = List("""(?is)<!--.*?-->""")
   /**
    * Compose all the removal functions into one

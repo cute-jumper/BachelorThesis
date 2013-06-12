@@ -244,13 +244,12 @@ c(D_i,D_j)=\frac{S(D_i,w)\cap S(D_j,w)}{S(D_i,w)}
 期望加权标签度量有较低的错误率，因为这些数据之间的结构差异只有\texttt{author}这
 个标签出现的次数。
 
-第二个数据集是一系列从以下网站得到的快照：\texttt{cnn.com}，
-\texttt{corona.bc.ca}，\texttt{news.gnome.org}，\texttt{10-10phonerates.com}和
-\texttt{my.yahoo.com}。快照是2001到2003两年期间的，大概是每天一次。冗余的快照
-（由MD5签名决定）被移除了，每个站点的快照集合取样20份页面。一样的聚类算法用在这
-些文档上，只有这次我们有一个预定义好的聚类（通过网站），并且可以将每个算法同这些
-预定义好的聚类进行比较。结果显示在Table II中。
-{\centering
+第二个数据集是一系列从以下网站得到的快
+照：cnn.com，corona.bc.ca，news.gnome.org，10-10phonerates.com和my.yahoo.com。快
+照是2001到2003两年期间的，大概是每天一次。冗余的快照（由MD5签名决定）被移除了，每
+个站点的快照集合取样20份页面。一样的聚类算法用在这些文档上，只有这次我们有一个预
+定义好的聚类（通过网站），并且可以将每个算法同这些预定义好的聚类进行比较。结果显
+示在Table II中。{\centering
 \includegraphics[width=\textwidth]{translationTable2}
 }
 
@@ -264,10 +263,9 @@ c(D_i,D_j)=\frac{S(D_i,w)\cap S(D_j,w)}{S(D_i,w)}
 换使得我们难以找出是网页的哪一些特征导致它们变得如此相似。
 
 作为最后的比较，我们检查了以上表格中从一个站点来的快照。这会在比如监测一个页面随
-着时间变化的时候很有用。我们选择\texttt{my.yahoo.com}因为里面的内容会定期发生变
-化，但是结构上随着时间的变化很缓慢（比如，当一个新的图片被加入到一些特点的假日）。
-我们再次把使用近似算法和树编辑距离产生的聚类进行比较。
-{\centering
+着时间变化的时候很有用。我们选择my.yahoo.com，因为里面的内容会定期发生变化，但是
+结构上随着时间的变化很缓慢（比如，当一个新的图片被加入到一些特点的假日）。我们再
+次把使用近似算法和树编辑距离产生的聚类进行比较。{\centering
   \includegraphics[width=\textwidth]{translationTable3}
 }
 

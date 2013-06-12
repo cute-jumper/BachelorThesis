@@ -9,6 +9,7 @@
      "algpseudocode"
      "algorithmicx"
      "algorithm"
+     "pgfplots"
      "comment"
      "thutils"
      "latex2e"
