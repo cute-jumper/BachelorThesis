@@ -238,7 +238,7 @@ c(D_i,D_j)=\frac{S(D_i,w)\cap S(D_j,w)}{S(D_i,w)}
 通过每种度量得到的聚类与树编辑距离得到的聚类进行比较，计算一个错误估计。结果显示
 在Table I中。
 {\centering
-  \includegraphics[width=\textwidth]{translationTable1}
+  \includegraphics[width=\textwidth]{translation/Table1}
 }
 我们测试了最多6个聚类，因为这个数据集中根据书籍的作者数量，有6个自然的聚类。我们
 期望加权标签度量有较低的错误率，因为这些数据之间的结构差异只有\texttt{author}这
@@ -250,7 +250,7 @@ c(D_i,D_j)=\frac{S(D_i,w)\cap S(D_j,w)}{S(D_i,w)}
 个站点的快照集合取样20份页面。一样的聚类算法用在这些文档上，只有这次我们有一个预
 定义好的聚类（通过网站），并且可以将每个算法同这些预定义好的聚类进行比较。结果显
 示在Table II中。{\centering
-\includegraphics[width=\textwidth]{translationTable2}
+\includegraphics[width=\textwidth]{translation/Table2}
 }
 
 这个错误率好像异常地高，特别是对于我们在其他测试中用来当做基准的树编辑距离算法。
@@ -266,7 +266,7 @@ c(D_i,D_j)=\frac{S(D_i,w)\cap S(D_j,w)}{S(D_i,w)}
 着时间变化的时候很有用。我们选择my.yahoo.com，因为里面的内容会定期发生变化，但是
 结构上随着时间的变化很缓慢（比如，当一个新的图片被加入到一些特点的假日）。我们再
 次把使用近似算法和树编辑距离产生的聚类进行比较。{\centering
-  \includegraphics[width=\textwidth]{translationTable3}
+  \includegraphics[width=\textwidth]{translation/Table3}
 }
 
 我们观察到除了FFT以外的大部分近似算法在小的聚类大小上都有非常低的错误率，但是错误
@@ -274,7 +274,7 @@ c(D_i,D_j)=\frac{S(D_i,w)\cap S(D_j,w)}{S(D_i,w)}
 shingle聚类之间映射变化的矩阵是有意义的。Table IV描述了FFT聚类和树编辑距离聚类的
 不同，Table V描述了路径聚类和树编辑距离聚类之间的不同。
 {\centering
-  \includegraphics[width=\textwidth]{translationTable4}
+  \includegraphics[width=\textwidth]{translation/Table4}
 }
 
 从这两个矩阵我们可以推导出FFT度量会倾向于将所有的数据点聚成一个类别，因此不提供一
@@ -296,11 +296,20 @@ shingle聚类之间映射变化的矩阵是有意义的。Table IV描述了FFT�
 子。用于精度估计的相对小的数据集说明了近似算法在计算近似相似度上的有效性。Figure
 1展示了不同算法在书籍文档的数量对数增长时的相对代价。
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.8\textwidth]{translation/Figure1}
+\end{figure}
+
 聚类的时间是在一个小于一千比特的较小的文档上计算的。为了更好地理解计算两个文档之
 间差异的代价，我们比较了在TCP-H基准测试数据上的每个度量方法的代价。这个数据是
 由Toxgene [19]XML文档生成器随机生成的。我们修改了生成器的参数以便产生包含原始数据
 集合1\%，5\%，10\%，15\%，20\%，和25\%的文档。这个生成器跑两次，在每个分数上产生
 两个不同的文档。结果在Figure 2中。
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.8\textwidth]{translation/Figure2}
+\end{figure}
 
 我们可以看到树编辑距离算法比任何其他的近似算法都要慢好几个数量级。FFT算法也显示
 出了尽管它用很大的精度换来了速度，它仍然比加权标签或者路径shingle方法慢一个数量

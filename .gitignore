@@ -8,3 +8,6 @@ workspace/TemplateExtractor/.*
 bin/
 target/
 .predictive/
+tmp
+*.vrb
+*.fls

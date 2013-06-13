@@ -25,9 +25,9 @@ BIBFILE=ref/*.bib
 SHUJICONTENTS=$(SHUJIMAIN).tex
 CLSFILES=dtx-style.sty $(PACKAGE).cls $(PACKAGE).cfg
 
-.PHONY: all clean distclean dist thesis shuji doc cls
+.PHONY: all clean distclean dist thesis shuji cls compress
 
-all: doc thesis shuji
+all: thesis shuji
 
 ###### generate cls/cfg
 cls: $(CLSFILES)
@@ -37,40 +37,40 @@ $(CLSFILES): $(SOURCES)
 
 ###### for doc
 
-doc: $(PACKAGE).pdf
+# doc: $(PACKAGE).pdf
 
-ifeq ($(METHOD),xelatex)
+# ifeq ($(METHOD),xelatex)
 
-$(PACKAGE).pdf: $(CLSFILES)
-	xelatex $(PACKAGE).dtx
-	makeindex -s gind.ist -o $(PACKAGE).ind $(PACKAGE).idx
-	makeindex -s gglo.ist -o $(PACKAGE).gls $(PACKAGE).glo
-	xelatex $(PACKAGE).dtx
-	xelatex $(PACKAGE).dtx
+# $(PACKAGE).pdf: $(CLSFILES)
+# 	xelatex $(PACKAGE).dtx
+# 	makeindex -s gind.ist -o $(PACKAGE).ind $(PACKAGE).idx
+# 	makeindex -s gglo.ist -o $(PACKAGE).gls $(PACKAGE).glo
+# 	xelatex $(PACKAGE).dtx
+# 	xelatex $(PACKAGE).dtx
 
-else ifeq ($(METHOD),pdflatex)
+# else ifeq ($(METHOD),pdflatex)
 
-$(PACKAGE).pdf: $(CLSFILES)
-	pdflatex $(PACKAGE).dtx
-	makeindex -s gind.ist -o $(PACKAGE).ind $(PACKAGE).idx
-	makeindex -s gglo.ist -o $(PACKAGE).gls $(PACKAGE).glo
-	pdflatex $(PACKAGE).dtx
-	pdflatex $(PACKAGE).dtx
+# $(PACKAGE).pdf: $(CLSFILES)
+# 	pdflatex $(PACKAGE).dtx
+# 	makeindex -s gind.ist -o $(PACKAGE).ind $(PACKAGE).idx
+# 	makeindex -s gglo.ist -o $(PACKAGE).gls $(PACKAGE).glo
+# 	pdflatex $(PACKAGE).dtx
+# 	pdflatex $(PACKAGE).dtx
 
-else
+# else
 
-$(PACKAGE).dvi: $(CLSFILES)
-	latex $(PACKAGE).dtx
-	makeindex -s gind.ist -o $(PACKAGE).ind $(PACKAGE).idx
-	makeindex -s gglo.ist -o $(PACKAGE).gls $(PACKAGE).glo
-	latex $(PACKAGE).dtx
-	latex $(PACKAGE).dtx
+# $(PACKAGE).dvi: $(CLSFILES)
+# 	latex $(PACKAGE).dtx
+# 	makeindex -s gind.ist -o $(PACKAGE).ind $(PACKAGE).idx
+# 	makeindex -s gglo.ist -o $(PACKAGE).gls $(PACKAGE).glo
+# 	latex $(PACKAGE).dtx
+# 	latex $(PACKAGE).dtx
 
-$(PACKAGE).pdf: $(PACKAGE).dvi
-	latex $(PACKAGE).dtx
-	dvipdfmx  $(PACKAGE).dvi
+# $(PACKAGE).pdf: $(PACKAGE).dvi
+# 	latex $(PACKAGE).dtx
+# 	dvipdfmx  $(PACKAGE).dvi
 
-endif
+# endif
 
 ###### for thesis
 
@@ -167,7 +167,9 @@ clean:
 		*.loe \
 		data/*.aux \
 		$(EPSGEN) \
-		dtx-style.sty
+		dtx-style.sty\
+		$(FINALNAME).tar.gz\
+		$(FINALNAME).pdf
 
 distclean: clean
 	-@rm -f *.cls *.cfg
@@ -179,3 +181,8 @@ dist:
 	else \
 	    ./makedist.sh $(VERSION) UTF8; \
 	fi
+
+compress:$(THESISMAIN).pdf $(SHUJIMAIN).pdf	
+	@make clean
+	@cp $(THESISMAIN).pdf $(FINALNAME).pdf
+	@tar -cvzf $(FINALNAME).tar.gz `find . -! -path "*auto*" -! -path "*tmp*" -type f`
