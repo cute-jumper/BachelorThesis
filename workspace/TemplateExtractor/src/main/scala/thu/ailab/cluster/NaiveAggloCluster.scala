@@ -1,8 +1,8 @@
 package thu.ailab.cluster
 
-import thu.ailab.global._
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.{HashSet => MHashSet, HashMap => MHashMap}
+import thu.ailab.global._
 
 /**
  * I avoid using functional style here
@@ -27,7 +27,7 @@ abstract class NaiveAggloCluster extends LoggerTrait {
   protected val clusters = new MHashMap[Int, Cluster]
   (0 until initSize).foreach { i =>
     clusters += i -> new Cluster(new ClusterPoint(i))
-  }  
+  }
   var minDist = Double.MaxValue
   var minPair = (0, 0)
   /**
@@ -45,38 +45,46 @@ abstract class NaiveAggloCluster extends LoggerTrait {
   /**
    * May have bugs
    */
+  val pairs = (for (i <- 0 until initSize; j <- 0 until i) yield ((i, j))).sortBy(x => getDistance(x._1, x._2))
+  val reserve = Array.fill(initSize)(true)
   def findNearest() = {
     val bank = new MHashSet[Cluster]
     var minDist = Double.MaxValue
     var minPairId = (-1, -1)
-    for (c <- clusters.values) {
-      for (deposit <- bank) {
-        val dist = c.distFrom(deposit)
-        if (dist < minDist) {
-          minDist = dist
-          minPairId = (c.centerId, deposit.centerId)
-        }
+    val ids = clusters.values.map(_.centerId).toArray
+    for (i <- ids.indices; j <- 0 until i) {
+      val dist = getDistance(ids(i), ids(j))
+      if (dist < minDist) {
+        minDist = dist
+        minPairId = (ids(i), ids(j))
       }
-      bank.add(c)
-    }
+    } 
     (minPairId, minDist)
   }  
   def clustering() = {
     import scala.annotation.tailrec
     @tailrec
-    def tailrecClustering(clusters: MHashMap[Int, Cluster]) {
-       val (minPairId, minDist) = findNearest
-       if (minDist > clusterThreshold) {
-         logger.info("minDist: %f ".format(minDist) + minPairId)
-         return
-       }
-       val newCluster = clusters(minPairId._1).mergeCluster(clusters(minPairId._2))
-       clusters.remove(minPairId._1)
-       clusters.remove(minPairId._2)
-       clusters(newCluster.centerId) = newCluster
-       tailrecClustering(clusters)
+    def tailrecClustering(clusters: MHashMap[Int, Cluster], times: Int) {
+      val findRes = pairs.find(x => reserve(x._1) && reserve(x._2)) 
+      if (findRes.isEmpty) {
+        logger.info("all in one")
+        return
+      }
+      val minPairId = findRes.get
+      val minDist = getDistance(minPairId._1, minPairId._2)
+      if (minDist > clusterThreshold) {
+        logger.info("minDist: %f ".format(minDist) + minPairId)
+        return
+      }
+      val newCluster = clusters(minPairId._1).mergeCluster(clusters(minPairId._2))
+      clusters.remove(minPairId._1)
+      clusters.remove(minPairId._2)
+      clusters(newCluster.centerId) = newCluster
+      reserve(minPairId._1) = false;reserve(minPairId._2) = false;
+      reserve(newCluster.centerId) = true;
+      tailrecClustering(clusters, times + 1)      
     }
-    tailrecClustering(clusters)
+    tailrecClustering(clusters, 0)
   }
   class ClusterPoint(val id: Int) {
     var distSum: Double = 0.0

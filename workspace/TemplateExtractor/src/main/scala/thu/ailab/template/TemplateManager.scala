@@ -19,6 +19,7 @@ class TemplateManager private(val templates: Seq[Template]) extends LoggerTrait 
 	  } else 
 	    None
 	}
+  def getTemplates() = templates
 	override def toString() = templates.mkString("\n%s\n".format("#" * 80))
 }
 
@@ -57,6 +58,10 @@ object TemplateManager {
     new TemplateManager((templatesXML \ "template" map (Template.fromXML(_))).
         sortBy(_.getETagSeqLength)(Ordering[Int].reverse))
   }
+  def recoverTemplates(templateFile: String) = {
+    val templatesXML = scala.xml.XML.loadFile(templateFile)
+    new TemplateManager((templatesXML \ "template" map (Template.fromXML(_))))
+  }
 }
 
 object TestTemplateManager extends AppEntry {
@@ -76,5 +81,5 @@ object TestTemplateManager extends AppEntry {
   def testBuild() {
     println(TemplateManager.buildTemplates)
   }
-  testExtract()
+  testBuild()
 }

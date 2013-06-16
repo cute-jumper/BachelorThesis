@@ -8,7 +8,7 @@ import thu.ailab.utils.Tools.{withPrintWriter, getTrainFiles}
 import java.io.FileInputStream
 import java.io.FileOutputStream
 
-object DocProcessor {
+object DocProcessor extends LoggerTrait {
   val dataset = MyConfigFactory.getValue[String]("global.dataset")
   val docDir = MyConfigFactory.getValue[String](dataset, "document.dir")
   val prepDir = MyConfigFactory.getValue[String](dataset, "preprocess.dir")
@@ -24,11 +24,11 @@ object DocProcessor {
       xml.XML.save(fn.replace(docDir, prepDir), tagSeq.toXML)
     }
     val statMap = HTMLSuffixTree.getStat
-    println("-" * 10 + "begin stat" + "-" * 10)
+    logger.info("-" * 10 + "begin stat" + "-" * 10)
     for (len <- statMap.keys.toSeq.sortBy(identity); count = statMap(len)) {
-      println(len + " : " + count)
+      logger.info(len + " : " + count)
     }
-    println("-" * 10 + "end stat" + "-" * 10)
+    logger.info("-" * 10 + "end stat" + "-" * 10)
   }
   def copyFile(srcFile: String, destFile: String) = {
     val fin = new FileInputStream(srcFile).getChannel()

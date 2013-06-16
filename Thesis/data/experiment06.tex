@@ -113,32 +113,8 @@
 | 过滤后详细页个数 |                                      35466 |                                       65655 |        |
 \end{comment}
 
-过滤掉了不需要的网页以后，我们得到了详细页的集合。在进行下一步的实验之前，我们先
-将这些详细页集合分成训练集和测试集，各个数据集的具体分割情况如\reftbl{experiment:tab:split}所示。%TODO
-\begin{table}[hb]
-\centering
-% BEGIN RECEIVE ORGTBL 数据分割
-\begin{tabular}{llll}
-  \toprule
- & 训练集 & 测试集 & 详细页总数 \\
-\hline
-blog &  &  &  \\
-news &  &  &  \\
-others &  &  &  \\
-\bottomrule
-\end{tabular}
-% END RECEIVE ORGTBL 数据分割
-\caption{训练集和测试集分布}
-\label{experiment:tab:split}
-\end{table}
-\begin{comment}
-#+ORGTBL: SEND 数据分割 orgtbl-to-latex :splice nil :skip 0
-|        | 训练集 | 测试集 | 详细页总数 |
-|--------+--------+--------+------------|
-| blog   |        |        |      35466 |
-| news   |        |        |      65655 |
-| others |        |        |            |
-\end{comment}
+过滤掉了不需要的网页以后，我们得到了详细页的集合。我们从每个详细页集合中分别随机
+抽取10000个样本作为每个集合的训练集。
 
 接下来将去除无用的标签。\reftbl{experiment:tab:uselesstags}给出了我们实验中去掉无
 用标签的几种正则表达式模式及每种模式对应的标签名。
@@ -180,32 +156,7 @@ others &  &  &  \\
 
 \subsection{聚类和模板生成模块实验和分析}
 由于我们要处理的网页的数量非常多，计算网页的结构相似度将是我们整个系统最耗时的部
-分，因此，我们先将训练集中所有的文档结构相似度离线算好，方便后续的实
-验。\reftbl{experiment:tab:calcsim}给出了在各个数据集上计算所有的文档结构相似度的时间统计结果。 % TODO
-\begin{table}[h]
-  \centering
-% BEGIN RECEIVE ORGTBL 计算时间
-\begin{tabular}{llll}
-  \toprule
- & blog & news & others \\
-\hline
-训练集大小 &  &  &  \\
-所花时间 &  &  &  \\
-\bottomrule
-\end{tabular}
-% END RECEIVE ORGTBL 计算时间
-\caption{每个数据集计算全部文档结构相似度的时间}
-\label{experiment:tab:calcsim}
-\end{table}
-\begin{comment}
-#+ORGTBL: SEND 计算时间 orgtbl-to-latex :splice nil :skip 0
-|            | blog | news | others |
-|------------+------+------+--------|
-| 训练集大小 |      |      |        |
-| 所花时间   |      |      |        |
-\end{comment}
-
-可以看到，由于采用了Actor模型进行并行计算%TODO：分析
+分，因此，我们先将训练集中所有的文档结构相似度离线算好，方便后续的实验。
 
 在聚类模块中，最重要的实验参数是聚类时设置的相似度阈值。为了观察该阈值对实验结果
 的影响，我们调整该阈值，观察聚类的个数的变化；同时，我们还将统计根据不同的聚类结
@@ -214,28 +165,28 @@ others &  &  &  \\
 
 \begin{table}
 % BEGIN RECEIVE ORGTBL 阈值变化
-  \centering
-\begin{tabular}{rllll}
-  \toprule
-阈值 & 聚类个数 & 模板长度 & 必选节点包含的点数 & 可选节点平均长度 \\
+\begin{tabular}{rrrll}
+阈值 & 聚类个数 & 模板平均长度 & 必选节点平均长度 & 可选节点平均长度 \\
 \hline
 0.2 &  &  &  &  \\
 0.3 &  &  &  &  \\
-0.4 &  &  &  &  \\
-0.5 &  &  &  &  \\
-\bottomrule
+0.4 & 9 & 22.6 &  &  \\
+0.5 & 7 & 24.9 &  &  \\
+0.6 & 5 & 24.8 &  &  \\
 \end{tabular}
 % END RECEIVE ORGTBL 阈值变化
 \caption{阈值变化对实验结果的影响\label{experiment:tab:threshold}}
 \end{table}
 \begin{comment}
 #+ORGTBL: SEND 阈值变化 orgtbl-to-latex :splice nil :skip 0
-| 阈值 | 聚类个数 | 模板长度 | 必选节点包含的点数 | 可选节点平均长度 |
-|------+----------+----------+--------------------+------------------|
-|  0.2 |          |          |                    |                  |
-|  0.3 |          |          |                    |                  |
-|  0.4 |          |          |                    |                  |
-|  0.5 |          |          |                    |                  |
+| 阈值 | 聚类个数 | 模板平均长度 | 必选节点平均长度 | 可选节点平均长度 |
+|------+----------+--------------+------------------+------------------|
+|  0.2 |          |              |                  |                  |
+|  0.3 |          |              |                  |                  |
+|  0.4 |        9 |         22.6 |             4.66 |             2.59 |
+|  0.5 |        7 |         24.9 |             4.68 |             2.71 |
+|  0.6 |        5 |         24.8 |             3.76 |             2.90 |
+|  0.7 |        2 |              |                  |                  |
 \end{comment}
 
 

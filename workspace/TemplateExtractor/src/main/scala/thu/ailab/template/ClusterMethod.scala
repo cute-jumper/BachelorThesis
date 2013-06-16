@@ -8,6 +8,7 @@ import thu.ailab.sequence._
 import thu.ailab.tree.TreeNode
 import thu.ailab.distance.LCSWithPath
 import thu.ailab.cluster.TSNaiveAggloCluster
+import thu.ailab.global.LoggerTrait
 
 class ClusterMethod(centerId: Int, fileIds: Seq[Int]) {
   private val dataset = MyConfigFactory.getValue[String]("global.dataset") 
@@ -30,7 +31,7 @@ class ClusterMethod(centerId: Int, fileIds: Seq[Int]) {
   }
 }
 
-object ClusterMethod {
+object ClusterMethod extends LoggerTrait {
   import akka.actor._
   import akka.routing.RoundRobinRouter
   import scala.concurrent.duration._
@@ -155,9 +156,10 @@ object ClusterMethod {
         }
       case TaskEnds(taskId, opNodeOption) =>
         finishedCount += 1
+        logger.info("finishedCount: " + finishedCount)
         if (opNodeOption.isDefined) {
           posToOpNode += taskId -> opNodeOption.get
-        }
+        }        
         if (finishedCount == nrOfMessages) {
           listener ! AllFinished((System.currentTimeMillis() - start).millis)
           context.stop(self)

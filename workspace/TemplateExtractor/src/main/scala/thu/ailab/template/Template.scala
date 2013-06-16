@@ -32,9 +32,13 @@ class Template(val tnArray: Array[TemplateNode], val centerId: Int) {
   def extract(thatTagSeq: TagSequence) = {
     val (matchedNodes, exPattern) = getMatchedNodesAndExPattern(thatTagSeq)
     val jnodeArray = matchedNodes.getCompact.flatMap(_.asInstanceOf[VerboseTreeNode].relatedRoots)
+    val jnodeMap = matchedNodes.getCompact.flatMap { x =>
+      val vtn = x.asInstanceOf[VerboseTreeNode]
+      vtn.relatedRoots.map(_ -> vtn)
+    }.toMap
     val nodePool = jnodeArray.toSet
     for (node <- jnodeArray) {
-      println(node.nodeName + ": " + getNodeText(node, nodePool))
+      println(jnodeMap(node) + ": " + getNodeText(node, nodePool))
     }
     for ((node, exType) <- exPattern) {
       println("=" * 100)
@@ -46,7 +50,7 @@ class Template(val tnArray: Array[TemplateNode], val centerId: Int) {
   private val id2filename = scala.io.Source.fromFile(
           MyConfigFactory.getValue[String](dataset, "output.id2filename")).
           getLines.toArray
-  private val centerTagSeq = new TagSeqFactory(id2filename).getInstance(centerId) 
+  private lazy val centerTagSeq = new TagSeqFactory(id2filename).getInstance(centerId) 
   def distFromCenter(thatTagSeq: TagSequence) = {
     new LCSArraySpaceOptimized(centerTagSeq, thatTagSeq).getDistance
   }

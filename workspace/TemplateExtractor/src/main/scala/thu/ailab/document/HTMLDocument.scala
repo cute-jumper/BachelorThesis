@@ -86,18 +86,26 @@ class LocalHTMLDocument(val filename: String) extends HTMLDocument with LoggerTr
   /**
    *  Since we mainly deal with Chinese documents, default is gb18030
    */
-  val charset = MyCharsetDetector.detectFile(filename).getOrElse(defaultCharset)
+  val charset = {
+    val res = MyCharsetDetector.detectFile(filename).getOrElse(defaultCharset).toLowerCase()
+    if (res != "utf8"  && res != "utf-8" && res != defaultCharset)
+      defaultCharset
+    else
+      res
+  }
   val url = java.net.URLDecoder.decode(filename, charset)
   logger.debug("%s Charset: %s", filename, charset)
     /**
    * Get full content, with blank lines stripped
    */
-  val allLines = io.Source.fromFile(filename)(scala.io.Codec(charset)).getLines
-  val fullContent = allLines map (_.trim) filter (_.length != 0) mkString "\n"  
+  val allLines = io.Source.fromFile(filename)(charset).getLines
+  val fullContent = 
+    allLines map (_.trim) filter (_.length != 0) mkString "\n"  
 }
 
 class WebHTMLDocument(val html: String) extends HTMLDocument {
 	val charset = MyCharsetDetector.detectString(html).getOrElse(defaultCharset)
+	println("web charset: " + charset)
   val fullContent = html
 }
 

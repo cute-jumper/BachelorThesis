@@ -11,6 +11,9 @@ class TagSeqBundle(val tagSeq: TagSequence, val confidence: Double) {
   override def toString() = {
     tagSeq + " --> " + confidence
   }
+  def getBundleWeightedLength() = {
+    tagSeq.compactLength * confidence
+  }
   def toXML() = {
     <tagseqbundle>
     {tagSeq.toXML}
@@ -63,6 +66,10 @@ class OptionalNode(val bundleArray: Array[TagSeqBundle]) extends {
   def getBundleCount() = bundleArray.size
   override def toString() = {
     "O: " + bundleArray.mkString(" | ")
+  }
+  def getAverageLength() = {
+    val sum = bundleArray.foldLeft(0.0)((acc, x) => acc + x.getBundleWeightedLength)
+    sum
   }
   def toXML() = {
     <templatenode type={nodeType.toString}>{bundleArray.map(_.toXML)}</templatenode>

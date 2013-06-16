@@ -1,5 +1,5 @@
 global {
-       dataset=blog
+       dataset=news
 }
 logger {
        filepath="~/tmp/example.log"
@@ -28,6 +28,7 @@ blog {
 }
 news {
      errorPageMaxLength=6000
+     trainsize=10000
      pattern {
             contentsPageUrlPattern=".*(?<!\\.s?html)$"
      }
@@ -53,7 +54,7 @@ actor {
 }
 cluster {
         DocNaiveAggloCluster {
-                          clusterThreshold=0.4
+                          clusterThreshold=0.3
         }
         TSNaiveAggloCluster {
                           clusterThreshold=0.2

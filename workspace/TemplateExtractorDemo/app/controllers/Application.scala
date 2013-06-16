@@ -33,4 +33,5 @@ object Application extends Controller {
       }
     }
   }
+  def news(url: String) = blog(url)
 }

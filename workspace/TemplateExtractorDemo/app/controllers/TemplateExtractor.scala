@@ -10,12 +10,17 @@ import thu.ailab.template.TemplateManager
 import thu.ailab.tree.VerboseTreeNode
 
 object TemplateExtractor {
-  val templateMgr = TemplateManager.recoverTemplates()
+  println("Init started")
+  val templateMgr = TemplateManager.recoverTemplates(sys.props("user.home") + "/Programs/BachelorThesis/Data/material/templateFile_news_0.4")
+  println("Init done")
   def feed(html: String) = {
+    println("web doc")
     val htmlDoc = new WebHTMLDocument(html)
+    println("start parse")
     val doc = Jsoup.parse(htmlDoc.simplifiedContent, htmlDoc.charset)
     val vnodeArray = new TreeBuilder(doc).getVerboseTagSequence.toArray
     val thatTagSeq = TagSequence.fromNodeArray(vnodeArray, false)
+    println("start choosing")
     val templateOption = templateMgr.chooseTemplate(thatTagSeq)
     if (templateOption.isDefined) {
       val template = templateOption.get
