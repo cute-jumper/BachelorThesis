@@ -1,11 +1,14 @@
 package thu.ailab.utils
 
+import thu.ailab.global.MyConfigFactory
+import thu.ailab.global.LoggerTrait
+
 /**
  * Interfaces for the outer to call the internal
  * utilities.
  */
 
-object Tools {
+object Tools extends LoggerTrait {
   /**
    * @param process
    * 
@@ -28,5 +31,23 @@ object Tools {
       writer.close()
     }
   }
+  import java.io.File
+  val dataset = MyConfigFactory.getValue[String]("global.dataset")  
+  val trainsize = MyConfigFactory.getValue[Int](dataset, "trainsize")
+  val docDir = MyConfigFactory.getValue[String](dataset, "document.dir")
+  def getTrainFiles() = {
+    new File(docDir).listFiles().slice(0, trainsize).map(_.getAbsolutePath)
+  }
+  def getTestFiles() = {
+    val files = new File(docDir).listFiles()
+    files.slice(trainsize, files.size).map(_.getAbsolutePath)
+  }
+  import util.Random
+  def getRandomTestFile() = {
+    val files = new File(docDir).listFiles()
+    val testsize = files.size - trainsize
+    val chosen = files(Random.nextInt(testsize) + trainsize).getAbsolutePath
+    logger.info("random choose: " + chosen)
+    chosen
+  }
 }
-

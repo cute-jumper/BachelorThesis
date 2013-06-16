@@ -110,7 +110,7 @@
 | 目录页URL规则    | .*(?<!\textbackslash\textbackslash.html?)$ | .*(?<!\textbackslash\textbackslash.s?html)$ |        |
 | 错误页最大长度   |                                       6000 |                                        6000 |        |
 | 原来总文件个数   |                                      59998 |                                       81561 | 183635 |
-| 过滤后详细页个数 |                                            |                                       65655 |        |
+| 过滤后详细页个数 |                                      35466 |                                       65655 |        |
 \end{comment}
 
 过滤掉了不需要的网页以后，我们得到了详细页的集合。在进行下一步的实验之前，我们先
@@ -135,7 +135,7 @@ others &  &  &  \\
 #+ORGTBL: SEND 数据分割 orgtbl-to-latex :splice nil :skip 0
 |        | 训练集 | 测试集 | 详细页总数 |
 |--------+--------+--------+------------|
-| blog   |        |        |            |
+| blog   |        |        |      35466 |
 | news   |        |        |      65655 |
 | others |        |        |            |
 \end{comment}

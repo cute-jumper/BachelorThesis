@@ -6,11 +6,12 @@ logger {
 }
 blog {
      errorPageMaxLength=6000
+     trainsize=2000
      pattern {
             contentsPageUrlPattern=".*(?<!\\.html?)$"
      }
      document {
-            dir="~/Data/blog"
+            dir="~/Data/blog_detail"
      }
      preprocess {
             dir="~/Data/blog_preprocess"
@@ -31,7 +32,7 @@ news {
             contentsPageUrlPattern=".*(?<!\\.s?html)$"
      }
      document {
-            dir="~/Data/news"
+            dir="~/Data/news_detail"
      }
      preprocess {
             dir="~/Data/news_preprocess"
@@ -52,7 +53,7 @@ actor {
 }
 cluster {
         DocNaiveAggloCluster {
-                          clusterThreshold=0.5
+                          clusterThreshold=0.4
         }
         TSNaiveAggloCluster {
                           clusterThreshold=0.2

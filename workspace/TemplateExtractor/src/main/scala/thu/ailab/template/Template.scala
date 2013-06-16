@@ -42,16 +42,13 @@ class Template(val tnArray: Array[TemplateNode], val centerId: Int) {
       println(getNodeText(node, nodePool))
     }
   }
-  private val clusterThreshold = MyConfigFactory.getValue[Double](
-      "cluster.DocNaiveAggloCluster.clusterThreshold")
   private val dataset = MyConfigFactory.getValue[String]("global.dataset")
   private val id2filename = scala.io.Source.fromFile(
           MyConfigFactory.getValue[String](dataset, "output.id2filename")).
           getLines.toArray
   private val centerTagSeq = new TagSeqFactory(id2filename).getInstance(centerId) 
-  def isMatched(thatTagSeq: TagSequence) = {
-    val dist = new LCSArraySpaceOptimized(centerTagSeq, thatTagSeq).getDistance
-    dist < clusterThreshold
+  def distFromCenter(thatTagSeq: TagSequence) = {
+    new LCSArraySpaceOptimized(centerTagSeq, thatTagSeq).getDistance
   }
   def getMatchedNodesAndExPattern(thatTagSeq: TagSequence) = {
     def finalNormalize(tnArray: Array[TreeNode]): Array[TreeNode] = {
@@ -88,10 +85,6 @@ class Template(val tnArray: Array[TemplateNode], val centerId: Int) {
       thatTagSeq.getCompact()(ciMap(x._1)).asInstanceOf[VerboseTreeNode].relatedRoots.map(_ -> x._2))
     val clcs = thatTagSeq.makeTagSequence(ci._2)
     assert(clcs.compactLength == eTagSeq.compactLength)
-    val foo = new LCSWithPath(clcs, thatTagSeq)
-    println("clcs length: " + clcs.compactLength)
-    println(clcs)
-    println("foo length: " + foo.getCommonIndices.length)
     val tagSegMap = ClusterMethod.getTagSegMap(clcs,
       Some(1).iterator,
       (id: Int) => thatTagSeq)
@@ -149,16 +142,3 @@ object Template {
   }
 }
 
-object TestTemplate extends AppEntry {
-  val fn = sys.props("user.home") + "/Data/blog/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_3d09ff700102dy0u.html"
-  val vtnArray = new TreeBuilder(fn).getVerboseTagSequence.toArray
-  val thatTagSeq = TagSequence.fromNodeArray(vtnArray, false)
-  val templateArray = TemplateManager.recoverTemplates()
-  val tpOption = templateArray.chooseTemplate(thatTagSeq)
-  if (tpOption.isDefined) {
-    val tp = tpOption.get
-    tp.extract(thatTagSeq)
-  } else {
-    
-  }
-}

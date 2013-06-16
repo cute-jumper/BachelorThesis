@@ -48,7 +48,7 @@ abstract class HTMLDocument {
    * Remove single tags, like <br/>, <input ../>
    */
   private def removeSingleTags(tags: List[String])(content: String) = {
-    removeTags(tags, content)("""(?is)<%s.*?/[ ]*>""".format(_))
+    removeTags(tags, content)("""(?is)<[ ]*%s.*?/[ ]*>""".format(_))
   }
 
   /**

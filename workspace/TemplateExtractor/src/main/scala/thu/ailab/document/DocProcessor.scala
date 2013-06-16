@@ -4,7 +4,7 @@ import java.io.File
 import thu.ailab.global._
 import thu.ailab.sequence.TagSequence
 import thu.ailab.tree.{TreeNode, TreeBuilder, HTMLSuffixTree}
-import thu.ailab.utils.Tools.withPrintWriter
+import thu.ailab.utils.Tools.{withPrintWriter, getTrainFiles}
 import java.io.FileInputStream
 import java.io.FileOutputStream
 
@@ -14,15 +14,21 @@ object DocProcessor {
   val prepDir = MyConfigFactory.getValue[String](dataset, "preprocess.dir")
   val errorPageMaxLength = MyConfigFactory.getValue[Long](dataset, "errorPageMaxLength")
   def HTMLToTagSequence() = {
-    val filenames = new File(docDir).listFiles().map(_.getAbsolutePath())
+    val filenames = getTrainFiles
     val f = new File(prepDir)
     if (!f.exists()) {
       f.mkdir()
     }
     for (fn <- filenames) {
-      val tagSeq = TagSequence.fromNodeArray(new TreeBuilder(fn).getTagSequence.toArray, false)
+      val tagSeq = TagSequence.fromNodeArrayForPrep(new TreeBuilder(fn).getTagSequence.toArray, false)
       xml.XML.save(fn.replace(docDir, prepDir), tagSeq.toXML)
     }
+    val statMap = HTMLSuffixTree.getStat
+    println("-" * 10 + "begin stat" + "-" * 10)
+    for (len <- statMap.keys.toSeq.sortBy(identity); count = statMap(len)) {
+      println(len + " : " + count)
+    }
+    println("-" * 10 + "end stat" + "-" * 10)
   }
   def copyFile(srcFile: String, destFile: String) = {
     val fin = new FileInputStream(srcFile).getChannel()
@@ -62,5 +68,5 @@ object DocProcessor {
 }
 
 object TestDocProcessor extends AppEntry {
-	DocProcessor.filterDetailPages(true)
+	DocProcessor.HTMLToTagSequence
 }

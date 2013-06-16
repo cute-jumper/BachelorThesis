@@ -3,13 +3,11 @@ package thu.ailab.distance
 import thu.ailab.sequence.TagSeqFactory
 import thu.ailab.global.MyConfigFactory
 import thu.ailab.global.AppEntry
+import thu.ailab.utils.Tools.getTrainFiles
 
 object DocDistance extends {
   val dataset = MyConfigFactory.getValue[String]("global.dataset")
-  val id2filename = new java.io.File( 
-      MyConfigFactory.getValue[String](dataset, "document.dir")).listFiles().map { 
-    _.getAbsolutePath
-  }
+  val id2filename = getTrainFiles
   val tagSeqFactory = new TagSeqFactory(id2filename)  
   override val totalSize = tagSeqFactory.getSize
 } with CalcDistance {

@@ -58,13 +58,13 @@ object TagSequence {
   def fromNodeArray(_inputArray: Array[VerboseTreeNode], isCompact: Boolean) = {
     val inputArray = 
       if (isCompact) _inputArray 
-      else HTMLSuffixTree.stripDuplicates(_inputArray, false)
+      else HTMLSuffixTree.stripDuplicates(_inputArray)
     new TagSequence(inputArray.map(_.asInstanceOf[TreeNode]))
   }
   def fromNodeArray(_inputArray: Array[TreeNode], isCompact: Boolean) = {
     val inputArray = 
       if (isCompact) _inputArray 
-      else HTMLSuffixTree.stripDuplicates(_inputArray, false)
+      else HTMLSuffixTree.stripDuplicates(_inputArray)
     new TagSequence(inputArray)
   }
   def fromNodeArrayForPrep(_inputArray: Array[TreeNode], isCompact: Boolean) = {

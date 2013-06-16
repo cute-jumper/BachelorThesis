@@ -18,8 +18,8 @@ class ClusterMethod(centerId: Int, fileIds: Seq[Int]) {
   val docCenter = ClusterMethod.findLCSInAll(tagSeqFactory.getInstance(centerId),
     fileIds.filter(_ != centerId).iterator,
     tagSeqFactory.getInstance)
-  println("%sEssential Nodes%s\n".format("-" * 20, "-" * 20) +
-    docCenter.getCompact.mkString(" "))
+//  println("%sEssential Nodes%s\n".format("-" * 20, "-" * 20) +
+//    docCenter.getCompact.mkString(" "))
   def getTemplateNodeArray() = {
     val tagSegMap = ClusterMethod.getTagSegMap(docCenter,
         fileIds.iterator,
@@ -72,7 +72,6 @@ object ClusterMethod {
     for (id <- idIterator) {
       val ts = getSequence(id)
       val commonIndices = new LCSWithPath(docCenter, ts).getCommonIndices
-      println(centerLen + " + " + commonIndices.length)
       assert(centerLen == commonIndices.length)
       var prevIndex = (-1, -1)
       for (curIndex <- commonIndices) {
