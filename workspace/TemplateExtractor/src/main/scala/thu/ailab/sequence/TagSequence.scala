@@ -58,13 +58,19 @@ object TagSequence {
   def fromNodeArray(_inputArray: Array[VerboseTreeNode], isCompact: Boolean) = {
     val inputArray = 
       if (isCompact) _inputArray 
-      else HTMLSuffixTree.stripDuplicates(_inputArray)
+      else HTMLSuffixTree.stripDuplicates(_inputArray, false)
     new TagSequence(inputArray.map(_.asInstanceOf[TreeNode]))
   }
   def fromNodeArray(_inputArray: Array[TreeNode], isCompact: Boolean) = {
     val inputArray = 
       if (isCompact) _inputArray 
-      else HTMLSuffixTree.stripDuplicates(_inputArray)
+      else HTMLSuffixTree.stripDuplicates(_inputArray, false)
+    new TagSequence(inputArray)
+  }
+  def fromNodeArrayForPrep(_inputArray: Array[TreeNode], isCompact: Boolean) = {
+    val inputArray = 
+      if (isCompact) _inputArray 
+      else HTMLSuffixTree.stripDuplicates(_inputArray, true)
     new TagSequence(inputArray)
   }
   def fromXML(node: scala.xml.Node) = {

@@ -5,6 +5,7 @@
      "sec:implementation"
      "sec:demo"
      "experiment:fig:demo"
+     "sec:result-analysis"
      "sec:dataenv"
      "experiment:tab:overview"
      "sec:results"
@@ -14,7 +15,7 @@
      "experiment:tab:uselesstags"
      "experiment:fig:recordlength"
      "experiment:tab:calcsim"
-     "experiment:fig:threshold"
+     "experiment:tab:threshold"
      "experiment:fig:xmloutput"
      "sec:analysis")))
 

@@ -63,7 +63,7 @@
 \hline
 文件个数 & 59998 & 81561 & 183635 \\
 总大小 & 5.4G & 7.9G & 18G \\
-来源 & blog.sina.com.cn &  news.xxx.com &  \\
+来源 & blog.sina.com.cn &  ent.sina.com.cn &  \\
 \bottomrule
 \end{tabular}
 % END RECEIVE ORGTBL 实验数据概况
@@ -72,11 +72,11 @@
 \end{table}
 \begin{comment}
 #+ORGTBL: SEND 实验数据概况 orgtbl-to-latex :splice nil :skip 0
-|          | blog             | news  | other  |
-|----------+------------------+-------+--------|
-| 文件个数 | 59998            | 81561 | 183635 |
-| 总大小   | 5.4G             | 7.9G  | 18G    |
-| 来源     | blog.sina.com.cn |       |        |
+|          | blog             | news            | other  |
+|----------+------------------+-----------------+--------|
+| 文件个数 | 59998            | 81561           | 183635 |
+| 总大小   | 5.4G             | 7.9G            | 18G    |
+| 来源     | blog.sina.com.cn | ent.sina.com.cn |        |
 \end{comment}
 
 接下来的几个小节我们将大体按照模块的顺序，依次介绍实验的详细情况。
@@ -105,12 +105,12 @@
 \end{table}
 \begin{comment}
 #+ORGTBL: SEND 过滤无用网页 orgtbl-to-latex :splice nil :skip 0
-|                  |                                       blog |                                       news | others |
-|------------------+--------------------------------------------+--------------------------------------------+--------|
-| 目录页URL规则    | .*(?<!\textbackslash\textbackslash.html?)$ | .*(?<!\textbackslash\textbackslash.shtml)$ |        |
-| 错误页最大长度   |                                       6000 |                                       6000 |        |
-| 原来总文件个数   |                                      59998 |                                      81561 | 183635 |
-| 过滤后详细页个数 |                                            |                                            |        |
+|                  |                                       blog |                                        news | others |
+|------------------+--------------------------------------------+---------------------------------------------+--------|
+| 目录页URL规则    | .*(?<!\textbackslash\textbackslash.html?)$ | .*(?<!\textbackslash\textbackslash.s?html)$ |        |
+| 错误页最大长度   |                                       6000 |                                        6000 |        |
+| 原来总文件个数   |                                      59998 |                                       81561 | 183635 |
+| 过滤后详细页个数 |                                            |                                       65655 |        |
 \end{comment}
 
 过滤掉了不需要的网页以后，我们得到了详细页的集合。在进行下一步的实验之前，我们先
@@ -136,7 +136,7 @@ others &  &  &  \\
 |        | 训练集 | 测试集 | 详细页总数 |
 |--------+--------+--------+------------|
 | blog   |        |        |            |
-| news   |        |        |            |
+| news   |        |        |      65655 |
 | others |        |        |            |
 \end{comment}
 

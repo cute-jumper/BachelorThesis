@@ -3,7 +3,8 @@
 # Author: qjp
 # Date: <2013-06-03 Mon>
 
-SERVER_ADDRESS="qiujunpeng@118.192.65.79"
+SERVER_ADDRESS="qiujunpeng@192.168.201.118"
+SERVER_HOME="/home/qiujunpeng"
 SERVER_PROJECT_DIR="$SERVER_HOME/workspace/TemplateExtractor"
 CLIENT_PROJECT_DIR="$HOME/Programs/BachelorThesis/workspace/TemplateExtractor"
 CLIENT_RSYNC_EXCLUDE="bin

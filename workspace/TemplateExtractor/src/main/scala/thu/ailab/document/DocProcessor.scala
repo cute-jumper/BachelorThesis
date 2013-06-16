@@ -1,17 +1,18 @@
 package thu.ailab.document
 
 import java.io.File
-
 import thu.ailab.global._
 import thu.ailab.sequence.TagSequence
 import thu.ailab.tree.{TreeNode, TreeBuilder, HTMLSuffixTree}
 import thu.ailab.utils.Tools.withPrintWriter
+import java.io.FileInputStream
+import java.io.FileOutputStream
 
 object DocProcessor {
-  private val dataset = MyConfigFactory.getValue[String]("global.dataset")
-  private val docDir = MyConfigFactory.getValue[String](dataset, "document.dir")
-  private val prepDir = MyConfigFactory.getValue[String](dataset, "preprocess.dir")
-  private val errorPageMaxLength = MyConfigFactory.getValue[Long](dataset, "errorPageMaxLength")
+  val dataset = MyConfigFactory.getValue[String]("global.dataset")
+  val docDir = MyConfigFactory.getValue[String](dataset, "document.dir")
+  val prepDir = MyConfigFactory.getValue[String](dataset, "preprocess.dir")
+  val errorPageMaxLength = MyConfigFactory.getValue[Long](dataset, "errorPageMaxLength")
   def HTMLToTagSequence() = {
     val filenames = new File(docDir).listFiles().map(_.getAbsolutePath())
     val f = new File(prepDir)
@@ -23,12 +24,30 @@ object DocProcessor {
       xml.XML.save(fn.replace(docDir, prepDir), tagSeq.toXML)
     }
   }
-  def getDetailPage(dir: String) = {
-    new File(dir).listFiles().filterNot(isErrorPageByLength).map(_.getAbsolutePath()).
-    filterNot(x => isContentsPageByUrl(x))/* || 
-        isErrorPageByContent(scala.io.Source.fromFile(x).getLines.mkString("")))
-        */
-  }  
+  def copyFile(srcFile: String, destFile: String) = {
+    val fin = new FileInputStream(srcFile).getChannel()
+    val fout = new FileOutputStream(destFile).getChannel()
+    fin.transferTo(0, fin.size(), fout)
+    fin.close()
+    fout.close()
+  }
+  def filterDetailPages(copy: Boolean = false) = {
+    def getDetailPage(files: Array[File]) = {
+      files.filterNot(isErrorPageByLength).map(_.getAbsolutePath()).
+      filterNot(x => isContentsPageByUrl(x))
+    }
+    val files = new File(docDir).listFiles()
+    println("total size: " + files.size)
+    val detailFiles = getDetailPage(files)
+    println("detail size: " + detailFiles.size)
+    if (copy) {
+      val detailDir = docDir + "_detail"
+      val f = new File(detailDir)
+      if (f.exists || f.mkdir()) {
+        detailFiles.foreach(x => copyFile(x, x.replace(docDir, detailDir)))
+      }      
+    }
+  }
   def isContentsPageByUrl(url: String) = {
     val dataset = MyConfigFactory.getValue[String]("global.dataset")
     val pattern = MyConfigFactory.getValue[String](dataset, "pattern.contentsPageUrlPattern")
@@ -43,5 +62,5 @@ object DocProcessor {
 }
 
 object TestDocProcessor extends AppEntry {
-	DocProcessor.HTMLToTagSequence
+	DocProcessor.filterDetailPages(true)
 }

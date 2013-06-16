@@ -2,15 +2,16 @@ package thu.ailab.tree
 
 import scala.collection.mutable.{HashMap => MHashMap, HashSet => MHashSet}
 import scala.collection.mutable.ArrayBuffer
+import thu.ailab.global.LoggerTrait
 
 /**
  * This class must be used when the TreeNode instance has only one tag and call
  * toString to each TreeNode
  */
 private class HTMLSuffixTree(html: Array[String], verbose: Boolean = true) extends 
-SuffixTree[String](html, "\0", "$.-1", verbose) {
+SuffixTree[String](html, "\0", "$.-1", verbose) with LoggerTrait {
   def parseDepth(s: String) = s.split("\\.").last.toInt
-  private def findAllRepetitions() = {
+  private def findAllRepetitions(logStat: Boolean = false) = {
     val rangeMap = new MHashMap[Int, (Int, InternalNode)]
     def updateRangeMap(endIndex: Int, newLength: Int, node: InternalNode) = {
       if (rangeMap.contains(endIndex)) {
@@ -48,6 +49,17 @@ SuffixTree[String](html, "\0", "$.-1", verbose) {
         updateRangeMap(endIndex, prefixSeq.length, curNode)
     }
     findAllRepetitionsImpl(root, IndexedSeq[String](), -1)
+    if (logStat) {
+      val stat = new MHashMap[Int, Int]
+      rangeMap.foreach { x =>
+        stat(x._2._1) = stat.getOrElse(x._2._1, 0) + 1
+      }
+      logger.info("-" * 20 + "begin all" + "-" * 20)
+      stat.foreach { x =>
+        logger.info("%d: %d", x._1, x._2)
+      }
+      logger.info("-" * 20 + "end all" + "-" * 20)
+    }
     rangeMap.map { x =>
       (x._1 - x._2._1, x._1) -> x._2._2
     }
@@ -76,10 +88,10 @@ object HTMLSuffixTree {
     }
     fatherMap.toMap
   }
-  def stripDuplicates(tnArray: Array[TreeNode]) = {
+  def stripDuplicates(tnArray: Array[TreeNode], logStat: Boolean) = {
     val suffixTree = new HTMLSuffixTree(tnArray.map(_.toString), 
         verbose = false)
-    val rangeMap = suffixTree.findAllRepetitions
+    val rangeMap = suffixTree.findAllRepetitions(logStat)
     val fatherMap = getFatherMap(rangeMap.keys, tnArray)
     type InternalNode = suffixTree.InternalNode
     val flagArray = Array.fill(tnArray.length)(RESERVE)
@@ -106,10 +118,10 @@ object HTMLSuffixTree {
     }
     for ((node, flag) <- tnArray zip flagArray if flag != REMOVE) yield node
   }
-  def stripDuplicates(vtnArray: Array[VerboseTreeNode]) = {
+  def stripDuplicates(vtnArray: Array[VerboseTreeNode], logStat: Boolean) = {
     val suffixTree = new HTMLSuffixTree(vtnArray.map(_.toString), 
         verbose = false)
-    val rangeMap = suffixTree.findAllRepetitions
+    val rangeMap = suffixTree.findAllRepetitions(logStat)
     val fatherMap = getFatherMap(rangeMap.keys, vtnArray)
     type InternalNode = suffixTree.InternalNode
     val flagArray = Array.fill(vtnArray.length)(RESERVE)
@@ -173,6 +185,6 @@ object TestHTMLSuffixTree extends App {
 //  }
   //val html = Array("body2", "div3", "a4", "div4", "img5", "div3", "a4", "div4", "img5", "div3")
   //val html = Array("body1", "head2", "div3", "a4", "p4", "a4", "p4", "div3", "ul4", "li5", "li5", "li5")
-  val newTagSeq = HTMLSuffixTree.stripDuplicates(tagSeq)
+  val newTagSeq = HTMLSuffixTree.stripDuplicates(tagSeq, false)
   println(newTagSeq mkString " ")
 }

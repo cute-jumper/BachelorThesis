@@ -27,7 +27,8 @@ object MyConfigFactory {
     val dispatch = Map(
         classOf[String] -> getConfString _,
         classOf[Double] -> conf.getDouble _,
-        classOf[Int] -> conf.getInt _
+        classOf[Int] -> conf.getInt _,
+        classOf[Long] -> conf.getLong _
         )
     //(dispatch.find(_._1 == mf.erasure).map(_._2).get)(name).asInstanceOf[T]
     (dispatch.find(_._1 isAssignableFrom ct.runtimeClass).map(_._2).get)(name).asInstanceOf[T]

@@ -96,7 +96,7 @@ class TreeBuilder(doc: Document) {
 object TestTreeBuilder extends App {
   val fn = sys.props("user.home") + "/Programs/BachelorThesis/Data/blog1000/http%3A%2F%2Fblog.sina.com.cn%2Fs%2Fblog_00f2e45101017088.html"
   val vTagSeq = new TreeBuilder(fn).getVerboseTagSequence.toArray
-  val compact = HTMLSuffixTree.stripDuplicates(vTagSeq)
+  val compact = HTMLSuffixTree.stripDuplicates(vTagSeq, false)
   for (vnode <- compact if vnode.allowMultiple) {
     println("verbose node: " + vnode.toString)
     println(vnode.relatedRoots.map(_.nodeName()).mkString(" | "))

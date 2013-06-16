@@ -1,3 +1,6 @@
+global {
+       dataset=blog
+}
 logger {
        filepath="~/tmp/example.log"
 }
@@ -7,10 +10,10 @@ blog {
             contentsPageUrlPattern=".*(?<!\\.html?)$"
      }
      document {
-            dir="~/Data/blog1000"
+            dir="~/Data/blog"
      }
      preprocess {
-            dir="~/Data/blog1000_preprocess"
+            dir="~/Data/blog_preprocess"
      }
      output {
             distFile="~/tmp/distFile_blog"
@@ -25,13 +28,13 @@ blog {
 news {
      errorPageMaxLength=6000
      pattern {
-            contentsPageUrlPattern=".*(?<!\\.shtml?)$"
+            contentsPageUrlPattern=".*(?<!\\.s?html)$"
      }
      document {
-            dir="~/Data/news1000"
+            dir="~/Data/news"
      }
      preprocess {
-            dir="~/Data/news1000_preprocess"
+            dir="~/Data/news_preprocess"
      }
      output {
             distFile="~/tmp/distFile_news"
