@@ -5,6 +5,7 @@
      "sec:implementation"
      "sec:demo"
      "experiment:fig:demo"
+     "experiment:fig:demoresult"
      "sec:result-analysis"
      "sec:dataenv"
      "experiment:tab:overview"
@@ -12,8 +13,7 @@
      "sec:experiement:pre"
      "experiment:tab:filter"
      "experiment:tab:uselesstags"
-     "experiment:fig:recordlength"
+     "experiment:tab:recordlength"
      "experiment:tab:threshold"
-     "experiment:fig:xmloutput"
-     "sec:analysis")))
+     "experiment:fig:xmloutput")))
 

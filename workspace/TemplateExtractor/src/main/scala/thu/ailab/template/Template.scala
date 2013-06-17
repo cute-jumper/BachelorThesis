@@ -13,7 +13,7 @@ import thu.ailab.utils.Tools.withPrintWriter
 import ExType._
 import thu.ailab.distance.LCSArraySpaceOptimized
 
-class Template(val tnArray: Array[TemplateNode], val centerId: Int) {
+class Template(val tnArray: Array[TemplateNode], val centerFile: String) extends LoggerTrait {
   val eNodes = tnArray.filter(_.isEssential).map(_.asInstanceOf[EssentialNode])
   val eTagSeq = TagSequence.fromNodeArray(eNodes.flatMap(_.getTreeNodes), true)
   val exPatternEss = eTagSeq.getCompact.zipWithIndex.filter(_._1.exType != MAGIC).map(x =>
@@ -38,19 +38,17 @@ class Template(val tnArray: Array[TemplateNode], val centerId: Int) {
     }.toMap
     val nodePool = jnodeArray.toSet
     for (node <- jnodeArray) {
-      println(jnodeMap(node) + ": " + getNodeText(node, nodePool))
+      //println(jnodeMap(node) + ": " + getNodeText(node, nodePool))
     }
-    for ((node, exType) <- exPattern) {
-      println("=" * 100)
-      println(exType)
-      println(getNodeText(node, nodePool))
-    }
+    for ((node, exType) <- exPattern) yield {
+//      println("=" * 100)
+//      println(exType)
+//      println(getNodeText(node, nodePool))
+      (exType, getNodeText(node, nodePool))
+    }    
   }
-  private val dataset = MyConfigFactory.getValue[String]("global.dataset")
-  private val id2filename = scala.io.Source.fromFile(
-          MyConfigFactory.getValue[String](dataset, "output.id2filename")).
-          getLines.toArray
-  private lazy val centerTagSeq = new TagSeqFactory(id2filename).getInstance(centerId) 
+  private lazy val dataset = MyConfigFactory.getValue[String]("global.dataset")
+  private lazy val centerTagSeq = TagSequence.fromFile(centerFile)
   def distFromCenter(thatTagSeq: TagSequence) = {
     new LCSArraySpaceOptimized(centerTagSeq, thatTagSeq).getDistance
   }
@@ -88,7 +86,13 @@ class Template(val tnArray: Array[TemplateNode], val centerId: Int) {
     exPattern ++= exPatternEss.flatMap(x =>
       thatTagSeq.getCompact()(ciMap(x._1)).asInstanceOf[VerboseTreeNode].relatedRoots.map(_ -> x._2))
     val clcs = thatTagSeq.makeTagSequence(ci._2)
-    assert(clcs.compactLength == eTagSeq.compactLength)
+    if (clcs.compactLength != eTagSeq.compactLength) {
+      logger.info("-" * 10 + "Potential Error Begins" + "-" * 10)
+      logger.info(clcs.toString)
+      logger.info(eTagSeq.toString)
+      logger.info("-" * 10 + "Potential Error Ends" + "-" * 10)
+      //assert(false)
+    }
     val tagSegMap = ClusterMethod.getTagSegMap(clcs,
       Some(1).iterator,
       (id: Int) => thatTagSeq)
@@ -113,7 +117,7 @@ class Template(val tnArray: Array[TemplateNode], val centerId: Int) {
     }
     val tnArray = finalNormalize(tpSeq.flatMap(_.getCompact).toArray)
     val root = TPTreeNode.makeTPTree(tnArray, posToOpNode)
-    println(root.toASCII())
+    //println(root.toASCII())
     (TagSequence.fromNodeArray(tnArray, true), exPattern.toMap)
   }
   def getNodeText(node: Node, nodePool: Set[Node]) = {
@@ -133,7 +137,7 @@ class Template(val tnArray: Array[TemplateNode], val centerId: Int) {
     tnArray.mkString("\n")
   }
   def toXML() = {
-    <template centerId={centerId.toString}>
+    <template centerFile={centerFile}>
       { tnArray.map(_.toXML) }
     </template>
   }
@@ -142,7 +146,15 @@ class Template(val tnArray: Array[TemplateNode], val centerId: Int) {
 object Template {
   def fromXML(node: scala.xml.Node) = {
     new Template((node \ "templatenode" map (TemplateNode.fromXML(_))).toArray,
-        node.attribute("centerId").get.text.toInt)
+        node.attribute("centerFile").get.text)
+  }
+  
+  def fromOldXML(node: scala.xml.Node) = {    
+    val tnArray = (node \ "templatenode" map (TemplateNode.fromXML(_))).toArray
+    val centerId = node.attribute("centerId").get.text.toInt
+    val dataset = MyConfigFactory.getValue[String]("global.dataset")
+    val id2filename = scala.io.Source.fromFile(MyConfigFactory.getValue[String](dataset, "output.id2filename")).getLines.toArray
+    new Template(tnArray, id2filename(centerId))
   }
 }
 

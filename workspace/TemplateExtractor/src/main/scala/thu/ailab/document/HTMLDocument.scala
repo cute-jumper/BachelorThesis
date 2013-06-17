@@ -105,7 +105,6 @@ class LocalHTMLDocument(val filename: String) extends HTMLDocument with LoggerTr
 
 class WebHTMLDocument(val html: String) extends HTMLDocument {
 	val charset = MyCharsetDetector.detectString(html).getOrElse(defaultCharset)
-	println("web charset: " + charset)
   val fullContent = html
 }
 

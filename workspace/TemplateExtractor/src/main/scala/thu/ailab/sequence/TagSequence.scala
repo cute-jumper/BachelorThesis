@@ -5,6 +5,7 @@ import thu.ailab.tree.TreeNode
 import thu.ailab.distance.LCSWithPath
 import thu.ailab.tree.HTMLSuffixTree
 import thu.ailab.tree.VerboseTreeNode
+import thu.ailab.tree.TreeBuilder
 
 class TagSequence private (compactArray: Array[TreeNode]) {
   val separateArray = compactArray flatMap (_.getSeparateNodes)
@@ -72,6 +73,9 @@ object TagSequence {
       if (isCompact) _inputArray 
       else HTMLSuffixTree.stripDuplicates(_inputArray, true)
     new TagSequence(inputArray)
+  }
+  def fromFile(name: String) = {
+    TagSequence.fromNodeArray(new TreeBuilder(name).getTagSequence.toArray, false) 
   }
   def fromXML(node: scala.xml.Node) = {
     TagSequence.fromNodeArray((node \ "treenode" map (TreeNode.fromXML(_))).toArray, true)

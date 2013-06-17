@@ -3,12 +3,14 @@
     (LaTeX-add-bibliographies
      "ref/refs")
     (TeX-add-symbols
+     '("vc" 1)
      '("reftbl" 1)
      '("reffig" 1))
     (TeX-run-style-hooks
      "algpseudocode"
      "algorithmicx"
      "algorithm"
+     "bm"
      "pgfplots"
      "comment"
      "thutils"

@@ -6,21 +6,22 @@ import thu.ailab.distance.LCSWithPath
 import thu.ailab.tree.TreeBuilder
 import thu.ailab.global.AppEntry
 import thu.ailab.global.LoggerTrait
+import scala.collection.mutable.ArrayBuffer
 
-class TemplateManager private(val templates: Seq[Template]) extends LoggerTrait {
+class TemplateManager private (val templates: Seq[Template]) extends LoggerTrait {
   private val clusterThreshold = MyConfigFactory.getValue[Double](
-      "cluster.DocNaiveAggloCluster.clusterThreshold")
-	def chooseTemplate(thatTagSeq: TagSequence): Option[Template] = {
-	  val (minDist, index) = 
-	    templates.map(_.distFromCenter(thatTagSeq)).zipWithIndex.minBy(_._1)
-	  if (minDist < clusterThreshold) {
-	    logger.info("choose template " + index)
-	    Some(templates(index))
-	  } else 
-	    None
-	}
+    "cluster.DocNaiveAggloCluster.clusterThreshold")
+  def chooseTemplate(thatTagSeq: TagSequence): Option[Template] = {
+    val (minDist, index) =
+      templates.map(_.distFromCenter(thatTagSeq)).zipWithIndex.minBy(_._1)
+    if (minDist < clusterThreshold) {
+      logger.info("choose template " + index)
+      Some(templates(index))
+    } else
+      None
+  }
   def getTemplates() = templates
-	override def toString() = templates.mkString("\n%s\n".format("#" * 80))
+  override def toString() = templates.mkString("\n%s\n".format("#" * 80))
 }
 
 object TemplateManager {
@@ -28,7 +29,6 @@ object TemplateManager {
     val dataset = MyConfigFactory.getValue[String]("global.dataset")
     val id2filename = io.Source.fromFile(
       MyConfigFactory.getValue[String](dataset, "output.id2filename")).getLines.toArray
-    val tagSeqFactory = new TagSeqFactory(id2filename)
     val templateFile = MyConfigFactory.getValue[String](dataset, "template.templateFile")
     def ClusterFileReader() = {
       val clusterXML = xml.XML.loadFile(
@@ -38,11 +38,11 @@ object TemplateManager {
     val clusterFileIds = ClusterFileReader()
     def getClusterTemplate(centerId: Int, fileIds: Seq[Int]) = {
       val tnArray = new ClusterMethod(centerId, fileIds).getTemplateNodeArray
-      val tp = new Template(tnArray, centerId)
+      val tp = new Template(tnArray, id2filename(centerId))
       tp
     }
-    val templates = clusterFileIds.map(ids => 
-      Function.tupled(getClusterTemplate _)(ids)).sortBy(-_.getETagSeqLength)
+    val templates = clusterFileIds.map(ids =>
+      Function.tupled(getClusterTemplate _)(ids))
     scala.xml.XML.save(templateFile,
       <templates>
         {
@@ -55,8 +55,7 @@ object TemplateManager {
     val dataset = MyConfigFactory.getValue[String]("global.dataset")
     val templateFile = MyConfigFactory.getValue[String](dataset, "template.templateFile")
     val templatesXML = scala.xml.XML.loadFile(templateFile)
-    new TemplateManager((templatesXML \ "template" map (Template.fromXML(_))).
-        sortBy(_.getETagSeqLength)(Ordering[Int].reverse))
+    new TemplateManager((templatesXML \ "template" map (Template.fromXML(_))))
   }
   def recoverTemplates(templateFile: String) = {
     val templatesXML = scala.xml.XML.loadFile(templateFile)
@@ -78,8 +77,36 @@ object TestTemplateManager extends AppEntry {
       println("No template found!")
     }
   }
+  def testSaveToXML() {
+    val filenames = thu.ailab.utils.Tools.getTestFiles.slice(0, 100)
+    val templateArray = TemplateManager.recoverTemplates()
+    val sb = new StringBuilder
+    for (fn <- filenames) {
+      val vtnArray = new TreeBuilder(fn).getVerboseTagSequence.toArray
+      val thatTagSeq = TagSequence.fromNodeArray(vtnArray, false)
+      val tpOption = templateArray.chooseTemplate(thatTagSeq)
+      if (tpOption.isDefined) {
+        val tp = tpOption.get
+        val exPattern = tp.extract(thatTagSeq)
+        sb ++= "<document name=\"%s\">\n".format(fn)
+        for ((exType, content) <- exPattern) {
+          sb ++= "<%s>%s</%s>\n".format(exType.toString(), content, exType.toString)
+        }
+        sb ++= "</document>\n"
+        println("Processing " + fn)
+      } else {
+        println("No template found of %s!".format(fn))
+      }
+    }
+    import thu.ailab.utils.Tools.withPrintWriter
+    withPrintWriter(sys.props("user.home") + "/tmp/results.xml") { pw =>
+      pw.println("<documents>")
+      pw.println(sb)
+      pw.println("</documents>")
+    }
+  }
   def testBuild() {
     println(TemplateManager.buildTemplates)
   }
-  testBuild()
+  testSaveToXML()
 }

@@ -1,5 +1,5 @@
 global {
-       dataset=news
+       dataset=blog
 }
 logger {
        filepath="~/tmp/example.log"
@@ -54,7 +54,7 @@ actor {
 }
 cluster {
         DocNaiveAggloCluster {
-                          clusterThreshold=0.3
+                          clusterThreshold=0.5
         }
         TSNaiveAggloCluster {
                           clusterThreshold=0.2

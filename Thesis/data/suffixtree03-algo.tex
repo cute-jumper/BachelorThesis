@@ -25,7 +25,7 @@
     \State $results := Collection.empty$
     \State $//$对于该内部节点的每一条不连接叶子节点的边
     \For{$edge \gets node.edges~\mathbf{if}~edge.endNode.isNotLeaf$}
-    \State $//$依次取出该条边上元素的根节点可能为root的点
+    \State $//$依次取出该条边上位于以subTreeRoot为根的子树上的点
     \State $seq := edge.takeWhile(element$ inSubTreeOf $subTreeRoot)$\label{suffixtree:code:equals}
     \If {$seq.length == edge.length$}
     \State $//$遍历完了该条边上所有元素，

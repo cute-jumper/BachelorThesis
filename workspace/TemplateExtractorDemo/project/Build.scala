@@ -13,7 +13,8 @@ object ApplicationBuild extends Build {
     anorm,
     "org.jsoup" % "jsoup" % "1.7.2",
     "com.twitter" % "util-core_2.10" % "6.3.4",
-    "com.twitter" % "util-logging_2.10" % "6.3.4"
+    "com.twitter" % "util-logging_2.10" % "6.3.4",
+    "com.ibm.icu" % "icu4j" % "51.1"
   )
 
 

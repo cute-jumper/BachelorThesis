@@ -21,7 +21,22 @@ object Test extends AppEntry {
     println("en average: " + enLength * 1.0 / enCount)
     println("on average: " + onLength * 1.0 / onCount)
   }
+  getTemplateStat(sys.props("user.home") + "/Programs/BachelorThesis/Data/material/templateFile_news_0.3")
   getTemplateStat(sys.props("user.home") + "/Programs/BachelorThesis/Data/material/templateFile_news_0.4")
   getTemplateStat(sys.props("user.home") + "/Programs/BachelorThesis/Data/material/templateFile_news_0.5")
   getTemplateStat(sys.props("user.home") + "/Programs/BachelorThesis/Data/material/templateFile_news_0.6")
+  
+  def rebuildTemplates() = {
+    val dataset = MyConfigFactory.getValue[String]("global.dataset")
+    val templateFile = MyConfigFactory.getValue[String](dataset, "template.templateFile")
+    val templatesXML = scala.xml.XML.loadFile(templateFile)
+    val templates = (templatesXML \ "template" map (thu.ailab.template.Template.fromOldXML(_)))
+    scala.xml.XML.save(templateFile + "_result",
+      <templates>
+        {
+          for (tp <- templates) yield (tp.toXML)
+        }
+      </templates>)
+  }
+  //rebuildTemplates()
 }

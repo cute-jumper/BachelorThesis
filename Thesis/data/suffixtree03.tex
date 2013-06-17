@@ -23,16 +23,16 @@ E
 对应的后缀树如\reffig{suffixtree:fig:suffix-tree-apple}所示。
 从\reffig{suffixtree:fig:suffix-tree-apple}中可以看到，共有5条从根节点到叶子节点
 的路径，每一条路径都对应于一条后缀。
-\begin{figure}
+\begin{figure}[h]
   \centering
-  \includegraphics[width=0.5\textwidth]{suffixtree03/suffix-tree-apple}
+  \includegraphics[width=0.4\textwidth]{suffixtree03/suffix-tree-apple}
   \caption{APPLE对应的后缀树}
   \label{suffixtree:fig:suffix-tree-apple}
 \end{figure}
 
 我们可以总结出序列$S$的后缀树有以下几个特点：
 \begin{enumerate}
-\item 所有的边都对应\texttt{S}的长度至少为一的非空的子序列
+\item 所有的边都对应$S$的长度至少为1的非空的子序列
 \item 从根到叶子节点的路径序列和序列S的后缀一一对应
 \item 所有的内部节点（根节点不一定）都有至少两个子节点
 \end{enumerate}
@@ -48,7 +48,7 @@ E
 
 首先我们引入3个状态变量描述某一个时刻对应的后缀树的构造状态。
 
-第一个状态变量是\texttt{\#}，表示序列中即将扫描的下一个元素的位置。初始值为0，表
+第一个状态变量是\texttt{\#}，表示序列中扫描到的最后一个元素的位置。初始值为0，表
 示第一个元素，在以后的每轮迭代中，\#的值将加1，当\#的值和序列的长度相同时迭代终
 止。
   
@@ -184,7 +184,7 @@ results)$将新的序列加入到结果集合中。实际在加入的时候，�
 留\texttt{<div4><a5><img5>}，将第二个\texttt{<div3><div4>}序列从重复序列集合中去
 掉。
 
-其他还有一些边界条件，这里不再赘述了。
+实际处理中其他还有一些类似的边界条件，这里就不再赘述了。
 
 \section{本章小结}
 \label{sec:summarysuffixtree}
