@@ -1,0 +1,61 @@
+% Created 2013-06-13 Thu 14:35
+\documentclass[presentation]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fixltx2e}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{soul}
+\usepackage{textcomp}
+\usepackage{marvosym}
+\usepackage{wasysym}
+\usepackage{latexsym}
+\usepackage{amssymb}
+\usepackage{amstext}
+\usepackage{hyperref}
+\tolerance=1000
+\usepackage{listings}
+\usepackage{fontspec}
+\usepackage{xunicode}
+\usepackage{xltxtra}
+\usepackage{xeCJK}
+\setmainfont{Times New Roman}
+\setmonofont{Courier New}
+\setCJKmainfont[BoldFont=YouYuan]{SimSun}
+\setCJKfamilyfont{song}{SimSun}
+\setCJKfamilyfont{msyh}{微软雅黑}
+\setCJKfamilyfont{fs}{FangSong}
+\usepackage{booktabs}
+\usepackage{pbox}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\floatname{algorithm}{算法}
+\renewcommand{\algorithmicrequire}{\textbf{输入:}}
+\renewcommand{\algorithmicensure}{\textbf{输出:}}
+% tikz packages begin
+\usepackage{tikz}
+\usetikzlibrary{arrows, positioning, shapes.arrows, fit, backgrounds, chains, scopes}
+% tikz packages end
+\AtBeginSection[]{\begin{frame}<beamer>\frametitle{提纲}\tableofcontents[currentsection]\end{frame}}
+\usetheme{default}
+\author{计92 丘骏鹏 2009011282}
+\date{指导老师：朱小燕~ 郝宇}
+\title{大数据环境下信息抽取模板自动聚类与发现}
+\begin{document}
+
+\maketitle
+\begin{frame}<beamer>\frametitle{提纲}\tableofcontents\end{frame}
+\include{secs/01intro}
+\include{secs/02framework}
+\include{secs/03experiment}
+\include{secs/04conclusion}
+\end{document}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: t
+%%% End: 

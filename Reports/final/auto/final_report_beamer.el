@@ -1,15 +1,5 @@
-(TeX-add-style-hook "final_report"
+(TeX-add-style-hook "final_report_beamer"
  (lambda ()
-    (LaTeX-add-labels
-     "sec-1"
-     "sec-2"
-     "fig:baidunews"
-     "suffixtree:algo:fromroot"
-     "suffixtree:algo:findrep"
-     "suffixtree:code:equals"
-     "suffixtree:code:add"
-     "sec-3"
-     "sec-4")
     (TeX-run-style-hooks
      "tikz"
      "algpseudocode"
@@ -43,5 +33,9 @@
      "latex2e"
      "beamer10"
      "beamer"
-     "presentation")))
+     "presentation"
+     "secs/01intro"
+     "secs/02framework"
+     "secs/03experiment"
+     "secs/04conclusion")))
 

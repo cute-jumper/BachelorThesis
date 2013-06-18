@@ -11,3 +11,5 @@ target/
 tmp
 *.vrb
 *.fls
+*.nav
+*.snm

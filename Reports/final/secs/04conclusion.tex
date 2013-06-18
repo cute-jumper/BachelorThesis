@@ -1,0 +1,81 @@
+\section{总结和展望}
+\label{sec-4}
+\begin{frame}[label=sec-4-1]{总结}
+\begin{enumerate}[<+->]
+\item 设计并实现了一套利用后缀树在树的先序遍历序列中查找重复子树的算法。
+\item 实现并改进了最长公共子序列算法，将其用于计算文档的结构相似度；实现了简单的
+凝聚层次聚类算法，并将其用于文档的聚类
+\item 实现了一个无监督的模板生成算法，通过人工指定模板中某些部分对应的语义，可以
+使用模板提取新的由该模板生成的网页中对应的信息。
+\item 实现了一个Web Service，可以直观地看到网页和模板的匹配情况。
+\end{enumerate}
+\end{frame}
+\begin{frame}
+  \begin{tikzpicture}[scale=.58,transform shape,
+    font=\large,
+    io/.style={fill=black!30, text width=3cm, minimum size=1cm,align=center,draw=black},
+    submodule/.style={fill=cyan!80, text width=3cm, minimum size=1cm, rounded corners,align=center,draw=black},
+    bold arrow/.style={very thick, >=triangle 90},
+    mylabel/.style={dotted, draw}
+    ]    
+    \node (input) [io] {输入网页};
+    {\node (input-arrow) [below=1mm of input]
+    [single arrow, minimum width=5mm, minimum height=0.8cm, shape border rotate=270, draw]{};}
+    \node (m1-1) [submodule, below=4mm of input-arrow]{过滤无用网页};
+    \node (m1-2) [submodule, below=5mm of m1-1]{\alert<2>{简化HTML文档}} edge[<-] (m1-1);
+    \visible<2>{\node [mylabel, left=of m1-2]{\Large 利用后缀树去重} edge[<-, red, thick] (m1-2);}
+    \node (m2-1) [submodule, below=1.2cm of m1-2]{\alert<3>{结构相似度计算}};
+    \visible<3>{\node [mylabel, left=of m2-1] {\Large 优化LCS} edge[<-, red, thick] (m2-1);}
+    \draw [<-, bold arrow] (m2-1) -- (m1-2);
+    \node (m2-2) [submodule, below=5mm of m2-1]{\alert<4>{网页聚类}} edge[<-] (m2-1);
+    \visible<4>{\node [mylabel, left=of m2-2]{\Large 凝聚层次聚类} edge[<-, red, thick] (m2-2);}
+    \node (m3-1) [submodule, below=1.2cm of m2-2]{\alert<5>{模板生成}};
+    \visible<5>{\node [mylabel, left=of m3-1]{\Large 无监督算法} edge [<-, red, thick] (m3-1);}
+    \draw [<-, bold arrow] (m3-1) -- (m2-2);
+    \node (m3-2) [submodule, below=5mm of m3-1]{\alert<6>{内容抽取}} edge[<-] (m3-1);
+    \visible<6>{\node [mylabel, right=of m3-2]{\Large Web Service} edge [<-, red, thick] (m3-2);}
+    \node (new-input) [io, left=of m3-2]{新的网页输入};
+    \node (output) [io, below=of m3-2]{XML输出};
+    {\draw [->, bold arrow] (new-input) -- (m3-2);
+    \draw [<-, bold arrow] (output) -- (m3-2);}
+  \begin{pgfonlayer}{background}
+    \tikzset{module/.style={inner sep=1em, fill=white, dashed, draw=black, rounded corners}};
+    {\node (m1)[module, fit=(m1-1) (m1-2)]{};
+    {\node (m1-name) [right=5mm of m1]{\Large{预处理模块}};}}
+    {\node (m2)[module, fit=(m2-1) (m2-2)]{} [below=of m1];
+    {\node (m2-name) [right=5mm of m2]{\Large{网页聚类模块}};}}
+    {\node (m3)[module, fit=(m3-1) (m3-2)]{} [below=of m2];
+    {\node (m37name) [right=5mm of m3] {\Large{模板生成和内容提取模块}};}}
+  \end{pgfonlayer}  
+\end{tikzpicture}
+\end{frame}
+\begin{frame}[label=sec-4-2]{未来的工作}
+\begin{enumerate}[<+->]
+\item 预处理模块：改进Ukkonen原有的在线构造算法，在构造树的时候就考虑一些原本的结构
+信息。查找重复时利用后缀树中其他的一些信息，比如后缀链。
+\item 网页结构相似度计算和网页聚类模块：可以进一步改进计算相似度的算法，加入一些其他
+的除了深度之外的更多结构信息；可以考虑使用更复杂但是鲁棒性更好的一些聚类算法。
+\item 模板生成和内容提取：对模板生成算法做一些修改，设计一些更高级的机器学习算法。在
+内容提取的时候，可以采用树的匹配算法而不是序列的匹配算法。
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[t]
+  \frametitle{致谢}
+  \begin{block}{}
+    衷心感谢朱小燕老师和郝宇老师在整个毕设过程的悉心指导。他们不仅
+    在整个系统的实现和优化上提出了很多宝贵的意见和建议，而且在科研的态度和方法上
+    也深深影响了我。
+    \par
+    感谢黄民烈老师在方法上提供的一些建议，感谢实验室师兄师姐的帮助。实验室良好的科研氛围给我的毕设提供了巨大的动力。
+      
+  \end{block}
+
+\end{frame}
+
+
+% Emacs 24.2.1 (Org mode 8.0.3)
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "../final_report_beamer"
+%%% End: 

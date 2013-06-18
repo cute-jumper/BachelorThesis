@@ -26,8 +26,9 @@ object TemplateExtractor {
       val (matchedNodes, exPattern) = template.getMatchedNodesAndExPattern(thatTagSeq)
 //      val nodePool = matchedNodes.getCompact.map(
 //          _.asInstanceOf[VerboseTreeNode]).flatMap(_.relatedRoots).toSet
-      doc.traverse(new RenderExPatternVisitor(exPattern))
-      Some(doc.html)
+      val origDoc = Jsoup.parse(html, htmlDoc.charset)
+      origDoc.traverse(new RenderExPatternVisitor(exPattern))
+      Some(origDoc.html)
     } else {
       None
     }
@@ -59,9 +60,9 @@ object TemplateExtractor {
     }    
     def head(node: Node, depth: Int) = {
       val keyOption = nodeMap.keySet.find(x => x.baseUri == node.baseUri() 
-          && x.attributes == node.attributes)
+          && x.attributes == node.attributes && x.nodeName() == node.nodeName())
       if (keyOption.isDefined) {
-        node.attr("style", styleTemplate.format(getColor(depth)))
+        node.attr("style", "border:5pt dashed black;")
         node.attr("title", nodeMap(keyOption.get).toString)
         println(node.nodeName)
       }
