@@ -41,7 +41,10 @@
 \usetikzlibrary{arrows, positioning, shapes.arrows, fit, backgrounds, chains, scopes}
 % tikz packages end
 \AtBeginSection[]{\begin{frame}<beamer>\frametitle{提纲}\tableofcontents[currentsection]\end{frame}}
+\AtBeginSubsection[]{\begin{frame}<beamer>\frametitle{提纲}\tableofcontents[currentsection, currentsubsection]\end{frame}}
 \usetheme{default}
+\usecolortheme{seahorse}
+\setbeamertemplate{footline}[frame number]
 \author{计92 丘骏鹏 2009011282}
 \date{指导老师：朱小燕~ 郝宇}
 \title{大数据环境下信息抽取模板自动聚类与发现}

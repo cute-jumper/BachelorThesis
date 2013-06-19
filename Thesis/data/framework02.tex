@@ -16,7 +16,38 @@
 
 \begin{figure}
   \centering
-  \includegraphics[width=\textwidth]{framework02/framework}
+  \begin{tikzpicture}[scale=.58,transform shape,
+    font=\large,
+    io/.style={fill=black!30, text width=3cm, minimum size=1cm,align=center,draw=black},
+    submodule/.style={fill=cyan!80, text width=3cm, minimum size=1cm, rounded corners,align=center,draw=black},
+    bold arrow/.style={very thick, >=triangle 90},
+    input arrow/.style={single arrow, minimum width=5mm, minimum height=0.8cm, draw},
+    mylabel/.style={dotted, draw}
+    ]    
+    \node (input) [io] {输入网页};
+    \node (input-arrow) [below=1mm of input, input arrow, shape border rotate=270]{};
+    \node (m1-1) [submodule, below=4mm of input-arrow]{过滤无用网页};
+    \node (m1-2) [submodule, below=5mm of m1-1]{简化HTML文档} edge[<-] (m1-1);
+    \node (m2-1) [submodule, below=1.2cm of m1-2]{结构相似度计算};
+    \draw [<-, bold arrow] (m2-1) -- (m1-2);
+    \node (m2-2) [submodule, below=5mm of m2-1]{网页聚类} edge[<-] (m2-1);
+    \node (m3-1) [submodule, below=1.2cm of m2-2]{模板生成};
+    \draw [<-, bold arrow] (m3-1) -- (m2-2);
+    \node (m3-2) [submodule, below=5mm of m3-1]{内容抽取} edge[<-] (m3-1);
+    \node (new-input-arrow)[left=5mm of m3-2, input arrow]{};
+    \node (new-input) [io, left=2mm of new-input-arrow]{新的网页输入};
+    \node (output) [io, below=of m3-2]{XML输出};
+    \draw [<-, bold arrow] (output) -- (m3-2);
+  \begin{pgfonlayer}{background}
+    \tikzset{module/.style={inner sep=1em, fill=white, fill=green!30, rounded corners}};
+    \node (m1)[module, fit=(m1-1) (m1-2)]{};
+    \node (m1-name) [right=5mm of m1]{\Large{预处理模块}};
+    \node (m2)[module, fit=(m2-1) (m2-2)]{} [below=of m1];
+    \node (m2-name) [right=5mm of m2]{\Large{网页聚类模块}};
+    \node (m3)[module, fit=(m3-1) (m3-2)]{} [below=of m2];
+    \node (m3-name) [right=5mm of m3] {\Large{模板生成和内容提取模块}};
+  \end{pgfonlayer}  
+\end{tikzpicture}
   \caption{系统整体框架示意}
   \label{framework:fig:framework}
 \end{figure}

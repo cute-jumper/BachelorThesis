@@ -11,7 +11,7 @@
      "algorithmicx"
      "algorithm"
      "bm"
-     "pgfplots"
+     "tikz"
      "comment"
      "thutils"
      "latex2e"

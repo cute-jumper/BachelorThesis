@@ -13,3 +13,7 @@ tmp
 *.fls
 *.nav
 *.snm
+*.aux
+*.log
+*.toc
+_region_.*

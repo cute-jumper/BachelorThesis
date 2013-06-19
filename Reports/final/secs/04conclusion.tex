@@ -10,14 +10,16 @@
 \item 实现了一个Web Service，可以直观地看到网页和模板的匹配情况。
 \end{enumerate}
 \end{frame}
+
 \begin{frame}
+  \transdissolve<2->
   \begin{tikzpicture}[scale=.58,transform shape,
     font=\large,
     io/.style={fill=black!30, text width=3cm, minimum size=1cm,align=center,draw=black},
     submodule/.style={fill=cyan!80, text width=3cm, minimum size=1cm, rounded corners,align=center,draw=black},
     bold arrow/.style={very thick, >=triangle 90},
     mylabel/.style={dotted, draw}
-    ]    
+    ]
     \node (input) [io] {输入网页};
     {\node (input-arrow) [below=1mm of input]
     [single arrow, minimum width=5mm, minimum height=0.8cm, shape border rotate=270, draw]{};}
@@ -40,15 +42,16 @@
     \draw [<-, bold arrow] (output) -- (m3-2);}
   \begin{pgfonlayer}{background}
     \tikzset{module/.style={inner sep=1em, fill=white, dashed, draw=black, rounded corners}};
-    {\node (m1)[module, fit=(m1-1) (m1-2)]{};
-    {\node (m1-name) [right=5mm of m1]{\Large{预处理模块}};}}
-    {\node (m2)[module, fit=(m2-1) (m2-2)]{} [below=of m1];
-    {\node (m2-name) [right=5mm of m2]{\Large{网页聚类模块}};}}
-    {\node (m3)[module, fit=(m3-1) (m3-2)]{} [below=of m2];
-    {\node (m37name) [right=5mm of m3] {\Large{模板生成和内容提取模块}};}}
+    \node (m1)[module, fit=(m1-1) (m1-2)]{};
+    \node (m1-name) [right=5mm of m1]{\Large{预处理模块}};
+    \node (m2)[module, fit=(m2-1) (m2-2)]{} [below=of m1];
+    \node (m2-name) [right=5mm of m2]{\Large{网页聚类模块}};
+    \node (m3)[module, fit=(m3-1) (m3-2)]{} [below=of m2];
+    \node (m37name) [right=5mm of m3] {\Large{模板生成和内容提取模块}};
   \end{pgfonlayer}  
 \end{tikzpicture}
 \end{frame}
+
 \begin{frame}[label=sec-4-2]{未来的工作}
 \begin{enumerate}[<+->]
 \item 预处理模块：改进Ukkonen原有的在线构造算法，在构造树的时候就考虑一些原本的结构

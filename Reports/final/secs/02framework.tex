@@ -1,9 +1,11 @@
 \section{系统框架与模块实现}
 \label{sec-2}
+\subsection{整体框架}
 \begin{frame}[label=sec-2-1]{整体框架}
   \transdissolve<2->
   \centering
-  \begin{tikzpicture}[scale=.58,transform shape,
+  \vspace{-2mm}
+  \begin{tikzpicture}[scale=.57,transform shape,
     font=\large,
     io/.style={fill=black!30, text width=3cm, minimum size=1cm,align=center,draw=black},
     submodule/.style={fill=cyan!80, text width=3cm, minimum size=1cm, rounded corners,align=center,draw=black},
@@ -41,9 +43,57 @@
   \end{pgfonlayer}  
 \end{tikzpicture}
 \end{frame}
+\subsection{预处理模块}
+\begin{frame}{预处理模块介绍}
+  \transdissolve<2->
+  \centering
+  \vspace{-2mm}
+  \begin{tikzpicture}[scale=.58,transform shape,
+    font=\large,
+    io/.style={fill=black!30, text width=3cm, minimum size=1cm,align=center,draw=black},
+    submodule/.style={fill=cyan!80, text width=3cm, minimum size=1cm, rounded corners,align=center,draw=black},
+    bold arrow/.style={very thick, >=triangle 90},
+    mylabel/.style={dotted, draw}
+    ]    
+    \node (input) [io] {输入网页};
+    \visible<2->{\node (input-arrow) [below=1mm of input]
+    [single arrow, minimum width=5mm, minimum height=0.8cm, shape border rotate=270, draw]{};}
+  \visible<4->{
+    \node (m1-1) [submodule, below=4mm of input-arrow]{过滤无用网页};}
+  \invisible<1->{
+    \node (m1-2) [submodule, below=5mm of m1-1]{简化HTML文档} edge[<-] (m1-1);
+    \node (m2-1) [submodule, below=1.2cm of m1-2]{结构相似度计算};
+    \draw [<-, bold arrow] (m2-1) -- (m1-2);
+    \node (m2-2) [submodule, below=5mm of m2-1]{网页聚类} edge[<-] (m2-1);
+    \node (m3-1) [submodule, below=1.2cm of m2-2]{模板生成};
+    \draw [<-, bold arrow] (m3-1) -- (m2-2);
+    \node (m3-2) [submodule, below=5mm of m3-1]{内容抽取} edge[<-] (m3-1);
+    \node (new-input) [io, left=of m3-2]{新的网页输入};
+    \node (output) [io, below=of m3-2]{XML输出};
+    \draw [->, bold arrow] (new-input) -- (m3-2);
+    \draw [<-, bold arrow] (output) -- (m3-2);
+    }
+  \begin{pgfonlayer}{background}
+    \tikzset{module/.style={inner sep=1em, fill=white, dashed, draw=black, rounded corners}};
+    \visible<3->{\node (m1)[module, fit=(m1-1) (m1-2)]{};
+    \node (m1-name) [right=5mm of m1]{\Large{预处理模块}};}
+  \invisible<1->{
+    \node (m2)[module, fit=(m2-1) (m2-2)]{} [below=of m1];
+    \node (m2-name) [right=5mm of m2]{\Large{网页聚类模块}};
+    \node (m3)[module, fit=(m3-1) (m3-2)]{} [below=of m2];
+    \node (m37name) [right=5mm of m3] {\Large{模板生成和内容提取模块}};
+  }
+      \invisible<1->{
+      \node (offline) [draw, inner sep=3mm, fill=orange!20, fit=(input) (m1-1) (m1-2) (m2-1) (m2-2) (m3-1)]
+      [label={[red]right:\LARGE{离线处理部分}}]{};
+      \node (online) [draw, inner sep=3mm, fill=green!30,fit=(m3-2) (new-input) (output), rounded corners]
+      [label={[red]right:\LARGE{在线处理部分}}]{};}
+  \end{pgfonlayer}  
+\end{tikzpicture}
+\end{frame}
 
 \begin{frame}[fragile,label=sec-2-2]{预处理模块-过滤无用网页}
-  \transsplithorizontalin<3,5>
+  \transdissolve<3,5>
   \begin{block}{错误页过滤}
     \begin{itemize}
     \item<2->  404等错误页大小一般比较小
@@ -80,6 +130,51 @@ http://blog.sina.com.cn/s/blog_55cac30301016yb1.html
     \end{itemize}
 \end{block}
 \end{frame}
+\begin{frame}{预处理模块介绍}
+  \transdissolve<2->
+  \begin{tikzpicture}[scale=.58,transform shape,
+    font=\large,
+    io/.style={fill=black!30, text width=3cm, minimum size=1cm,align=center,draw=black},
+    submodule/.style={fill=cyan!80, text width=3cm, minimum size=1cm, rounded corners,align=center,draw=black},
+    bold arrow/.style={very thick, >=triangle 90},
+    mylabel/.style={dotted, draw}
+    ]    
+    \node (input) [io] {输入网页};
+    \node (input-arrow) [below=1mm of input]
+    [single arrow, minimum width=5mm, minimum height=0.8cm, shape border rotate=270, draw]{};
+      \node (m1-1) [submodule, below=4mm of input-arrow]{过滤无用网页};
+      \visible<2->{\node (m1-2) [submodule, below=5mm of m1-1]{简化HTML文档} edge[<-] (m1-1);}
+  \invisible<1->{
+  \node (m2-1) [submodule, below=1.2cm of m1-2]{结构相似度计算};
+    \draw [<-, bold arrow] (m2-1) -- (m1-2);
+    \node (m2-2) [submodule, below=5mm of m2-1]{网页聚类} edge[<-] (m2-1);
+    \node (m3-1) [submodule, below=1.2cm of m2-2]{模板生成};
+    \draw [<-, bold arrow] (m3-1) -- (m2-2);
+    \node (m3-2) [submodule, below=5mm of m3-1]{内容抽取} edge[<-] (m3-1);
+    \node (new-input) [io, left=of m3-2]{新的网页输入};
+    \node (output) [io, below=of m3-2]{XML输出};
+    \draw [->, bold arrow] (new-input) -- (m3-2);
+    \draw [<-, bold arrow] (output) -- (m3-2);
+    }
+  \begin{pgfonlayer}{background}
+    \tikzset{module/.style={inner sep=1em, fill=white, dashed, draw=black, rounded corners}};
+    \node (m1)[module, fit=(m1-1) (m1-2)]{};
+    \node (m1-name) [right=5mm of m1]{\Large{预处理模块}};
+  \invisible<1->{
+    \node (m2)[module, fit=(m2-1) (m2-2)]{} [below=of m1];
+    \node (m2-name) [right=5mm of m2]{\Large{网页聚类模块}};
+    \node (m3)[module, fit=(m3-1) (m3-2)]{} [below=of m2];
+    \node (m37name) [right=5mm of m3] {\Large{模板生成和内容提取模块}};
+  }
+      \invisible<1->{
+      \node (offline) [draw, inner sep=3mm, fill=orange!20, fit=(input) (m1-1) (m1-2) (m2-1) (m2-2) (m3-1)]
+      [label={[red]right:\LARGE{离线处理部分}}]{};
+      \node (online) [draw, inner sep=3mm, fill=green!30,fit=(m3-2) (new-input) (output), rounded corners]
+      [label={[red]right:\LARGE{在线处理部分}}]{};}
+  \end{pgfonlayer}  
+\end{tikzpicture}
+\end{frame}
+
 \begin{frame}[t,label=sec-2-4]{预处理模块-简化HTML文档}
   \transdissolve<4>
   \begin{block}{简化HTML文档的3个步骤}
@@ -143,7 +238,7 @@ BANANA对应的的后缀树
 \begin{block}{错误情况举例}
   \begin{itemize}[<+->]
 \item \texttt{\small <div4><a5><div3><div4><a5><div3>}中的重复串\texttt{\small <div4><a5><div3>}横跨了两个不同子树。
-\item \texttt{\small <div3><div4><a5><p5><div3><a5><p5>}中的两个重复串\texttt{\small <a5><p5>}分属不同的子树。
+\item \texttt{\small <div3><div4><a5><p5><div3><p4><a5><p5>}中的两个重复串\texttt{\small <a5><p5>}分属不同的子树。
 \item \texttt{\small <div3><div4><div3><div4><a5><p5><div4><a5><p5>}中的重复串\texttt{\small <div3><div4>}和\texttt{\small <div4><a5><p5>}有交集\texttt{\small <div4>}。
   \end{itemize}
 \end{block}
@@ -158,7 +253,7 @@ BANANA对应的的后缀树
 \end{frame}
 
 \begin{frame}{后缀树查找重复序列算法-1}
-  特点1：\alert{保证序列尽可能长}
+  特点1：\alert<2->{保证序列尽可能长}
   \visible<2->{
 \begin{block}{}
 \begin{algorithm}[H]
@@ -180,7 +275,7 @@ BANANA对应的的后缀树
 \end{frame}
 
 \begin{frame}{后缀树查找重复序列算法-2}
-   特点2：\alert{保证序列不会横跨多个子树，且不互相包含}
+   特点2：\alert<2->{保证序列不会横跨多个子树，且不互相包含}
    \visible<2->{
   \begin{block}{}
 \floatname{algorithm}{\tiny 算法}
@@ -219,7 +314,7 @@ BANANA对应的的后缀树
 
 \begin{frame}{后缀树查找重复序列算法-3}
   \vspace{-2.5cm}
-  特点3：\alert{保证重复序列相交均在同一子树中，且无相交的情况}
+  特点3：\alert<2->{保证重复序列相交均在同一子树中，且无相交的情况}
   \vspace{5mm}
   \visible<2->{
 \begin{itemize}
@@ -232,8 +327,55 @@ BANANA对应的的后缀树
 }
 \end{frame}
 
+\subsection{网页聚类模块}
+\begin{frame}{网页聚类模块介绍}
+  \transdissolve<2->
+  \begin{tikzpicture}[scale=.58,transform shape,
+    font=\large,
+    io/.style={fill=black!30, text width=3cm, minimum size=1cm,align=center,draw=black},
+    submodule/.style={fill=cyan!80, text width=3cm, minimum size=1cm, rounded corners,align=center,draw=black},
+    bold arrow/.style={very thick, >=triangle 90},
+    mylabel/.style={dotted, draw}
+    ]    
+    \node (input) [io] {输入网页};
+    \node (input-arrow) [below=1mm of input]
+    [single arrow, minimum width=5mm, minimum height=0.8cm, shape border rotate=270, draw]{};
+      \node (m1-1) [submodule, below=4mm of input-arrow]{过滤无用网页};
+      \node (m1-2) [submodule, below=5mm of m1-1]{简化HTML文档} edge[<-] (m1-1);
+  \visible<4->{\node (m2-1) [submodule, below=1.2cm of m1-2]{结构相似度计算};}
+    \visible<2->{\draw [<-, bold arrow] (m2-1) -- (m1-2);}
+  \invisible<1->{
+    \node (m2-2) [submodule, below=5mm of m2-1]{网页聚类} edge[<-] (m2-1);
+    \node (m3-1) [submodule, below=1.2cm of m2-2]{模板生成};
+    \draw [<-, bold arrow] (m3-1) -- (m2-2);
+    \node (m3-2) [submodule, below=5mm of m3-1]{内容抽取} edge[<-] (m3-1);
+    \node (new-input) [io, left=of m3-2]{新的网页输入};
+    \node (output) [io, below=of m3-2]{XML输出};
+    \draw [->, bold arrow] (new-input) -- (m3-2);
+    \draw [<-, bold arrow] (output) -- (m3-2);
+    }
+  \begin{pgfonlayer}{background}
+    \tikzset{module/.style={inner sep=1em, fill=white, dashed, draw=black, rounded corners}};
+    \node (m1)[module, fit=(m1-1) (m1-2)]{};
+    \node (m1-name) [right=5mm of m1]{\Large{预处理模块}};
+    \visible<3->{
+    \node (m2)[module, fit=(m2-1) (m2-2)]{} [below=of m1];
+    \node (m2-name) [right=5mm of m2]{\Large{网页聚类模块}};}
+  \invisible<1->{
+    \node (m3)[module, fit=(m3-1) (m3-2)]{} [below=of m2];
+    \node (m37name) [right=5mm of m3] {\Large{模板生成和内容提取模块}};
+  }
+      \invisible<1->{
+      \node (offline) [draw, inner sep=3mm, fill=orange!20, fit=(input) (m1-1) (m1-2) (m2-1) (m2-2) (m3-1)]
+      [label={[red]right:\LARGE{离线处理部分}}]{};
+      \node (online) [draw, inner sep=3mm, fill=green!30,fit=(m3-2) (new-input) (output), rounded corners]
+      [label={[red]right:\LARGE{在线处理部分}}]{};}
+  \end{pgfonlayer}  
+\end{tikzpicture}
+\end{frame}
+
 \begin{frame}[label=sec-2-12]{网页聚类模块-计算结构相似度}
-\begin{itemize}
+\begin{itemize}[<+->]
 \item 序列 $S_1,S_2$ ，$x_i$ 和 $y_j$ 分别表示 $S_1$ 的第 $i$ 个元素和 $S_2$ 的第
 $j$ 个元素， $f(depth)$ 是根据深度加权的函数，我们认为深度越深的节点，成为模板
 的概率就越小。
@@ -265,6 +407,51 @@ Actor的调度的算法采用RoundRobin。
 \end{figure}
 \end{itemize}
 \end{frame}
+\begin{frame}{网页聚类模块介绍}
+  \transdissolve<2->
+  \begin{tikzpicture}[scale=.58,transform shape,
+    font=\large,
+    io/.style={fill=black!30, text width=3cm, minimum size=1cm,align=center,draw=black},
+    submodule/.style={fill=cyan!80, text width=3cm, minimum size=1cm, rounded corners,align=center,draw=black},
+    bold arrow/.style={very thick, >=triangle 90},
+    mylabel/.style={dotted, draw}
+    ]    
+    \node (input) [io] {输入网页};
+    \node (input-arrow) [below=1mm of input]
+    [single arrow, minimum width=5mm, minimum height=0.8cm, shape border rotate=270, draw]{};
+      \node (m1-1) [submodule, below=4mm of input-arrow]{过滤无用网页};
+      \node (m1-2) [submodule, below=5mm of m1-1]{简化HTML文档} edge[<-] (m1-1);
+    \node (m2-1) [submodule, below=1.2cm of m1-2]{结构相似度计算};
+    \draw [<-, bold arrow] (m2-1) -- (m1-2);
+    \visible<2->{\node (m2-2) [submodule, below=5mm of m2-1]{网页聚类} edge[<-] (m2-1);}
+  \invisible<1->{
+    \node (m3-1) [submodule, below=1.2cm of m2-2]{模板生成};
+    \draw [<-, bold arrow] (m3-1) -- (m2-2);
+    \node (m3-2) [submodule, below=5mm of m3-1]{内容抽取} edge[<-] (m3-1);
+    \node (new-input) [io, left=of m3-2]{新的网页输入};
+    \node (output) [io, below=of m3-2]{XML输出};
+    \draw [->, bold arrow] (new-input) -- (m3-2);
+    \draw [<-, bold arrow] (output) -- (m3-2);
+    }
+  \begin{pgfonlayer}{background}
+    \tikzset{module/.style={inner sep=1em, fill=white, dashed, draw=black, rounded corners}};
+    \node (m1)[module, fit=(m1-1) (m1-2)]{};
+    \node (m1-name) [right=5mm of m1]{\Large{预处理模块}};
+    \node (m2)[module, fit=(m2-1) (m2-2)]{} [below=of m1];
+    \node (m2-name) [right=5mm of m2]{\Large{网页聚类模块}};
+  \invisible<1->{
+    \node (m3)[module, fit=(m3-1) (m3-2)]{} [below=of m2];
+    \node (m37name) [right=5mm of m3] {\Large{模板生成和内容提取模块}};
+  }
+      \invisible<1->{
+      \node (offline) [draw, inner sep=3mm, fill=orange!20, fit=(input) (m1-1) (m1-2) (m2-1) (m2-2) (m3-1)]
+      [label={[red]right:\LARGE{离线处理部分}}]{};
+      \node (online) [draw, inner sep=3mm, fill=green!30,fit=(m3-2) (new-input) (output), rounded corners]
+      [label={[red]right:\LARGE{在线处理部分}}]{};}
+  \end{pgfonlayer}  
+\end{tikzpicture}
+\end{frame}
+
 \begin{frame}[label=sec-2-14]{聚类算法}
 \begin{columns}
 \begin{column}{0.4\textwidth}
@@ -282,6 +469,53 @@ Actor的调度的算法采用RoundRobin。
 
 \end{column}
 \end{columns}
+\end{frame}
+
+\subsection{模板生成和内容提取模块}
+
+\begin{frame}{模板生成和内容提取模块介绍}
+  \transdissolve<2->
+  \begin{tikzpicture}[scale=.58,transform shape,
+    font=\large,
+    io/.style={fill=black!30, text width=3cm, minimum size=1cm,align=center,draw=black},
+    submodule/.style={fill=cyan!80, text width=3cm, minimum size=1cm, rounded corners,align=center,draw=black},
+    bold arrow/.style={very thick, >=triangle 90},
+    mylabel/.style={dotted, draw}
+    ]    
+    \node (input) [io] {输入网页};
+    \node (input-arrow) [below=1mm of input]
+    [single arrow, minimum width=5mm, minimum height=0.8cm, shape border rotate=270, draw]{};
+      \node (m1-1) [submodule, below=4mm of input-arrow]{过滤无用网页};
+      \node (m1-2) [submodule, below=5mm of m1-1]{简化HTML文档} edge[<-] (m1-1);
+    \node (m2-1) [submodule, below=1.2cm of m1-2]{结构相似度计算};
+    \draw [<-, bold arrow] (m2-1) -- (m1-2);
+     \node (m2-2) [submodule, below=5mm of m2-1]{网页聚类} edge[<-] (m2-1);
+    \visible<4->{\node (m3-1) [submodule, below=1.2cm of m2-2]{模板生成};}
+    \visible<2->{\draw [<-, bold arrow] (m3-1) -- (m2-2);}
+  \invisible<1->{
+    \node (m3-2) [submodule, below=5mm of m3-1]{内容抽取} edge[<-] (m3-1);
+    \node (new-input) [io, left=of m3-2]{新的网页输入};
+    \node (output) [io, below=of m3-2]{XML输出};
+    \draw [->, bold arrow] (new-input) -- (m3-2);
+    \draw [<-, bold arrow] (output) -- (m3-2);
+    }
+  \begin{pgfonlayer}{background}
+    \tikzset{module/.style={inner sep=1em, fill=white, dashed, draw=black, rounded corners}};
+    \node (m1)[module, fit=(m1-1) (m1-2)]{};
+    \node (m1-name) [right=5mm of m1]{\Large{预处理模块}};
+    \node (m2)[module, fit=(m2-1) (m2-2)]{} [below=of m1];
+    \node (m2-name) [right=5mm of m2]{\Large{网页聚类模块}};
+  \visible<3->{
+    \node (m3)[module, fit=(m3-1) (m3-2)]{} [below=of m2];
+    \node (m37name) [right=5mm of m3] {\Large{模板生成和内容提取模块}};
+  }
+      \invisible<1->{
+      \node (offline) [draw, inner sep=3mm, fill=orange!20, fit=(input) (m1-1) (m1-2) (m2-1) (m2-2) (m3-1)]
+      [label={[red]right:\LARGE{离线处理部分}}]{};
+      \node (online) [draw, inner sep=3mm, fill=green!30,fit=(m3-2) (new-input) (output), rounded corners]
+      [label={[red]right:\LARGE{在线处理部分}}]{};}
+  \end{pgfonlayer}  
+\end{tikzpicture}
 \end{frame}
 
 \begin{frame}[label=sec-2-15]{模板形式化定义}
@@ -332,6 +566,7 @@ Actor的调度的算法采用RoundRobin。
 \end{frame}
 
 \begin{frame}[label=sec-2-18]{模板生成流程图}
+  \vspace{-2mm}
 \includegraphics[width=0.8\textwidth]{subsystem}
 \end{frame}
 
@@ -370,21 +605,63 @@ ON_{d,e}&=&(lx,2/3)~|~(pku,1/3)
 
 \begin{frame}[label=sec-2-21]{可选节点生成的实际实现}
 \begin{itemize}
-\item 实际情况要比上面的例子复杂。区间 $[t1,t2]$ 中未对齐的那些标签子序列,有些可能差
-异很大,有些则可能非常相近,但不完全一样。
-\item 我们发现，解决构造可选节点的这个子问题和模板提取的问题的流程都可以简单描述为：
-\\
-\textbf{\scriptsize
-存在一个序列集合,元素由几种不同的模式生成,先将这些元素分成几种类别,然后针
-对每个类别去提取“模板”}
-\item 因此，我们可以使用一个“自相似”的框架解决可选节点生成问题。下面，我们把成为构
-造可选节点时需要提取的公共的模式称为“子模板”。
+\item 实际情况要比上面的例子复杂。区间 $[t_1,t_2]$ 中未对齐的那些标签子序列,有些可能差
+异很大,有些则可能非常相近。
+\item<2-> 做法：对于每个区间$[t_1,t_2]$，先将几种不同的子序列分开，然后针对每个子序列集合提取“模板”。
+\item<3-> 我们发现，这和整体的框架很相似。因此，可选节点生成问题可以使用一个“自
+  相似”的框架解决。
 \end{itemize}
 \end{frame}
 
 \begin{frame}[label=sec-2-22]{构造可选节点流程}
 \includegraphics[width=0.9\textwidth]{subtemplate}
 \end{frame}
+
+\begin{frame}{模板生成和内容提取模块介绍}
+  \transdissolve<2->
+    \vspace{-2mm}
+  \begin{tikzpicture}[scale=.57,transform shape,
+    font=\large,
+    io/.style={fill=black!30, text width=3cm, minimum size=1cm,align=center,draw=black},
+    submodule/.style={fill=cyan!80, text width=3cm, minimum size=1cm, rounded corners,align=center,draw=black},
+    bold arrow/.style={very thick, >=triangle 90},
+    mylabel/.style={dotted, draw}
+    ]    
+    \node (input) [io] {输入网页};
+    \node (input-arrow) [below=1mm of input]
+    [single arrow, minimum width=5mm, minimum height=0.8cm, shape border rotate=270, draw]{};
+      \node (m1-1) [submodule, below=4mm of input-arrow]{过滤无用网页};
+      \node (m1-2) [submodule, below=5mm of m1-1]{简化HTML文档} edge[<-] (m1-1);
+    \node (m2-1) [submodule, below=1.2cm of m1-2]{结构相似度计算};
+    \draw [<-, bold arrow] (m2-1) -- (m1-2);
+     \node (m2-2) [submodule, below=5mm of m2-1]{网页聚类} edge[<-] (m2-1);
+    \node (m3-1) [submodule, below=1.2cm of m2-2]{模板生成};
+    \draw [<-, bold arrow] (m3-1) -- (m2-2);
+    \visible<3->{\node (m3-2) [submodule, below=5mm of m3-1]{内容抽取} edge[<-] (m3-1);}
+    \visible<4->{\node (new-input) [io, left=of m3-2]{新的网页输入};}
+    \visible<7->{\node (output) [io, below=of m3-2]{XML输出};}
+    \visible<5->{\draw [->, bold arrow] (new-input) -- (m3-2);}
+    \visible<6->{\draw [<-, bold arrow] (output) -- (m3-2);}
+  \begin{pgfonlayer}{background}
+    \tikzset{module/.style={inner sep=1em, fill=white, dashed, draw=black,
+        rounded corners}};
+    \invisible<2>{
+    \node (m1)[module, fit=(m1-1) (m1-2)]{};
+    \node (m1-name) [right=5mm of m1]{\Large{预处理模块}};
+    \node (m2)[module, fit=(m2-1) (m2-2)]{} [below=of m1];
+    \node (m2-name) [right=5mm of m2]{\Large{网页聚类模块}};
+    \node (m3)[module, fit=(m3-1) (m3-2)]{} [below=of m2];
+    \node (m37name) [right=5mm of m3] {\Large{模板生成和内容提取模块}};}
+    \visible<2>{
+      \node (offline) [draw, inner sep=3mm, fill=orange!20, fit=(input) (m1-1) (m1-2) (m2-1) (m2-2) (m3-1)]
+      [label={[red]right:\LARGE{离线处理部分}}]{};}
+      \visible<8->{
+      \node (online) [draw, inner sep=3mm, fill=green!30,fit=(m3-2) (new-input) (output), rounded corners]
+      [label={[red]right:\LARGE{在线处理部分}}]{};}
+  \end{pgfonlayer}  
+\end{tikzpicture}
+\end{frame}
+
 \begin{frame}[label=sec-2-23]{内容提取模块}
   \begin{columns}
     \begin{column}{0.4\textwidth}
@@ -396,7 +673,7 @@ ON_{d,e}&=&(lx,2/3)~|~(pku,1/3)
     \end{column}
     \begin{column}{0.6\textwidth}
 \centering
-    \vspace{-1cm}
+    \vspace{-3mm}
 \includegraphics[width=\textwidth]{extractor}
     \end{column}
   \end{columns}

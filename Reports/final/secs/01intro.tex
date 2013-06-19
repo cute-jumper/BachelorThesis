@@ -12,14 +12,15 @@
   \pause
     \node (template) {\includegraphics[width=0.5\textwidth]{django}};
   \pause
-  \node (arrow) [fill=cyan!50, right=of template, draw, single arrow, minimum height=1cm, minimum width=5mm] {};
+  \node (arrow) [fill=cyan!50, right=of template, draw, single arrow, minimum
+  height=1cm, minimum width=5mm] {生成};
   \pause
   \node (webpage)[right=of arrow] {\includegraphics[width=0.5\textwidth]{demoresult}};
 \end{tikzpicture}
 \end{frame}
 
 \begin{frame}[label=sec-1-2]{工作内容}
-  \transblindshorizontal<2-4>
+  \transdissolve<2-4>
 \begin{enumerate}
 \item 已经获得大量新闻、博客等网页数据，这些网页可能由不同的模板生成
 \item 我们将网页按不同的模板分开，然后从每个集合中提取出所有可能的模板
@@ -28,7 +29,8 @@
   \pause
     \node (template) {\includegraphics[width=0.5\textwidth]{demoresult}};
   \pause
-  \node (arrow) [fill=orange!50, right=of template, draw, single arrow, minimum height=1cm, minimum width=5mm] {};
+  \node (arrow) [fill=orange!50, right=of template, draw, single arrow, minimum
+  height=1cm, minimum width=5mm] {抽取};
   \pause
   \node (webpage)[right=of arrow] {\includegraphics[width=0.5\textwidth]{demoxmloutput}};
 \end{tikzpicture}
