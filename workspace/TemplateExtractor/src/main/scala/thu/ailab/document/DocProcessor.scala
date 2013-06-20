@@ -8,11 +8,17 @@ import thu.ailab.utils.Tools.{withPrintWriter, getTrainFiles}
 import java.io.FileInputStream
 import java.io.FileOutputStream
 
+/**
+ * Document preprocessing
+ */
 object DocProcessor extends LoggerTrait {
   val dataset = MyConfigFactory.getValue[String]("global.dataset")
   val docDir = MyConfigFactory.getValue[String](dataset, "document.dir")
   val prepDir = MyConfigFactory.getValue[String](dataset, "preprocess.dir")
   val errorPageMaxLength = MyConfigFactory.getValue[Long](dataset, "errorPageMaxLength")
+  /**
+   * Convert the original document to TagSequence and store the results.
+   */
   def HTMLToTagSequence() = {
     val filenames = getTrainFiles
     val f = new File(prepDir)
@@ -23,6 +29,9 @@ object DocProcessor extends LoggerTrait {
       val tagSeq = TagSequence.fromNodeArrayForPrep(new TreeBuilder(fn).getTagSequence.toArray, false)
       xml.XML.save(fn.replace(docDir, prepDir), tagSeq.toXML)
     }
+    /**
+     * Store the statistics
+     */
     val statMap = HTMLSuffixTree.getStat
     logger.info("-" * 10 + "begin stat" + "-" * 10)
     for (len <- statMap.keys.toSeq.sortBy(identity); count = statMap(len)) {
@@ -30,13 +39,20 @@ object DocProcessor extends LoggerTrait {
     }
     logger.info("-" * 10 + "end stat" + "-" * 10)
   }
-  def copyFile(srcFile: String, destFile: String) = {
+  /**
+   * Copy file using "Channel", faster than IO "Stream".
+   * FileChannel is a class defined in java.nio.channels
+   */
+  private def copyFile(srcFile: String, destFile: String) = {
     val fin = new FileInputStream(srcFile).getChannel()
     val fout = new FileOutputStream(destFile).getChannel()
     fin.transferTo(0, fin.size(), fout)
     fin.close()
     fout.close()
   }
+  /**
+   * Get detailed pages from all the pages and store them in a directory
+   */
   def filterDetailPages(copy: Boolean = false) = {
     def getDetailPage(files: Array[File]) = {
       files.filterNot(isErrorPageByLength).map(_.getAbsolutePath()).
@@ -54,6 +70,9 @@ object DocProcessor extends LoggerTrait {
       }      
     }
   }
+  /**
+   * Helper functions to judge a page type 
+   */
   def isContentsPageByUrl(url: String) = {
     val dataset = MyConfigFactory.getValue[String]("global.dataset")
     val pattern = MyConfigFactory.getValue[String](dataset, "pattern.contentsPageUrlPattern")

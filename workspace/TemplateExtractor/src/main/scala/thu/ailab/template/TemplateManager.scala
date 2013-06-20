@@ -8,6 +8,9 @@ import thu.ailab.global.AppEntry
 import thu.ailab.global.LoggerTrait
 import scala.collection.mutable.ArrayBuffer
 
+/**
+ * Manage the templates
+ */
 class TemplateManager private (val templates: Seq[Template]) extends LoggerTrait {
   private val clusterThreshold = MyConfigFactory.getValue[Double](
     "cluster.DocNaiveAggloCluster.clusterThreshold")
@@ -25,6 +28,9 @@ class TemplateManager private (val templates: Seq[Template]) extends LoggerTrait
 }
 
 object TemplateManager {
+  /**
+   * Build templates and store them in XMLs.
+   */
   def buildTemplates() = {
     val dataset = MyConfigFactory.getValue[String]("global.dataset")
     val id2filename = io.Source.fromFile(
@@ -51,18 +57,27 @@ object TemplateManager {
       </templates>)
     new TemplateManager(templates)
   }
+  /**
+   * Recover templates from XMLs automatically.
+   */
   def recoverTemplates() = {
     val dataset = MyConfigFactory.getValue[String]("global.dataset")
     val templateFile = MyConfigFactory.getValue[String](dataset, "template.templateFile")
     val templatesXML = scala.xml.XML.loadFile(templateFile)
     new TemplateManager((templatesXML \ "template" map (Template.fromXML(_))))
   }
+  /**
+   * Recover templates from XMLs manually. 
+   */
   def recoverTemplates(templateFile: String) = {
     val templatesXML = scala.xml.XML.loadFile(templateFile)
     new TemplateManager((templatesXML \ "template" map (Template.fromXML(_))))
   }
 }
 
+/**
+ * Run various tests
+ */
 object TestTemplateManager extends AppEntry {
   def testExtract() {
     val fn = thu.ailab.utils.Tools.getRandomTestFile

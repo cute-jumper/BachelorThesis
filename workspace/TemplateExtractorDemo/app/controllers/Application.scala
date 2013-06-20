@@ -11,8 +11,7 @@ object Application extends Controller {
   def index = Action {
     Ok(views.html.index("Your new application is ready."))
   }
-  def blog(url: String) = newsLocal(url)
-  def blogWeb(url: String) = Action { implicit request =>
+  def webRender(url: String, docType: String) = Action { implicit request =>
     Async {
       WS.url(url).get().map { response =>
         val re = """.*charset=([^ "/>]*)""".r
@@ -26,7 +25,7 @@ object Application extends Controller {
             }
           }
         println(response.header("content-type"))
-        val renderHTML = TemplateExtractor.feed(htmlString)
+        val renderHTML = TemplateExtractor.feed(htmlString, docType)
         if (renderHTML.isDefined)
           Ok(renderHTML.get).as(HTML)
         else
@@ -34,11 +33,10 @@ object Application extends Controller {
       }
     }
   }
-  def news(url: String) = newsLocal(url)
-  def newsLocal(url: String) = Action { implicit request =>
+  def localRender(url: String, docType: String) = Action { implicit request =>
     val charset = MyCharsetDetector.detectFile(url).get
     val htmlString = scala.io.Source.fromFile(url)(charset).getLines.mkString
-    val renderHTML = TemplateExtractor.feed(htmlString)
+    val renderHTML = TemplateExtractor.feed(htmlString, docType)
     if (renderHTML.isDefined)
       Ok(renderHTML.get).as(HTML)
     else

@@ -10,6 +10,11 @@ import thu.ailab.distance.LCSWithPath
 import thu.ailab.cluster.TSNaiveAggloCluster
 import thu.ailab.global.LoggerTrait
 
+/**
+ * Build optional nodes using clustering.
+ * 
+ * Main job is done by the functions of the companion object.
+ */
 class ClusterMethod(centerId: Int, fileIds: Seq[Int]) {
   private val dataset = MyConfigFactory.getValue[String]("global.dataset") 
   val id2filename = scala.io.Source.fromFile(
@@ -19,8 +24,6 @@ class ClusterMethod(centerId: Int, fileIds: Seq[Int]) {
   val docCenter = ClusterMethod.findLCSInAll(tagSeqFactory.getInstance(centerId),
     fileIds.filter(_ != centerId).iterator,
     tagSeqFactory.getInstance)
-//  println("%sEssential Nodes%s\n".format("-" * 20, "-" * 20) +
-//    docCenter.getCompact.mkString(" "))
   def getTemplateNodeArray() = {
     val tagSegMap = ClusterMethod.getTagSegMap(docCenter,
         fileIds.iterator,
@@ -31,6 +34,11 @@ class ClusterMethod(centerId: Int, fileIds: Seq[Int]) {
   }
 }
 
+/**
+ * Helper functions to build optional nodes.
+ * 
+ * We use "Actor" to speed up the calculation.
+ */
 object ClusterMethod extends LoggerTrait {
   import akka.actor._
   import akka.routing.RoundRobinRouter
@@ -47,6 +55,10 @@ object ClusterMethod extends LoggerTrait {
   private val dataset = MyConfigFactory.getValue[String]("global.dataset")
   val minConfidence = MyConfigFactory.getValue[Double](dataset, "template.optionalConfidence")
 
+  /**
+   * Compose the template node array according to alignment
+   * and the mapping between range and TagSegment array.
+   */
   def composeTemplateNodeArray(docCenter: TagSequence,
       tagSegMap: MHashMap[(Int, Int), Array[TagSegment]],
       posToOpNode: MHashMap[Int, OptionalNode]) = {    
@@ -65,6 +77,10 @@ object ClusterMethod extends LoggerTrait {
     tns.toArray
   }
   
+  /**
+   * Get TagSegment array according to alignment.
+   * Return the mapping relation.
+   */
   def getTagSegMap(docCenter: TagSequence, 
       idIterator: Iterator[Int],
       getSequence: (Int) => TagSequence) = {
@@ -92,6 +108,9 @@ object ClusterMethod extends LoggerTrait {
     }
     tagSegMap
   }
+  /**
+   * Do clustering!
+   */
   def clusterTagSegment(tss: Array[TagSegment],
     toConfidence: (Int) => Double): Option[OptionalNode] = {
     def getSequence(id: Int) = tss(id).getTagSeq
@@ -114,6 +133,9 @@ object ClusterMethod extends LoggerTrait {
     }
     else None
   }
+  /**
+   * Run LCS n times and get common sequence of the TagSequence set.
+   */
   def findLCSInAll(initTs: TagSequence, idIterator: Iterator[Int],
     getSequence: (Int) => TagSequence) = {
     @tailrec
@@ -130,8 +152,14 @@ object ClusterMethod extends LoggerTrait {
     helper(initTs, idIterator)
   }
 
+  /**
+   * This will be returned to the outside caller
+   */
   private val posToOpNode = new MHashMap[Int, OptionalNode]
 
+  /**
+   * The Actor model implementation part begins
+   */
   class Worker extends Actor {
     def receive = {
       case TaskBegins(taskId, tss, toConfidence) =>

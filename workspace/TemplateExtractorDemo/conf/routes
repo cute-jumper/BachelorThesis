@@ -8,6 +8,10 @@ GET     /                           controllers.Application.index
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
-GET     /blog/*url                  controllers.Application.blog(url)
+GET     /blog/l/*url                controllers.Application.localRender(url, docType="blog")
 
-GET     /news/*url                  controllers.Application.news(url)
+GET     /news/l/*url                controllers.Application.localRender(url, docType="news")
+
+GET     /blog/w/*url                controllers.Application.webRender(url, docType="blog")
+
+GET     /news/w/*url                controllers.Application.webRender(url, docType="news")

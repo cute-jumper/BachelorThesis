@@ -6,12 +6,15 @@ import thu.ailab.global._
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.{HashSet => MHashSet, HashMap => MHashMap}
 
+/**
+ * Class for clustering documents
+ */
 class DocNaiveAggloCluster extends {
   private val dataset = MyConfigFactory.getValue[String]("global.dataset") 
   val id2filename = scala.io.Source.fromFile(
       MyConfigFactory.getValue[String](dataset, "output.id2filename")).getLines.toArray
   val tagSeqFactory = new TagSeqFactory(id2filename)  
-  override val initSize = tagSeqFactory.getSize 
+  override val initSize = tagSeqFactory.getSize //pre-initialized
 } with NaiveAggloCluster {	
   /**
    * overrides
@@ -32,6 +35,9 @@ class DocNaiveAggloCluster extends {
     if (verbose) (id: Int) => tagSeqFactory.getFilename(id)
     else (id: Int) => id.toString
   }
+	/**
+	 * Output functions
+	 */
   import thu.ailab.utils.Tools.withPrintWriter  
   def writeClusterFile(filename: String) = {
     withPrintWriter(filename){ pw =>

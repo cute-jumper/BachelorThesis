@@ -11,16 +11,17 @@ import thu.ailab.document.WebHTMLDocument
 import thu.ailab.template.ExType
 
 object TemplateExtractor {
-  val templateMgr = TemplateManager.recoverTemplates(sys.props("user.home") + "/Programs/BachelorThesis/Data/material/template_blog_2000_anno.template")
-  println("init done")
-  def feed(html: String) = {
+  val templateDir = sys.props("user.home") + "/Programs/BachelorThesis/Data/material"
+  val templatesMan = List("blog", "news").zip( 
+  List("/template_blog_2000_anno.template", "/templateFile_news_0.5.template").map(
+    TemplateManager.recoverTemplates(_)
+  )).toMap
+  def feed(html: String, docType: String) = {
     val htmlDoc = new WebHTMLDocument(html)
     val doc = Jsoup.parse(htmlDoc.simplifiedContent, htmlDoc.charset)
-//    val doc = Jsoup.parse(html, htmlDoc.charset)
     val vnodeArray = new TreeBuilder(doc).getVerboseTagSequence.toArray
     val thatTagSeq = TagSequence.fromNodeArray(vnodeArray, false)
-    println("start choosing")
-    val templateOption = templateMgr.chooseTemplate(thatTagSeq)
+    val templateOption = templatesMan(docType).chooseTemplate(thatTagSeq)
     if (templateOption.isDefined) {
       val template = templateOption.get
       val (matchedNodes, exPattern) = template.getMatchedNodesAndExPattern(thatTagSeq)
@@ -52,12 +53,6 @@ object TemplateExtractor {
   }
   import thu.ailab.template.ExType._
   class RenderExPatternVisitor(nodeMap: Map[Node, ExType]) extends NodeVisitor {
-    val styleTemplate = "outline: %s dashed thick;box-shadow: 0 0 1px 2px #00f;"
-    def getColor(depth: Int) = {
-      val half = depth / 2
-      if (half > 16) "#fff"
-      else "#" + "%x".format(half) * 3
-    }    
     def head(node: Node, depth: Int) = {
       val keyOption = nodeMap.keySet.find(x => x.baseUri == node.baseUri() 
           && x.attributes == node.attributes && x.nodeName() == node.nodeName())
@@ -70,6 +65,5 @@ object TemplateExtractor {
     def tail(node: Node, depth: Int) = {
     }
   }
-
 }
 

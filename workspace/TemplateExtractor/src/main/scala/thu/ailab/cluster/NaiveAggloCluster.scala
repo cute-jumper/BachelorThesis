@@ -21,7 +21,7 @@ abstract class NaiveAggloCluster extends LoggerTrait {
   def initDistArray(): Array[Double]
   protected def composeShow(verbose: Boolean): (Int) => String
   /**
-   * variables
+   * Initialize all state variables
    */
   val distArray = initDistArray()
   protected val clusters = new MHashMap[Int, Cluster]
@@ -30,11 +30,8 @@ abstract class NaiveAggloCluster extends LoggerTrait {
   }
   var minDist = Double.MaxValue
   var minPair = (0, 0)
-  /**
-   * Functions and classes' definitions begin
-   */
-  def getClusters = clusters
 
+  def getClusters = clusters
   def getIndex(id1: Int, id2: Int) = {
     if (id1 < id2) (id2 - 1) * id2 / 2 + id1
     else (id1 - 1) * id1 / 2 + id2
@@ -43,24 +40,12 @@ abstract class NaiveAggloCluster extends LoggerTrait {
     distArray(getIndex(id1, id2))
   }
   /**
-   * May have bugs
+   * Variables, classes and functions for clustering begins
    */
-  val pairs = (for (i <- 0 until initSize; j <- 0 until i) yield ((i, j))).sortBy(x => getDistance(x._1, x._2))
+  val pairs = (for (i <- 0 until initSize; j <- 0 until i) 
+    yield ((i, j))).sortBy(x => getDistance(x._1, x._2))    
+  //Weather the point is the center
   val reserve = Array.fill(initSize)(true)
-  def findNearest() = {
-    val bank = new MHashSet[Cluster]
-    var minDist = Double.MaxValue
-    var minPairId = (-1, -1)
-    val ids = clusters.values.map(_.centerId).toArray
-    for (i <- ids.indices; j <- 0 until i) {
-      val dist = getDistance(ids(i), ids(j))
-      if (dist < minDist) {
-        minDist = dist
-        minPairId = (ids(i), ids(j))
-      }
-    } 
-    (minPairId, minDist)
-  }  
   def clustering() = {
     import scala.annotation.tailrec
     @tailrec

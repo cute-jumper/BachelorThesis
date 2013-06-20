@@ -19,6 +19,20 @@ abstract class Algorithm {
   def getCommonIndices(): List[(Int, Int)]
 }
 
+/**
+ * Class Hierarchy:
+ * Algorithm
+ * |-- LCS
+ *    |-- LCSWithPath
+ *    |-- LCSArraySpaceOptimized
+ *    
+ * Use LCSWithPath when the common path is needed.
+ * Use LCSArraySpaceOptimized when *only* the distance is needed.
+ */
+
+/**
+ * Base LCS class
+ */
 abstract class LCS extends Algorithm {
   /**
    * Recursively find the path
@@ -40,9 +54,12 @@ abstract class LCS extends Algorithm {
   }
 }
 
-abstract class LCSTagSequence(ts_1: TagSequence, ts_2: TagSequence)
+/**
+ * LCS algorithm implemented on top of TagSequence
+ */
+abstract class LCSTagSequence(ts1: TagSequence, ts2: TagSequence)
 extends LCS with LoggerTrait {
-  val (seq1, seq2) = (ts_1.getCompact, ts_2.getCompact)
+  val (seq1, seq2) = (ts1.getCompact, ts2.getCompact)
   val maxDepth = math.max(seq1.maxBy(_.depth).depth, seq2.maxBy(_.depth).depth)
   val (len1, len2) = (seq1.length, seq2.length)
   protected def getCostFromDepth(depth: Int) = maxDepth - depth + 1
@@ -53,8 +70,11 @@ extends LCS with LoggerTrait {
   }
 }
 
-class LCSWithPath(ts_1: TagSequence, ts_2: TagSequence)
-extends LCSTagSequence(ts_1, ts_2) {
+/**
+ * LCS algorithm with the path
+ */
+class LCSWithPath(ts1: TagSequence, ts2: TagSequence)
+extends LCSTagSequence(ts1, ts2) {
   def getLCSAndPath() = { 
     val table = Array.ofDim[Double](len1 + 1, len2 + 1)
     val directionMap = Array.ofDim[Direction](len1, len2)
@@ -77,6 +97,9 @@ extends LCSTagSequence(ts_1, ts_2) {
   def getCommonIndices() = commonIndices
 }
 
+/**
+ * LCS algorithm with space optimized to O(n)
+ */
 class LCSArraySpaceOptimized(ts_1: TagSequence, ts_2: TagSequence)
 extends LCSTagSequence(ts_1, ts_2) {
   case class NotImplementedException(msg: String) extends Exception

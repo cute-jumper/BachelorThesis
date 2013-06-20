@@ -62,11 +62,16 @@ object HTMLSuffixTree {
   }
   import ArrayElementOp._
   
-  val statMap = new MHashMap[Int, Int]
-  
+  /**
+   * Statistics
+   */
+  val statMap = new MHashMap[Int, Int]  
   def clearStat() = statMap.clear()
   def getStat() = statMap.toMap
   
+  /**
+   * Group nodes by their fathers
+   */
   private def getFatherMap[T <: TreeNode](ranges: Iterable[(Int, Int)], 
       tnArray: Array[T]) = {    
     val sortedRanges = ranges.toSeq.sortBy(-_._1)
@@ -82,6 +87,9 @@ object HTMLSuffixTree {
     }
     fatherMap.toMap
   }
+  /**
+   * Used for template building system
+   */
   def stripDuplicates(tnArray: Array[TreeNode], logStat: Boolean = false) = {
     val suffixTree = new HTMLSuffixTree(tnArray.map(_.toString), 
         verbose = false)
@@ -116,6 +124,9 @@ object HTMLSuffixTree {
     }
     for ((node, flag) <- tnArray zip flagArray if flag != REMOVE) yield node
   }
+  /**
+   * Used for content extracting system
+   */
   def stripDuplicates(vtnArray: Array[VerboseTreeNode]) = {
     val suffixTree = new HTMLSuffixTree(vtnArray.map(_.toString), 
         verbose = false)

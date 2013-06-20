@@ -7,6 +7,13 @@ import thu.ailab.tree.HTMLSuffixTree
 import thu.ailab.tree.VerboseTreeNode
 import thu.ailab.tree.TreeBuilder
 
+/**
+ * Class storing information the sequence of TreeNode after
+ * all the duplicated have been stripped.
+ * 
+ * Constructor is private. Use constructor functions in the
+ * companion object to construct the instances.
+ */
 class TagSequence private (compactArray: Array[TreeNode]) {
   val separateArray = compactArray flatMap (_.getSeparateNodes)
   def getCompact() = compactArray
@@ -23,7 +30,7 @@ class TagSequence private (compactArray: Array[TreeNode]) {
     </tagsequence>
   }
   /**
-   * Useless
+   * Useless. Make all to be private. 
    */
   private def getSeparate() = separateArray
   private val separateLength = separateArray.length
@@ -56,18 +63,28 @@ class TagSequence private (compactArray: Array[TreeNode]) {
 }
 
 object TagSequence {
+  /**
+   * Used for content extracting system
+   */
   def fromNodeArray(_inputArray: Array[VerboseTreeNode], isCompact: Boolean) = {
     val inputArray = 
       if (isCompact) _inputArray 
       else HTMLSuffixTree.stripDuplicates(_inputArray)
     new TagSequence(inputArray.map(_.asInstanceOf[TreeNode]))
   }
+  /**
+   * Used for template building system
+   */
   def fromNodeArray(_inputArray: Array[TreeNode], isCompact: Boolean) = {
     val inputArray = 
       if (isCompact) _inputArray 
       else HTMLSuffixTree.stripDuplicates(_inputArray)
     new TagSequence(inputArray)
   }
+  /**
+   * Only use this when doing pre-processing, 
+   * because it will introduce extra overhead.
+   */
   def fromNodeArrayForPrep(_inputArray: Array[TreeNode], isCompact: Boolean) = {
     val inputArray = 
       if (isCompact) _inputArray 
@@ -79,5 +96,5 @@ object TagSequence {
   }
   def fromXML(node: scala.xml.Node) = {
     TagSequence.fromNodeArray((node \ "treenode" map (TreeNode.fromXML(_))).toArray, true)
-  }  
+  }
 }

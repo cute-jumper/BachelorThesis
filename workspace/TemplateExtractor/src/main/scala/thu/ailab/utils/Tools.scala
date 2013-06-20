@@ -20,7 +20,7 @@ object Tools extends LoggerTrait {
     (ret, (System.nanoTime() - start) / 1e9)    
   }  
   /**
-   * new control structure to use PrintWriter
+   * Define a new control structure to use PrintWriter
    */
   import java.io.PrintWriter
   def withPrintWriter(filename: String)(op: PrintWriter => Unit) {
@@ -35,6 +35,9 @@ object Tools extends LoggerTrait {
   val dataset = MyConfigFactory.getValue[String]("global.dataset")  
   val trainsize = MyConfigFactory.getValue[Int](dataset, "trainsize")
   val docDir = MyConfigFactory.getValue[String](dataset, "document.dir")
+  /**
+   * Helper functions to get files according to the configuration.
+   */
   def getTrainFiles() = {
     new File(docDir).listFiles().slice(0, trainsize).map(_.getAbsolutePath)
   }

@@ -5,7 +5,7 @@ import com.twitter.logging.FileHandler
 
 /**
  * Set root logger, and all the sub logger will use the file handler.
- * Call at startup
+ * In order to call this at startup, programs should extend the AppEntry.
  */
 object LoggerSettings {
   def apply(logfile: String) {

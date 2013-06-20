@@ -4,7 +4,7 @@ import org.jsoup.Jsoup
 import org.jsoup.select.NodeVisitor
 import org.jsoup.nodes._
 import scala.collection.mutable.ArrayBuffer
-import scala.collection.mutable.{HashMap => MHashMap}
+import scala.collection.mutable.{ HashMap => MHashMap }
 import scala.collection.JavaConversions._
 import thu.ailab.sequence.TagSequence
 import thu.ailab.document.LocalHTMLDocument
@@ -12,8 +12,16 @@ import thu.ailab.global._
 import thu.ailab.distance.LCSArraySpaceOptimized
 import thu.ailab.template.TPTreeNode
 
+/**
+ * Traverse the DOM Tree
+ */
 class TreeBuilder(doc: Document) {
   def this(filename: String) = {
+    /**
+     * I know this is a rather tricky way to deal with
+     * the restriction of Scala's rules for auxiliary
+     * constructor... Any new awesome ideas?
+     */
     this(((filename: String) => {
       val htmlDoc = new LocalHTMLDocument(filename)
       Jsoup.parse(htmlDoc.simplifiedContent, htmlDoc.charset)
@@ -40,6 +48,9 @@ class TreeBuilder(doc: Document) {
     doc.children().head.traverse(visitor)
     visitor.root
   }
+  /**
+   * Various visitors for different purposes
+   */
   class TagSeqVisitor extends NodeVisitor {
     val tagSeq = new ArrayBuffer[TreeNode]
     def head(node: Node, depth: Int) = {
@@ -51,7 +62,6 @@ class TreeBuilder(doc: Document) {
       }
     }
     def tail(node: Node, depth: Int) = {
-      
     }
   }
   class VerboseTagSeqVisitor extends NodeVisitor {
@@ -65,30 +75,27 @@ class TreeBuilder(doc: Document) {
       }
     }
     def tail(node: Node, depth: Int) = {
-      
     }
   }
-
   class TPTreeVisitor extends NodeVisitor {
     val root = new TPTreeNode(new TreeNode(doc.nodeName, 0), None)
     val jsoupToTP = new MHashMap[Node, TPTreeNode]
     jsoupToTP += (doc -> root)
     def head(node: Node, depth: Int) = {
       val name = node match {
-        case n: Element => n.nodeName()
-              val tn = new TreeNode(n.nodeName, depth + 1)
-      val father = jsoupToTP(node.parent())
-      val tpTreeNode = new TPTreeNode(tn, Some(father))
-      father.addChild(tpTreeNode)
-      jsoupToTP += node -> tpTreeNode
-
+        case n: Element =>
+          n.nodeName()
+          val tn = new TreeNode(n.nodeName, depth + 1)
+          val father = jsoupToTP(node.parent())
+          val tpTreeNode = new TPTreeNode(tn, Some(father))
+          father.addChild(tpTreeNode)
+          jsoupToTP += node -> tpTreeNode
         case n: TextNode => //n.getWholeText().trim()
         case n: DataNode => //n.getWholeData().trim()
         case _ => //"ERROR!!!"
       }
     }
     def tail(node: Node, depth: Int) = {
-      
     }
   }
 }

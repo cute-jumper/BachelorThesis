@@ -9,10 +9,7 @@ import thu.ailab.utils.MyCharsetDetector
  * It is *NOT* DOM or SAX, though.
  *
  * Important fields:
- *  - filename
- *  - url
  *  - charset
- *  - fullContent(allLines)
  *  - simplifiedContent(strippedLines)
  */
 
@@ -22,7 +19,9 @@ abstract class HTMLDocument {
    */
   val charset: String 
   val fullContent: String
-    
+  /**
+   *  Since we mainly deal with Chinese documents, default is gb18030
+   */  
 	val defaultCharset = "gb18030"
   /**
    * Remove tags according to the regular expression generator
@@ -82,10 +81,10 @@ abstract class HTMLDocument {
   lazy val simplifiedContent = strippedLines mkString "\n"
 }
 
+/**
+ * Class to deal with HTML stored in local disks
+ */
 class LocalHTMLDocument(val filename: String) extends HTMLDocument with LoggerTrait  {
-  /**
-   *  Since we mainly deal with Chinese documents, default is gb18030
-   */
   val charset = {
     val res = MyCharsetDetector.detectFile(filename).getOrElse(defaultCharset).toLowerCase()
     if (res != "utf8"  && res != "utf-8" && res != defaultCharset)
@@ -94,7 +93,6 @@ class LocalHTMLDocument(val filename: String) extends HTMLDocument with LoggerTr
       res
   }
   val url = java.net.URLDecoder.decode(filename, charset)
-  logger.debug("%s Charset: %s", filename, charset)
     /**
    * Get full content, with blank lines stripped
    */
@@ -103,6 +101,9 @@ class LocalHTMLDocument(val filename: String) extends HTMLDocument with LoggerTr
     allLines map (_.trim) filter (_.length != 0) mkString "\n"  
 }
 
+/**
+ * Class to deal with HTML on the web
+ */
 class WebHTMLDocument(val html: String) extends HTMLDocument {
 	val charset = MyCharsetDetector.detectString(html).getOrElse(defaultCharset)
   val fullContent = html

@@ -8,10 +8,10 @@ import com.ibm.icu.text.{CharsetMatch, CharsetDetector}
  * Simple wrapper of icu4j, which can used to automatically detect
  * the character set of the HTML documents.
  * 
- * @param filname
+ * filname: 
  * Path to the file
  * 
- * @return Option[String]
+ * Option[String]: 
  * Possible character set with confidence not below than 50, wrapped
  * in an option type.
  */

@@ -383,6 +383,9 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
     }
     updateNodeEdge(root)
   }
+  /**
+   * Visitor pattern
+   */
   class SuffixTreeVisitor(pw: java.io.PrintWriter, toPrint: (Show) => String) {
     def visit(show: Show) = {
       pw.println(toPrint(show))
@@ -403,7 +406,7 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
     doTraverse(root)
   }
   /**
-   * Store the suffix tree in graphviz dot format
+   * Store the suffix tree in Graphviz dot format
    */
   def translateToDot(filename: String) = {
     withPrintWriter(filename) { pw =>

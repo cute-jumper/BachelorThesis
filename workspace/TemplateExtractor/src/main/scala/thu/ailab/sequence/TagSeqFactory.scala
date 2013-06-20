@@ -5,6 +5,9 @@ import java.io.File
 import thu.ailab.global.MyConfigFactory
 import thu.ailab.tree.{TreeNode, TreeBuilder, HTMLSuffixTree}
 
+/**
+ * Manage all the TagSequences. Each TagSequence stands for a document.
+ */
 class TagSeqFactory(id2filename: Array[String]) {
   final val factorySize = id2filename.length
   def getSize() = factorySize
@@ -18,6 +21,10 @@ class TagSeqFactory(id2filename: Array[String]) {
   
   def getPrepFilename(filename: String) = filename.replace(docDir, prepDir) 
   
+  /**
+   * If we have pre-processed the document, use the pre-processing result,
+   * else use the original document.
+   */
   def getInstance(id: Int) = {
     if (documentCache(id) == null) {
       val filename = id2filename(id)

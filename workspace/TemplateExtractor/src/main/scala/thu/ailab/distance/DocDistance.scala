@@ -5,6 +5,9 @@ import thu.ailab.global.MyConfigFactory
 import thu.ailab.global.AppEntry
 import thu.ailab.utils.Tools.getTrainFiles
 
+/**
+ * Class to calculate the distances between documents
+ */
 object DocDistance extends {
   val dataset = MyConfigFactory.getValue[String]("global.dataset")
   val id2filename = getTrainFiles

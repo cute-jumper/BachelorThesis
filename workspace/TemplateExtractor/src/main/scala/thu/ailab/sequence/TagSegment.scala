@@ -5,6 +5,9 @@ import scala.annotation.tailrec
 import thu.ailab.global.MyConfigFactory
 import thu.ailab.tree.TreeNode
 
+/**
+ * Used to stored the alignment information when building templates 
+ */
 class TagSegment(tagSeqInput: TagSequence, 
     val beginIndex: Int,
     val endIndex: Int,

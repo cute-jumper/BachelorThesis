@@ -4,6 +4,9 @@ import com.typesafe.config._
 import scala.collection.mutable.HashMap
 import java.io.File
 
+/**
+ * A wrapper class to read configuration.
+ */
 object MyConfigFactory {
   private val conf = ConfigFactory.load()
   private def getConfString(path: String) = {
@@ -19,7 +22,10 @@ object MyConfigFactory {
   }
   def hasValue(name: String) = conf.hasPath(name)
   /**
-   * A generic method using Manifest
+   * A generic method using ClassTag.
+   * 
+   * ATTENTION: In Scala 2.10, we should use ClassTag instead of ClassManifest.
+   * The latter is deprecated since 2.10.  
    */
   import scala.reflect.ClassTag
   def getValue[T](names: String*)(implicit ct: ClassTag[T]): T = {
@@ -30,9 +36,11 @@ object MyConfigFactory {
         classOf[Int] -> conf.getInt _,
         classOf[Long] -> conf.getLong _
         )
-    //(dispatch.find(_._1 == mf.erasure).map(_._2).get)(name).asInstanceOf[T]
     (dispatch.find(_._1 isAssignableFrom ct.runtimeClass).map(_._2).get)(name).asInstanceOf[T]
   }
+  /** 
+   * Another implementation which is more dirty. Only for fun.
+   */
   private def getValue1[T: Manifest](name: String): T = {
     ((manifest[T].toString match { // or manifest[T].erasure.getName match {
       case "java.lang.String" => getConfString _

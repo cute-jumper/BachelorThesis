@@ -19,6 +19,16 @@ object Point {
   def apply(x: Int, y: Int) = new Point(x, y)
 }
 
+/**
+ * This is a class, standing for a model which
+ * uses "Actor" to calculate the distances between 
+ * every two points.
+ * 
+ * One who extends the class should provide three things:
+ * - totalSize: the total amount of points.
+ * - getSequence: how to get TagSequence according to a id.
+ * - postCalculation: what to do after a calculation.
+ */
 abstract class CalcDistance extends LoggerTrait {
   /**
    * Messages
@@ -33,14 +43,17 @@ abstract class CalcDistance extends LoggerTrait {
    */
   val totalSize: Int
   def getSequence(id: Int): TagSequence
-  def postCalculation(): Unit  
+  def postCalculation(): Unit
   /**
-   * Constructor body
+   * Initialize distArray to store all distances
    */
   val distArray = new Array[Double](totalSize * (totalSize - 1) / 2)
   
+  /**
+   * Main function for the outside callers. 
+   */
   def doCalculation() = {
-    calculate(nrOfWorkers = MyConfigFactory.getValue[Int]("actor.nrOfWorkers"), 
+    setupAndRun(nrOfWorkers = MyConfigFactory.getValue[Int]("actor.nrOfWorkers"), 
         pieceLength = MyConfigFactory.getValue[Int]("actor.pieceLength"))
     distArray
   }
@@ -48,11 +61,13 @@ abstract class CalcDistance extends LoggerTrait {
   def calcDistance(id1: Int, id2: Int) = {
     new LCSArraySpaceOptimized(getSequence(id1), getSequence(id2)).getDistance()
   }
+  /**
+   * Actors actually do calculation
+   */
   class Worker extends Actor {
     def receive = {
       case AreaSplit(p1, p2) =>
         val (count, duration) = timeIt(calculateArea(p1, p2))
-        //logger.info("Time spent: %f at %d".format(duration, count))
         sender ! AreaFinished
     }
     def calculateArea(p1: Point, p2: Point) = {
@@ -64,6 +79,9 @@ abstract class CalcDistance extends LoggerTrait {
       acc
     }
   }
+  /**
+   * Control Actor, responsible for dispatching tasks
+   */
   class Master(nrOfWorkers: Int,
       pieceLength: Int,
       listener: ActorRef) extends Actor {
@@ -73,13 +91,11 @@ abstract class CalcDistance extends LoggerTrait {
       name = "workRouter")
     val nrOfHSplit = (totalSize - 2) / pieceLength + 1
     val nrOfMessages = (nrOfHSplit + 1) * nrOfHSplit / 2
-    //logger.info("Total area count: %d".format(nrOfMessages))
     var finishedCount = 0
     def receive = {
       case StartCalculation =>
         var acc = 1
         for (i <- 0 until nrOfHSplit; j <- 0 to i) {
-          //logger.info("Start %d worker".format(acc))
           acc += 1
           workerRouter ! AreaSplit(Point(i * pieceLength, j * pieceLength), 
               Point(math.min((i + 1) * pieceLength, totalSize - 1),
@@ -87,14 +103,15 @@ abstract class CalcDistance extends LoggerTrait {
         }
       case AreaFinished => 
         finishedCount += 1
-        //logger.info("FinishedCount: %d".format(finishedCount))
         if (finishedCount == nrOfMessages) {
           listener ! AllFinished((System.currentTimeMillis() - start).millis)
           context.stop(self)
         }
     }
   }
-  
+  /**
+   * Listener, responsible for shut down the system
+   */
   class Listener extends Actor {
     def receive = {
       case AllFinished(duration) =>
@@ -103,8 +120,10 @@ abstract class CalcDistance extends LoggerTrait {
         context.system.shutdown
     }
   }
-     
-  private def calculate(nrOfWorkers: Int, pieceLength: Int) = {
+  /**
+   * Set up the system and run
+   */
+  private def setupAndRun(nrOfWorkers: Int, pieceLength: Int) = {
     val system = ActorSystem("CalcSimilarities")
     val listener = system.actorOf(Props(new Listener), name = "listener")
     val master = system.actorOf(Props(new Master(

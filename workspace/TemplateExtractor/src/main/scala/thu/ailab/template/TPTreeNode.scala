@@ -6,6 +6,9 @@ import scala.annotation.tailrec
 import thu.ailab.tree.TreeNode
 import thu.ailab.utils.RenderChars
 
+/**
+ * This class is mainly for visualization
+ */
 class TPTreeNode(val treeNode: TreeNode, val father: Option[TPTreeNode]) {
   val name = treeNode.toString
   val depth = treeNode.depth
@@ -50,29 +53,17 @@ class TPTreeNode(val treeNode: TreeNode, val father: Option[TPTreeNode]) {
 
 object TPTreeNode {
   def makeTPTree(tnArray: Array[TreeNode], posToOpNode: Map[Int, OptionalNode]) = {
-    //@tailrec
+    @tailrec
     def getAncestor(curNode: TPTreeNode, step: Int): TPTreeNode = {
       if (step == 0) curNode
-      else {
-        try {
-          getAncestor(curNode.father.get, step - 1)
-        } catch {
-          case x: Exception => 
-            println("name: " + curNode.name);
-            println("father: " + curNode.father)
-            println("step: " + step); throw x 
-        }
-      }
+      else getAncestor(curNode.father.get, step - 1)
     }
     val root = new TPTreeNode(tnArray.head, None)
     var curNode = root
     for ((tn, idx) <- tnArray.tail.zip (1 until tnArray.length)) {
-//      println("curNode: " + curNode.name)
-//      println("tn: " + tn)
       val father =
         if (tn.depth <= curNode.depth) getAncestor(curNode, curNode.depth - tn.depth + 1)
         else curNode
-//      println("father: " + father.name)
       val child = new TPTreeNode(tn, Some(father))
       father.addChild(child)
       curNode = child

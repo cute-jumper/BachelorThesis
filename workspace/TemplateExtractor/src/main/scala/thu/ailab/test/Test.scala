@@ -5,6 +5,9 @@ import thu.ailab.template.TemplateManager
 import thu.ailab.template.EssentialNode
 import thu.ailab.template.OptionalNode
 
+/**
+ * Test code should put here 
+ */
 object Test extends AppEntry {
   def getTemplateStat(templateFile: String) = {
     val tpMan = TemplateManager.recoverTemplates(templateFile)

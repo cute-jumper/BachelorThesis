@@ -4,6 +4,14 @@ import org.jsoup.nodes._
 import scala.collection.mutable.ArrayBuffer
 import thu.ailab.template.ExType._
 
+/**
+ * Representation of an array of nodes, 
+ * including information like node name and node depth 
+ * 
+ * Two forms:
+ * 1. An array of nodes, which could not be repeated.
+ * 2. An array of nodes, which could be repeated
+ */
 class TreeNode(val nameArray: Array[String],
     val depthArray: Array[Int], 
     val allowMultiple: Boolean,
@@ -98,6 +106,10 @@ object TreeNode {
   }
 }
 
+/**
+ * A more verbose version of TreeNode class.
+ * Add the corresponding original jsoup nodes to the TreeNode.
+ */
 class VerboseTreeNode(override val nameArray: Array[String], 
     override val depthArray: Array[Int], 
     override val allowMultiple: Boolean,
