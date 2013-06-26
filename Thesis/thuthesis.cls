@@ -50,8 +50,14 @@
 \DeclareOption{noraggedbottom}{\thu@raggedbottomfalse}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{ctexbook}}
 \ExecuteOptions{utf,arialtitle}
+ % modification begins
+\newif\ifthu@scanversion\thu@scanversionfalse
+\DeclareOption{scanversion}{\thu@scanversiontrue}
+\newif\ifthu@forprint\thu@forprintfalse
+\DeclareOption{forprint}{\thu@forprinttrue}
+ % modification ends
 \ProcessOptions\relax
-\LoadClass[cs4size,a4paper,openany,nocap,UTF8]{ctexbook}
+\LoadClass[cs4size,a4paper,openany,UTF8]{ctexbook}
 \ifthu@bachelor\relax\else
   \ifthu@master\relax\else
     \ifthu@doctor\relax\else
@@ -582,13 +588,12 @@
         \ignorespaces\yihao[1.55]\thu@ctitle} %TODO: CJKulem.sty
       \vskip1.3cm
     \else
-      \vskip0.8cm
       \parbox[t][9cm][t]{\paperwidth-8cm}{
-      \renewcommand{\baselinestretch}{1.3}
+      \renewcommand{\baselinestretch}{1.5}
       \begin{center}
       \yihao[1.2]{\sffamily\heiti\thu@ctitle}\par
-      \par\vskip 18bp
-      \xiaoer[1] \textrm{\thu@apply}
+      \par\vskip 20bp
+      \xiaoer[1] \textrm{{\ziju{0.1111}\thu@apply}}
       \end{center}}
     \fi
     \ifthu@bachelor
@@ -612,7 +617,6 @@
             \end{tabular}
         }}
     \else
-      \vskip 5bp
       \parbox[t][7.8cm][t]{\textwidth}{{\sanhao[1.5]
         \begin{center}\fangsong
           \setlength{\thu@title@width}{6em}
@@ -636,7 +640,7 @@
         \end{center}}}
       \fi
      \begin{center}
-       {\ifthu@bachelor\vskip-1.0cm\hskip-1.2cm\xiaosi\else\vskip-0.5cm\sanhao\fi \songti \thu@cdate}
+       {\ifthu@bachelor\vskip-1.0cm\hskip-1.2cm\xiaosi\else\sanhao\fi \songti \thu@cdate}
      \end{center}
     \end{center}} % end of titlepage
 \newcommand{\thu@engcover}{%
@@ -720,7 +724,13 @@
                      \thu@frontdate\thu@underline[7em]\relax\hspace*{1cm}
     \endgroup
   \fi}
-\newcommand{\makecover}{
+ % modification begins
+\RequirePackage{pdfpages}
+\newcommand{\makescanversion}[1]{
+  \includepdf[page=1]{#1}
+}
+ % modification ends
+\newcommand{\makecover}[1][auth-scan]{
   \phantomsection
   \pdfbookmark[-1]{\thu@ctitle}{ctitle}
   \normalsize%
@@ -731,8 +741,15 @@
         \cleardoublepage\thu@engcover
     \fi\fi
     \ifthu@postdoctor\relax\else%
+     % modification begins
+    \ifthu@forprint%
+      \cleardoublepage\else%
       \ifthu@bachelor\clearpage\else\cleardoublepage\fi%
-      \ifthu@bachelor\thu@authorization@mk\else%
+    \fi
+      \ifthu@bachelor%
+      \ifthu@scanversion\makescanversion{#1}\else\thu@authorization@mk\fi%
+      \else%
+     % modification ends
       \begin{list}{}{%
         \topsep\z@%
         \listparindent\parindent%
@@ -743,6 +760,9 @@
       \end{list}\fi%
     \fi
   \end{titlepage}
+  % modification begins
+  \ifthu@forprint\cleardoublepage\fi
+  % modification ends
   \normalsize
   \thu@makeabstract
   \let\@tabular\thu@tabular}
@@ -781,15 +801,30 @@
     \setlength{\listparindent}{0cm} % 段落缩进量
     \setlength{\topsep}{0pt} % 标签与上文的间距
    }}{\end{list}}
-\newenvironment{ack}{%
+\newenvironment{ack}[1][declare-scan]{%
+    \newcommand{\declarescanname}{#1}%
     \thu@chapter*{\thu@ackname}
   }
-  {
+{
+    % modification begins
+    \ifthu@scanversion%
+    \clearpage
+    \refstepcounter{chapter}%
+    \includepdf[pages={1},
+    pagecommand={
+        % \thispagestyle{empty}%
+        \addcontentsline{toc}{chapter}{\thu@declarename}%
+        \chaptermark{\thu@declarename}%
+      }%
+    ]{\declarescanname}%
+    % modification ends
+    \else
     \ifthu@postdoctor\relax\else%
      \thu@chapter*{\thu@declarename}
      \par{\xiaosi\parindent2em\thu@declaretext}\vskip2cm
        {\xiaosi\hfill\thu@signature\thu@underline[2.5cm]\relax%
         \thu@backdate\thu@underline[2.5cm]\relax}%
+    \fi
     \fi
   }
 \def\thu@starttoc#1{% #1: float type, prepend type name in \listof*** entry.

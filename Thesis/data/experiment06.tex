@@ -57,8 +57,10 @@
 
 我们有两个实验数据集，分别为博客（blog）和新闻（news）。实验数据集的概况
 如\reftbl{experiment:tab:overview}所示。
-\begin{table}[h]
+\begin{table}[h] 
   \centering
+  \caption{实验数据概况}
+  \label{experiment:tab:overview}
 % BEGIN RECEIVE ORGTBL 实验数据概况
 \begin{tabular}{lll}
   \toprule
@@ -70,8 +72,6 @@
 \bottomrule
 \end{tabular}
 % END RECEIVE ORGTBL 实验数据概况
-  \caption{实验数据概况}
-  \label{experiment:tab:overview}
 \end{table}
 \begin{comment}
 #+ORGTBL: SEND 实验数据概况 orgtbl-to-latex :splice nil :skip 0
@@ -91,6 +91,8 @@
 法。\reftbl{experiment:tab:filter}给出了实验中使用的过滤规则和过滤后的结果。
 \begin{table}[h]
   \centering
+  \caption{过滤无用网页实验结果}
+  \label{experiment:tab:filter}
 % BEGIN RECEIVE ORGTBL 过滤无用网页
 \begin{tabular}{lrr}
   \toprule
@@ -103,8 +105,6 @@
 \bottomrule
 \end{tabular}
 % END RECEIVE ORGTBL 过滤无用网页
-  \caption{过滤无用网页实验结果}
-  \label{experiment:tab:filter}
 \end{table}
 \begin{comment}
 #+ORGTBL: SEND 过滤无用网页 orgtbl-to-latex :splice nil :skip 0
@@ -123,6 +123,8 @@
 用标签的几种正则表达式模式及每种模式对应的标签名。
 \begin{table}[h]
   \centering
+  \caption{去掉的无用标签}
+  \label{experiment:tab:uselesstags}
 % BEGIN RECEIVE ORGTBL 无用标签
 \begin{tabular}{ll}
   \toprule
@@ -134,8 +136,6 @@
 \bottomrule
 \end{tabular}
 % END RECEIVE ORGTBL 无用标签
-  \caption{去掉的无用标签}
-  \label{experiment:tab:uselesstags}
 \end{table}
 \begin{comment}
 #+ORGTBL: SEND 无用标签 orgtbl-to-latex :splice nil :skip 0
@@ -151,6 +151,7 @@
 如\reftbl{experiment:tab:recordlength}所示。
 \begin{table}[h]
   \centering
+  \caption{检测出的重复记录长度的分布情况\label{experiment:tab:recordlength}}
 % BEGIN RECEIVE ORGTBL recordlength
 \begin{tabular}{rrr}
   \toprule
@@ -169,7 +170,6 @@ $\ge$10 & 745 & 3575 \\
 \bottomrule
 \end{tabular}
 % END RECEIVE ORGTBL recordlength
-  \caption{检测出的重复记录长度的分布情况\label{experiment:tab:recordlength}}
 \end{table}
 \begin{comment}
 #+ORGTBL: SEND recordlength orgtbl-to-latex :splice nil :skip 0
@@ -205,6 +205,7 @@ $\ge$10 & 745 & 3575 \\
 怎样的影响。我们选择在news数据集上进行实验，具体的实验结果见\reftbl{experiment:tab:threshold}。
 
 \begin{table}[h]
+\caption{阈值变化对实验结果的影响\label{experiment:tab:threshold}}
 % BEGIN RECEIVE ORGTBL 阈值变化
 \begin{tabular}{rrrrr}
   \toprule
@@ -217,7 +218,6 @@ $\ge$10 & 745 & 3575 \\
 \bottomrule
 \end{tabular}
 % END RECEIVE ORGTBL 阈值变化
-\caption{阈值变化对实验结果的影响\label{experiment:tab:threshold}}
 \end{table}
 \begin{comment}
 #+ORGTBL: SEND 阈值变化 orgtbl-to-latex :splice nil :skip 0

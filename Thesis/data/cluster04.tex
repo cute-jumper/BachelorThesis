@@ -62,7 +62,7 @@ $500h$大约是21天左右，对于我们的实验来说，这个时间是不可
 行计算编程模型为Actor。
 
 Actor模型是并行计算中常见的一种模型，早
-在1973年Hewitt就在\onlinecite{hewitt1973universal}中就提出了Actor的概念，
+在1973年Hewitt就在\cite{hewitt1973universal}中就提出了Actor的概念，
 到目前已经有40年左右的历史了。现代的很多编程语言都内建了对Actor的支持，
 比较有名的有Erlang和Scala等。
 
@@ -75,7 +75,7 @@ Actor模型的基本哲学和面向对象编程的思想非常类似，即一切
 在因为等待消息而堵塞，避免了由于同步和全局共享状态而导致的锁和其他问
 题。Actor模型的简单示意图如\reffig{cluster:fig:actor}所示。
 
-\begin{figure}
+\begin{figure}[h]
   \centering
   \includegraphics[width=0.6\textwidth]{cluster04/actor}
   \caption{Actor模型简单示意图}
@@ -97,7 +97,7 @@ Actor模型的基本哲学和面向对象编程的思想非常类似，即一切
 主Actor负责向监听Actor发送消息，告知任务完成，监听Actor则负责将整个系统关闭。这样
 一个计算的模式我们后面还会用到，因此我们将其做了封装，隐藏了底层的Actor模型的实现
 细节，便于后续的使用。
-\begin{figure}
+\begin{figure}[h]
   \centering
   \includegraphics[width=0.45\textwidth]{cluster04/triangle}
   \caption{任务分割示意图}
@@ -180,7 +180,7 @@ Sim(D_1,D_2)=\frac{|elcs(S_1,S_2)|}{\max(\sum\limits_{n\in
 
 聚类过程可以用\reffig{cluser:fig:aggloclustering}简单表示。这个例子中一开始有5个
 类，每一步选择最近的两个类进行一次凝聚，最后聚成两个类。
-\begin{figure}[hb]
+\begin{figure}[h]
   \centering
   \includegraphics[width=0.6\textwidth]{cluster04/aggloclustering}
   \caption{简单层次聚类方法图示}

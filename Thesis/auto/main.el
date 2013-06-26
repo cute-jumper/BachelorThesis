@@ -11,6 +11,7 @@
      "algorithmicx"
      "algorithm"
      "bm"
+     "setspace"
      "tikz"
      "comment"
      "thutils"

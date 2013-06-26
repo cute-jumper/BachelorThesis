@@ -64,16 +64,14 @@
 这部分要求要有较快的运行速度，因此不需要设计非常复杂的算法，主要通过设置一些简单
 的规则去对原始的网页集合进行过滤。通过观察，我们主要采取了以下这些策略：
 \begin{itemize}
-\item 404及其他类似的错误页可以通过一些关键字如\texttt{404 Not
-    Found}或者\texttt{Server Error}等进行辨别。通常这些错误页的文档都很简单，长度
+\item 404及其他类似的错误页可以通过一些关键字如{404 Not
+    Found}或者{Server Error}等进行辨别。通常这些错误页的文档都很简单，长度
   很短，因此还可以通过设置长度阈值将其过滤；这样还可以将一些无用的太短的文档同时
   去除。
 \item 大部分目录页的URL和详细页的URL有明显区别。比如对于新浪博客来说，详细页的
-  URL都以\texttt{.html}结尾，而目录页则没有。例如以下两个URL：
-\begin{verbatim}
-http://blog.sina.com.cn/u/1439351555
-http://blog.sina.com.cn/s/blog_55cac30301016yb1.html
-\end{verbatim}
+  URL都以{.html}结尾，而目录页则没有。例如以下两个URL：
+http://blog.sina.com.cn/u/1439351555\\
+http://blog.sina.com.cn/s/blog\_55cac30301016yb1.html\\
 第一个URL对应的是某个博主的文章目录，第二个URL则是该博主的某篇文章。因此只需要通
 过正则表达式匹配的方式即可将目录页过滤。其他网站也有类似这样的规则，我们只需要在
 实验前针对每个网站提前设置好规则进行过滤即可。由于每个网站每种特定的网页只需要指
@@ -82,10 +80,10 @@ http://blog.sina.com.cn/s/blog_55cac30301016yb1.html
   的URL和详细页的URL在模式没有太大的区别，或者人工设置规则的办法太麻烦了，我们的
   系统中也实现了通过网页的特征过滤详细页的机制。注意到目录页的作用主要是给用户提
   供进入各个详细页的入口，因此目录页的HTML文档的主要部分是由列表环
-  境\texttt{<ul>}或\texttt{<ol>}中的列表项\texttt{<li>}及其包含的超链接标
-  签\texttt{<a>}组成。\reffig{framework:fig:baidunews}是简化后的百度新闻目录
+  境{<ul>}或{<ol>}中的列表项{<li>}及其包含的超链接标
+  签{<a>}组成。\reffig{framework:fig:baidunews}是简化后的百度新闻目录
   页HTML代码的一部分\footnote{来源：2013年6月9日15时的news.baidu.com页面}。我们提
-  取出网页中的所有\texttt{<li>}标签中的\texttt{<a>}标签，计算这些\texttt{<a>}标签
+  取出网页中的所有{<li>}标签中的{<a>}标签，计算这些{<a>}标签
   的文本内容占网页所有文本内容的比重，超过一定的阈值则判定为目录页。由于这种方法
   比上述使用简单规则的办法要慢许多，因此在系统中我们将优先使用规则的方法对目录页
   进行过滤。
@@ -105,15 +103,15 @@ http://blog.sina.com.cn/s/blog_55cac30301016yb1.html
 第一步是去除无用的标签。这些标签有以下特点：
 \begin{enumerate}
  \item\label{item:1} 与网页模块无关。去除这些标签时，可以将标签本身及标签的内容一同去掉。比如
-  \texttt{<script>}、\texttt{<link>}、\texttt{<style>}等。
+  {<script>}、{<link>}、{<style>}等。
 \item\label{item:2} 通常是深层次的HTML文档的节点，用于控制格式，在模板中意义不大。
   去除这些标签时只取出标签本身，保留标签所包含的内容。比
-  如\texttt{<br/>}、\texttt{<p>}、\texttt{<strong>}、\texttt{<em>}等。
-\item\label{item:3} 我们在实验中不考虑非文本标签，因此将\texttt{<img>}、
-  \texttt{<audio>}等直接去除。
+  如{<br/>}、{<p>}、{<strong>}、{<em>}等。
+\item\label{item:3} 我们在实验中不考虑非文本标签，因此将{<img>}、
+  {<audio>}等直接去除。
 \item\label{item:4} 最后是去除一些在模板中变化很大的太复杂的标签，典型的是表格相
   关的一些标签，包
-  括\texttt{<table>}、\texttt{<th>}、\texttt{<tr>}、\texttt{<td>}等。
+  括{<table>}、{<th>}、{<tr>}、{<td>}等。
 \end{enumerate}
 
 接下来我们把每个HTML文档都解析成DOM Tree。DOM Tree的构建速度比较慢，在解析时需要
@@ -125,19 +123,19 @@ http://blog.sina.com.cn/s/blog_55cac30301016yb1.html
 先将树形结构转化为更便于处理的序列形式。具体地，我们采用先序遍历的方式，将DOM
 Tree转化成一个标签序列，为了可以还原成原始的DOM Tree，我们在遍历的同时在每个节点
 处保存了该节点的深度信息。对于\reffig{framework:fig:html}所示的HTML文档，解析成
-的DOM Tree如\reffig{framework:fig:domtree}所示，如果每个标签采用\texttt{标签名+深
+的DOM Tree如\reffig{framework:fig:domtree}所示，如果每个标签采用{标签名+深
   度}的表示方法，则我们采用先序遍历方式可以得到该DOM Tree对应的序列
-为：\texttt{<html0><body1><div2><a3><p3><div2>}。先序遍历的优点在于可以保证每个子
+为：{<html0><body1><div2><a3><p3><div2>}。先序遍历的优点在于可以保证每个子
 树的所有节点在序列中的位置是连续的，且根节点位于这段连续子序列的起始处。比如以第
-一个\texttt{<div>}标签为根的子树在遍历得到的序列中对应的序列
-为\texttt{<div2><a3><p3>}，根节点\texttt{<div2>}位于子序列的起始位置。这些特点对
+一个{<div>}标签为根的子树在遍历得到的序列中对应的序列
+为{<div2><a3><p3>}，根节点{<div2>}位于子序列的起始位置。这些特点对
 于后续的处理有很大的帮助。
 
 第三步是对HTML文档中重复出现的记录进行检测，去掉重复的多余的部分，从而用更简单的
 方式表示原文档。我们将DOM Tree的某个子树成为一个“记录”。由于HTML模板中动态生成
 的部分中可能包含大量重复的模式，比如\reffig{intro:fig:django-hard}所示的Django模
-板，其中的\texttt{news.comments}可能包含不定数目的元素，在比较由这个模板生成的两
-个不同网页的时候，应该将其中数目可能不一样的\texttt{<li>}的结构视为一样，否则将对
+板，其中的{news.comments}可能包含不定数目的元素，在比较由这个模板生成的两
+个不同网页的时候，应该将其中数目可能不一样的{<li>}的结构视为一样，否则将对
 后续的处理造成较大的误差。在网页的生成中，这种重复模式是大量存在的，因此，检测网
 页中的重复记录并做相应的简化是预处理过程中最重要的一个部分，我们将在
 第~\ref{chap:suffixtree}章中详细介绍。

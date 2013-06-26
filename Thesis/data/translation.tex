@@ -2,7 +2,8 @@
 \chapter{书面翻译}
 \label{chap:translation}
 \begin{center}  
-  \Large{文档结构相似性算法调研}
+  {文档结构相似性算法调研\\
+    A short survey of document structure similarity algorithms}
 \end{center}
 
 \section*{摘要}
@@ -162,7 +163,7 @@ body元素，可以被编码为：\\
 /html/head\\
 /html/head/title/\\
 /html/head/title/[text]\\
-/html/body
+/html/body\\
 /html/body/[text]
 
 路径相似度衡量两个不同文档之间的路径的相似度。一个路径被定义为一个从根节点开始，
@@ -205,7 +206,7 @@ c(D_i,D_j)=\frac{S(D_i,w)\cap S(D_j,w)}{S(D_i,w)}
 并将更大的误差引入到估计中。
 
 我们测量了路径shingle和部分路径shingle的精度。比较是在使用无穷的$k$的不同的窗口大
-小下进行的。用来比较是数据是从\texttt{my.yahoo.com}下载的在两年时间内的典型的网页
+小下进行的。用来比较是数据是从{my.yahoo.com}下载的在两年时间内的典型的网页
 快照。结果显示小的窗口大小（从1到4）对精度没有影响：两个聚类都没有错误，四个聚类
 只引入百分之三的错误。用来比较的shingle个数的不同并不影响聚类的效果。$k$的值从10
 测试到了1000,以及一个无穷数量的shingle。所有的都显示了错误在百分之十之内。
@@ -236,12 +237,15 @@ c(D_i,D_j)=\frac{S(D_i,w)\cap S(D_j,w)}{S(D_i,w)}
 
 每个度量方法都用来度量两个文本之间距离。文档根据这些距离通过开$k-means$进行聚类。
 通过每种度量得到的聚类与树编辑距离得到的聚类进行比较，计算一个错误估计。结果显示
-在Table I中。
-{\centering
+在表A-1中。
+\begin{figure}[h]
+  \centering
+  \caption*{表~A-1}
   \includegraphics[width=\textwidth]{translation/Table1}
-}
+\end{figure}
+
 我们测试了最多6个聚类，因为这个数据集中根据书籍的作者数量，有6个自然的聚类。我们
-期望加权标签度量有较低的错误率，因为这些数据之间的结构差异只有\texttt{author}这
+期望加权标签度量有较低的错误率，因为这些数据之间的结构差异只有{author}这
 个标签出现的次数。
 
 第二个数据集是一系列从以下网站得到的快
@@ -249,39 +253,51 @@ c(D_i,D_j)=\frac{S(D_i,w)\cap S(D_j,w)}{S(D_i,w)}
 照是2001到2003两年期间的，大概是每天一次。冗余的快照（由MD5签名决定）被移除了，每
 个站点的快照集合取样20份页面。一样的聚类算法用在这些文档上，只有这次我们有一个预
 定义好的聚类（通过网站），并且可以将每个算法同这些预定义好的聚类进行比较。结果显
-示在Table II中。{\centering
-\includegraphics[width=\textwidth]{translation/Table2}
-}
+示在表A-2中。
+\begin{figure}  
+  \centering
+  \caption*{表~A-2}
+\includegraphics[width=0.8\textwidth]{translation/Table2}
+\end{figure}
 
 这个错误率好像异常地高，特别是对于我们在其他测试中用来当做基准的树编辑距离算法。
 我们推测这个错误率是由于HTML的结构中用来呈现给用户内容的词汇相对较小。路径和路
 径shingle度量比树编辑距离性能要好，但也比预期的要差。这可能是因为它们使用了部分路
 径来描述树的结构。很深的树在顶部区域可能会呈现很多相似的结构，导致两个来自不同站
 点的树的相似度可能会互相偏向。FFT度量方法的糟糕的性能不能给出一个简单的解释。可以
-说依据相同的最开始的一批标签（\texttt{html}，\texttt{head}和\texttt{body}），每个
+说依据相同的最开始的一批标签（{html}，{head}和{body}），每个
 网页都是极度相似的信号，在叶子层面也是相似的构造（标签列表和文本）。然而，这个转
 换使得我们难以找出是网页的哪一些特征导致它们变得如此相似。
 
 作为最后的比较，我们检查了以上表格中从一个站点来的快照。这会在比如监测一个页面随
 着时间变化的时候很有用。我们选择my.yahoo.com，因为里面的内容会定期发生变化，但是
 结构上随着时间的变化很缓慢（比如，当一个新的图片被加入到一些特点的假日）。我们再
-次把使用近似算法和树编辑距离产生的聚类进行比较。{\centering
+次把使用近似算法和树编辑距离产生的聚类进行比较。
+\begin{figure}[h]
+\centering
+\caption*{表~A-3}
   \includegraphics[width=\textwidth]{translation/Table3}
-}
+\end{figure}
 
 我们观察到除了FFT以外的大部分近似算法在小的聚类大小上都有非常低的错误率，但是错误
-率在聚类的规模变大时会激增。观察一下描述树编辑距离聚类和FFT聚类以及路径/路径
-shingle聚类之间映射变化的矩阵是有意义的。Table IV描述了FFT聚类和树编辑距离聚类的
-不同，Table V描述了路径聚类和树编辑距离聚类之间的不同。
-{\centering
+率在聚类的规模变大时会激增。观察一下描述树编辑距离聚类和FFT聚类以及路
+径/路径shingle聚类之间映射变化的矩阵是有意义的。表A-4描述了FFT聚类和树编辑距离聚
+类的不同，表A-5描述了路径聚类和树编辑距离聚类之间的不同。
+\begin{figure}[h]
+\centering
+\caption*{表~A-4}
   \includegraphics[width=\textwidth]{translation/Table4}
-}
-
+\end{figure}
 从这两个矩阵我们可以推导出FFT度量会倾向于将所有的数据点聚成一个类别，因此不提供一
 个有效的分辨相似网页的能力。在另一方面，路径度量（路径shingle和加权标签度量实际是
 一样的）比树编辑距离更有分辨能力，能够比树编辑距离分出更好的类别。尽管这些实验中
 将这种情况标为了错误，它可能有很重要的分辨那些感觉上不一样，但在相同的编辑距离内
 的树的功能。
+\begin{figure}[h]
+  \centering
+  \caption*{表~A-5}
+  \includegraphics[width=\textwidth]{translation/Table5}
+\end{figure}
 
 最惊奇的观察在于加权标签的相似度度量方法，一开始我们认为是一文不值的东西，却能和
 复杂很多的技术达到一样的精确程度。这可能可以归因为大部分实验是在来自一个站点的相
@@ -292,23 +308,25 @@ shingle聚类之间映射变化的矩阵是有意义的。Table IV描述了FFT�
 
 \subsection{性能比较}
 选择一个近似算法的主要原因是为了将速度提高到一个可以接受的水平，因为最优的算法太
-慢了。文档聚类用于数据抽取或者搜索和获取方法，提供了一个结构化相似度的很好的例
-子。用于精度估计的相对小的数据集说明了近似算法在计算近似相似度上的有效性。Figure
-1展示了不同算法在书籍文档的数量对数增长时的相对代价。
+慢了。文档聚类用于数据抽取或者搜索和获取方法，提供了一个结构化相似度的很好的例子。
+用于精度估计的相对小的数据集说明了近似算法在计算近似相似度上的有效性。图A-1展示了
+不同算法在书籍文档的数量对数增长时的相对代价。
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.8\textwidth]{translation/Figure1}
+  \caption*{图~A-1}
 \end{figure}
 
 聚类的时间是在一个小于一千比特的较小的文档上计算的。为了更好地理解计算两个文档之
 间差异的代价，我们比较了在TCP-H基准测试数据上的每个度量方法的代价。这个数据是
 由Toxgene [19]XML文档生成器随机生成的。我们修改了生成器的参数以便产生包含原始数据
 集合1\%，5\%，10\%，15\%，20\%，和25\%的文档。这个生成器跑两次，在每个分数上产生
-两个不同的文档。结果在Figure 2中。
+两个不同的文档。结果在图A-2中。
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.8\textwidth]{translation/Figure2}
+  \caption*{图~A-2}
 \end{figure}
 
 我们可以看到树编辑距离算法比任何其他的近似算法都要慢好几个数量级。FFT算法也显示
@@ -354,61 +372,72 @@ shingle还可以部分调优，就算是因此取了原始的指纹。给定一�
 这个工作是基于No. W-7405- ENG-48. UCRL-CONF-202728法令，在美国能源部的保护下，
 在University of California Lawrence Livermore National Laboratory进行的，
 
+\begin{spacing}{0.9}
 \section*{参考文献}
 \begin{enumerate}[{[}1{]}]
-\item K. C. Tai, “The tree-to-tree correction problem,” Journal of the ACM,
-  vol. 26, no. 3, 1979.
-\item S. Y. Lu, “A tree-to-tree distance and its application to cluster
-  analysis,” IEEE Trans. Pattern Anal. Mach. Intell. PAMI-1, no. 2, 1979.
-\item D. Shasha and K. Zhang, “Fast algorithms for the unit cost editing
-  distance between trees,” Journal of Algorithms, no. 11, 1990.
-\item K. Zhang, D. Shasha, and J. T.-L. Wang, “Approximate tree matching in the
+\item{\small K. C. Tai, “The tree-to-tree correction problem,” Journal of the ACM,
+  vol. 26, no. 3, 1979.}
+\item{\small S. Y. Lu, “A tree-to-tree distance and its application to cluster
+  analysis,” IEEE Trans. Pattern Anal. Mach. Intell. PAMI-1, no. 2, 1979.}
+\item{\small D. Shasha and K. Zhang, “Fast algorithms for the unit cost editing
+  distance between trees,” Journal of Algorithms, no. 11, 1990.}
+\item{\small K. Zhang, D. Shasha, and J. T.-L. Wang, “Approximate tree matching in the
   presence of variable length don’t cares,” J. Algorithms, vol. 16, no. 1, pp.
-  33–66, 1994. [Online]. Available: citeseer.nj.nec.com/zhang93approximate.html
-\item D. Shasha and K. Zhang, “Approximate tree pattern matching,” in Pattern
+  33–66, 1994. [Online]. Available: citeseer.nj.nec.com/zhang93approximate.html}
+\item{\small D. Shasha and K. Zhang, “Approximate tree pattern matching,” in Pattern
   Matching Algorithms. Oxford University Press, 1997, pp. 341–371. [Online].
-  Available: citeseer.nj.nec.com/95609.html
-\item S. Chawathe, A. Rajaraman, H. Garcia-Molina, and J. Widom, “Change
+  Available: citeseer.nj.nec.com/95609.html}
+\item{\small S. Chawathe, A. Rajaraman, H. Garcia-Molina, and J. Widom, “Change
   detection in hierarchically structured information,” in Proceedings of ACM
-  SIGMOD, 1996.
-\item S. S. Chawathe and H. Garcia-Molina, “Meaningful change detection in
+  SIGMOD, 1996.}
+\item{\small S. S. Chawathe and H. Garcia-Molina, “Meaningful change detection in
   structured data,” in Proceedings of the 1997 ACM SIGMOD, 1997, pp. 26–37.
-  [Online]. Available: citeseer.nj.nec.com/article/chawathe97meaningful.html
-\item J. Chen, D. DeWitt, F. Tian, and Y. Wang, “NiagaraCQ: A scalable
+  [Online]. Available: citeseer.nj.nec.com/article/chawathe97meaningful.html}
+\item{\small J. Chen, D. DeWitt, F. Tian, and Y. Wang, “NiagaraCQ: A scalable
   continuous query system for Internet databases,” in Proceedings of the 2000
-  ACM SIGMOD, 2000.
-\item Y. Wang, D. DeWitt, and J.-Y. Cai, “X-Diff: An effective change detection
+  ACM SIGMOD, 2000.}
+\item{\small Y. Wang, D. DeWitt, and J.-Y. Cai, “X-Diff: An effective change detection
   algorithm for XML documents,” International Conference on Data Engineering,
-  2003.
-\item A. Marian, S. Abiteboul, G. Cobena, and L. Mignet, “Change- centric
+  2003.}
+\item{\small A. Marian, S. Abiteboul, G. Cobena, and L. Mignet, “Change- centric
   management of versions in an XML warehouse,” in The VLDB Journal, 2001, pp.
-  581–590. [Online]. Available: citeseer.nj.nec.com/marian00changecentric.html
-\item G. Cobena, S. Abiteboul, and A. Marian, “Detecting changes in XML
+  581–590. [Online]. Available: citeseer.nj.nec.com/marian00changecentric.html}
+\item{\small G. Cobena, S. Abiteboul, and A. Marian, “Detecting changes in XML
   documents,” in International Conference on Data Engineering, 2002, pp. 41
-  –52.
-\item F. Douglis, T. Ball, Y.-F. Chen, and E. Koutsofios, “The AT\&T Internet
+  –52.}
+\item{\small F. Douglis, T. Ball, Y.-F. Chen, and E. Koutsofios, “The AT\&T Internet
   difference engine: Tracking and viewing changes on the Web,” in World Wide
-  Web, vol. 1, January 1998, pp. 27–44.
-\item Y.-F. Chen, F. Douglis, H. Huan, and K.-P. Vo, “TopBlend: An efficient
+  Web, vol. 1, January 1998, pp. 27–44.}
+\item{\small Y.-F. Chen, F. Douglis, H. Huan, and K.-P. Vo, “TopBlend: An efficient
   implementation of HtmlDiff in Java,” in Proceedings of the WebNet2000
-  Conference, San Antonio, TX, November 2000.
-\item V. Boyapati, K. Chevrier, A. Finkel, N. Glance, T. Pierce, R. Stokton, and
+  Conference, San Antonio, TX, November 2000.}
+\item{\small V. Boyapati, K. Chevrier, A. Finkel, N. Glance, T. Pierce, R. Stokton, and
   C. Whitmer, “ChangeDetector(TM): A site-level monitoring tool for the WWW,”
-  in WWW2002, May 2002.
-\item A. Z. Broder, “On the Resemblance and Containment of Documents,” in
-  Proceedings of Compression and Complexity of SEQUENCES 1997, 1997.
-\item A. Nierman and H. Jagadish, “Evaluating structural similarity in XML
-  documents,” Fifth International Workshop on the Web and Databases, 2002.
-\item S. Flesca, G. Manco, E. Masciari, L. Pontieri, and A. Pugliese, “Detect-
+  in WWW2002, May 2002.}
+\item{\small A. Z. Broder, “On the Resemblance and Containment of Documents,” in
+  Proceedings of Compression and Complexity of SEQUENCES 1997, 1997.}
+\item{\small A. Nierman and H. Jagadish, “Evaluating structural similarity in XML
+  documents,” Fifth International Workshop on the Web and Databases, 2002.}
+\item{\small S. Flesca, G. Manco, E. Masciari, L. Pontieri, and A. Pugliese, “Detect-
   ing structural similarities between XML documents,” Fifth International
-  Workshop on the Web and Databases, 2002.
-\item D. Rocco, D. Buttler, and L. Liu, “Page Digest for large-scale Web ser-
+  Workshop on the Web and Databases, 2002.}
+\item{\small D. Rocco, D. Buttler, and L. Liu, “Page Digest for large-scale Web ser-
   vices,” in Proceedings of the IEEE Conference on Electronic Commerce, June
-  2003.
-\item D. Barbosa, A. O. Mendelzon, J. Keenleyside, and K. A. Lyons, “Toxgene:
+  2003.}
+\item{\small D. Barbosa, A. O. Mendelzon, J. Keenleyside, and K. A. Lyons, “Toxgene:
   An extensible template-based data generator for XML,” in SIGMOD Conference,
-  2002. [Online]. Available: citeseer.nj.nec.com/525958.html
-\end{enumerate}
+  2002. [Online]. Available: citeseer.nj.nec.com/525958.html}
+\end{enumerate}  
+\end{spacing}
+\vspace{20pt}
+\begin{center}
+  书面翻译对应的原文索引
+\end{center}
+\begin{spacing}{0.9}
+  {\wuhao Buttler D. A short survey of document structure
+    similarity algorithms. United States. Department of Energy, 2004}
+\end{spacing}
+
 %%% Local Variables: 
 %%% mode: latex
 %%% TeX-master: "../main"
