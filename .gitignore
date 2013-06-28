@@ -17,3 +17,4 @@ tmp
 *.log
 *.toc
 _region_.*
+scanversion

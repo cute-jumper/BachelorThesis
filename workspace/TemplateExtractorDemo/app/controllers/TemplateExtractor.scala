@@ -1,5 +1,6 @@
 package controllers
 
+import play.api.Play
 import org.jsoup.Jsoup
 import org.jsoup.select.NodeVisitor
 import org.jsoup.nodes._
@@ -11,9 +12,10 @@ import thu.ailab.document.WebHTMLDocument
 import thu.ailab.template.ExType
 
 object TemplateExtractor {
-  val templateDir = sys.props("user.home") + "/Programs/BachelorThesis/Data/material"
+  val templateBlog = Play.current.configuration.getString("templateFiles.blog").get
+  val templateNews = Play.current.configuration.getString("templateFiles.news").get
   val templatesMan = List("blog", "news").zip( 
-  List("/template_blog_2000_anno.template", "/templateFile_news_0.5.template").map(
+  List(templateBlog, templateNews).map(
     TemplateManager.recoverTemplates(_)
   )).toMap
   def feed(html: String, docType: String) = {

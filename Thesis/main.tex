@@ -3,7 +3,7 @@
 %%% TeX-master: t
 %%% End:
 
-\documentclass[bachelor,nofonts]{thuthesis}
+\documentclass[bachelor,nofonts,scanversion]{thuthesis}
 %\documentclass[master]{thuthesis}
 %\documentclass[doctor]{thuthesis}
 % \documentclass[%
@@ -23,6 +23,7 @@
   scopes}
 \usepackage{setspace}
 \usepackage{bm}
+\usepackage{pdfpages}
 \usepackage{algorithm}
 \usepackage{algorithmicx}
 \usepackage{algpseudocode}
@@ -99,4 +100,7 @@
 
 % 个人简历
 % \include{data/resume}
+% Add table
+\includepdf[page=1]{figures/table-front}
+\includepdf[page=1]{figures/table-back}
 \end{document}
