@@ -7,5 +7,6 @@ package thu.ailab.template
  */
 object ExType extends Enumeration {
   type ExType = Value
+  // Add any type you like
   val MAGIC, TITLE, AUTHOR, CONTENT = Value
 }

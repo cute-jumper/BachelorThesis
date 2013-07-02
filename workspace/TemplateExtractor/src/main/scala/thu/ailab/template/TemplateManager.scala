@@ -93,7 +93,9 @@ object TestTemplateManager extends AppEntry {
     }
   }
   def testSaveToXML() {
-    val filenames = thu.ailab.utils.Tools.getTestFiles.slice(0, 100)
+    val dataset = MyConfigFactory.getValue[String]("global.dataset")
+    val filenames = thu.ailab.utils.Tools.getTestFiles.slice(0, 
+        MyConfigFactory.getValue[Int](dataset, "template.extractCount"))
     val templateArray = TemplateManager.recoverTemplates()
     val sb = new StringBuilder
     for (fn <- filenames) {
@@ -114,7 +116,7 @@ object TestTemplateManager extends AppEntry {
       }
     }
     import thu.ailab.utils.Tools.withPrintWriter
-    withPrintWriter(sys.props("user.home") + "/tmp/results.xml") { pw =>
+    withPrintWriter(MyConfigFactory.getValue[String](dataset, "template.extractResult")) { pw =>
       pw.println("<documents>")
       pw.println(sb)
       pw.println("</documents>")
@@ -123,5 +125,9 @@ object TestTemplateManager extends AppEntry {
   def testBuild() {
     println(TemplateManager.buildTemplates)
   }
-  testSaveToXML()
+  MyConfigFactory.getValue[String]("global.stage") match {
+    case "build" => testBuild()
+    case "extractRandom" => testExtract()
+    case "extractAll" => testSaveToXML()
+  }  
 }

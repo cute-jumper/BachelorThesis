@@ -1,5 +1,6 @@
 global {
        dataset=blog
+       stage=build
 }
 logger {
        filepath="~/tmp/example.log"
@@ -24,6 +25,8 @@ blog {
      template {
             optionalConfidence=0.1
             templateFile="~/tmp/templateFile_blog"
+            extractCount=100
+            extractResult="~/tmp/blog_result.xml"
      }
 }
 news {
@@ -46,6 +49,8 @@ news {
      template {
             optionalConfidence=0.1
             templateFile="~/tmp/templateFile_news"
+            extractCount=100
+            extractResult="~/tmp/news_result.xml"
      }
 }
 actor {
