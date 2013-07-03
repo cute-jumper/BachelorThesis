@@ -16,5 +16,6 @@ tmp
 *.aux
 *.log
 *.toc
+*.out
 _region_.*
 scanversion
