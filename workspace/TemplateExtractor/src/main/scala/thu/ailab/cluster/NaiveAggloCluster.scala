@@ -5,13 +5,15 @@ import scala.collection.mutable.{HashSet => MHashSet, HashMap => MHashMap}
 import thu.ailab.global._
 
 /**
- * I avoid using functional style here
- * because I try to minimize all the
- * overhead to make it run faster.
+ * Base class implementing the clustering algorithm.
+ * 
+ * I avoid using functional style here because I try to minimize all the
+ * overhead to make it run faster. A lot of "var"s are used, which is 
+ * very common in imperative programming.
  */
 abstract class NaiveAggloCluster extends LoggerTrait {
   /**
-   * Undefined fields and methods.
+   * Abstract fields and methods.
    * 
    * Attention: initSize is a pre-initialized field, so
    * must be initialized before super's initialization 
@@ -21,17 +23,26 @@ abstract class NaiveAggloCluster extends LoggerTrait {
   def initDistArray(): Array[Double]
   protected def composeShow(verbose: Boolean): (Int) => String
   /**
-   * Initialize all state variables
+   * Initialize distance array 
    */
   val distArray = initDistArray()
+  /**
+   * Initialize each cluster to be an individual point
+   */
   protected val clusters = new MHashMap[Int, Cluster]
   (0 until initSize).foreach { i =>
     clusters += i -> new Cluster(new ClusterPoint(i))
   }
+  /**
+   * Initialize other state variables
+   */
   var minDist = Double.MaxValue
   var minPair = (0, 0)
 
   def getClusters = clusters
+  /**
+   * Given id1 and id2, calculate the corresponding index in distance array. 
+   */
   def getIndex(id1: Int, id2: Int) = {
     if (id1 < id2) (id2 - 1) * id2 / 2 + id1
     else (id1 - 1) * id1 / 2 + id2
@@ -40,16 +51,21 @@ abstract class NaiveAggloCluster extends LoggerTrait {
     distArray(getIndex(id1, id2))
   }
   /**
-   * Variables, classes and functions for clustering begins
+   * Sort all point pairs according to their distances.
    */
   val pairs = (for (i <- 0 until initSize; j <- 0 until i) 
     yield ((i, j))).sortBy(x => getDistance(x._1, x._2))    
-  //Weather the point is the center
+  /**
+   * An boolean array indicates whether the corresponding point should be reserve.  
+   */
   val reserve = Array.fill(initSize)(true)
   def clustering() = {
     import scala.annotation.tailrec
     @tailrec
     def tailrecClustering(clusters: MHashMap[Int, Cluster], times: Int) {
+      /**
+       * Find the pair with shortest distance
+       */
       val findRes = pairs.find(x => reserve(x._1) && reserve(x._2)) 
       if (findRes.isEmpty) {
         logger.info("all in one")
@@ -61,6 +77,9 @@ abstract class NaiveAggloCluster extends LoggerTrait {
         logger.info("minDist: %f ".format(minDist) + minPairId)
         return
       }
+      /**
+       * Merge two clusters, remove the two clusters and add the new cluster
+       */
       val newCluster = clusters(minPairId._1).mergeCluster(clusters(minPairId._2))
       clusters.remove(minPairId._1)
       clusters.remove(minPairId._2)

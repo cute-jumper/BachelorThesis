@@ -16,8 +16,12 @@ import thu.ailab.distance.LCSArraySpaceOptimized
 class Template(val tnArray: Array[TemplateNode], val centerFile: String) extends LoggerTrait {
   val eNodes = tnArray.filter(_.isEssential).map(_.asInstanceOf[EssentialNode])
   val eTagSeq = TagSequence.fromNodeArray(eNodes.flatMap(_.getTreeNodes), true)
+  /**
+   * Extraction pattern in Essential Node
+   */
   val exPatternEss = eTagSeq.getCompact.zipWithIndex.filter(_._1.exType != MAGIC).map(x =>
     x._2 -> x._1.exType).toMap
+    
   val oNodes = tnArray.filter(_.isOptional).map(_.asInstanceOf[OptionalNode])
   val posArray = eNodes.scanLeft(0)((acc, x) => acc + x.getTreeNodeCount)
   val posToOpNode = oNodes.zipWithIndex.map { x =>
@@ -35,17 +39,26 @@ class Template(val tnArray: Array[TemplateNode], val centerFile: String) extends
    */
   def extract(thatTagSeq: TagSequence) = {
     val (matchedNodes, exPattern) = getMatchedNodesAndExPattern(thatTagSeq)
+    /**
+     * Array of original Jsoup's node 
+     */
     val jnodeArray = matchedNodes.getCompact.flatMap(_.asInstanceOf[VerboseTreeNode].relatedRoots)
     val jnodeMap = matchedNodes.getCompact.flatMap { x =>
       val vtn = x.asInstanceOf[VerboseTreeNode]
       vtn.relatedRoots.map(_ -> vtn)
     }.toMap
     val nodePool = jnodeArray.toSet
+    /**
+     * Yield the extraction results
+     */
     for ((node, exType) <- exPattern) yield {
       (exType, getNodeText(node, nodePool))
     }
   }
   private lazy val dataset = MyConfigFactory.getValue[String]("global.dataset")
+  /**
+   * Lazy because it is not always needed
+   */
   private lazy val centerTagSeq = TagSequence.fromFile(centerFile)
   def distFromCenter(thatTagSeq: TagSequence) = {
     new LCSArraySpaceOptimized(centerTagSeq, thatTagSeq).getDistance
@@ -70,7 +83,7 @@ class Template(val tnArray: Array[TemplateNode], val centerFile: String) extends
       tnArray.filter(_ != null)
     }
     /**
-     * find best matched bundle in optional node
+     * find best matching bundle in Optional Node
      */
     def findBestBundle(bundleArray: Array[TagSeqBundle],
       tagSeq: TagSequence): Option[(TagSequence, Map[Node, ExType])] = {
@@ -79,6 +92,12 @@ class Template(val tnArray: Array[TemplateNode], val centerFile: String) extends
         val ci = lcs.getCommonIndices.unzip
         val ciMap = lcs.getCommonIndices.toMap
         if (ciMap.size == bundle.tagSeq.compactLength) {
+          /**
+           * Yes, a little long...
+           * 
+           * What we do here is that filter out the ones whose "exType" attribute is MAGIC,
+           * get the corresponding original node in DOM Tree and map these nodes to their "exType"
+           */
           val exPatternOpt = bundle.tagSeq.getCompact.zipWithIndex.filter(_._1.exType != MAGIC).flatMap { x =>
             tagSeq.getCompact()(ciMap(x._2)).asInstanceOf[VerboseTreeNode].relatedRoots.map(_ -> x._1.exType)
           }.toMap
@@ -112,6 +131,10 @@ class Template(val tnArray: Array[TemplateNode], val centerFile: String) extends
       (id: Int) => thatTagSeq)
     val tpSeq = new ArrayBuffer[TagSequence]
     var prevPos = 0
+    /**
+     * For each unaligned range, find the best matching bundle,
+     * and then update the corresponding variables.
+     */
     for {
       range <- tagSegMap.keys.toSeq.sorted if posToOpNode.contains(range._1)
       ts = tagSegMap(range).head
@@ -119,6 +142,11 @@ class Template(val tnArray: Array[TemplateNode], val centerFile: String) extends
       tpSeq += clcs.makeTagSequence(prevPos to range._1)
       val bundleArray = posToOpNode(range._1).bundleArray
       findBestBundle(bundleArray, ts.getTagSeq) match {
+        /**
+         * Matches best!
+         * 
+         * update array of TagSequence and extraction pattern.
+         */
         case Some((bestTagSeq, bestExPattern)) =>
           tpSeq += bestTagSeq
           exPattern ++= bestExPattern
@@ -126,6 +154,9 @@ class Template(val tnArray: Array[TemplateNode], val centerFile: String) extends
       }
       prevPos = range._2
     }
+    /**
+     * Bounds checking
+     */
     if (prevPos < clcs.compactLength) {
       tpSeq += clcs.makeTagSequence(prevPos until clcs.compactLength)
     }

@@ -39,7 +39,7 @@ object MyConfigFactory {
     (dispatch.find(_._1 isAssignableFrom ct.runtimeClass).map(_._2).get)(name).asInstanceOf[T]
   }
   /** 
-   * Another implementation which is more dirty. Only for fun.
+   * Another implementation which is dirtier. Only for fun.
    */
   private def getValue1[T: Manifest](name: String): T = {
     ((manifest[T].toString match { // or manifest[T].erasure.getName match {

@@ -13,6 +13,9 @@ SuffixTree[String](html, "\0", "$.-1", verbose) {
   def parseDepth(s: String) = s.split("\\.").last.toInt
   private def findAllRepetitions() = {
     val rangeMap = new MHashMap[Int, (Int, InternalNode)]
+    /**
+     * A common pattern to update a Map
+     */
     def updateRangeMap(endIndex: Int, newLength: Int, node: InternalNode) = {
       if (rangeMap.contains(endIndex)) {
         val origLength = rangeMap.get(endIndex).get._1
@@ -22,11 +25,20 @@ SuffixTree[String](html, "\0", "$.-1", verbose) {
         rangeMap(endIndex) = (newLength, node)
       }
     }
+    /**
+     * Recursive implementation
+     */
     def findAllRepetitionsImpl(curNode: InternalNode, 
         prefixSeq: IndexedSeq[String],
         preMinDepth: Int): Unit = {
+      /**
+       * Partition edges by the depth
+       */
       val (contEdges, stopEdges) = curNode.edges.partition(x => 
         parseDepth(x._1) > preMinDepth)
+      /**
+       * Iterate each "contEdges" which has a closed node
+       */
       for {
         (key, curEdge) <- contEdges if curEdge.isClosed
         nextNode = curEdge.endNode.asInstanceOf[InternalNode]
@@ -34,6 +46,10 @@ SuffixTree[String](html, "\0", "$.-1", verbose) {
       } {
         val edgeSeq = curEdge.getEdgeSeq
         var rep = edgeSeq.takeWhile(parseDepth(_) >= curMinDepth)
+        /**
+         * Not reach the end --> stop and update the Map
+         * Reach the end --> continue by recursively calling the function.
+         */
         if (rep.length < edgeSeq.length) {
           for (beginIndex <- curEdge.ranges) {
             updateRangeMap(beginIndex + rep.length, 
@@ -42,9 +58,13 @@ SuffixTree[String](html, "\0", "$.-1", verbose) {
           }
         } else {
           findAllRepetitionsImpl(nextNode, prefixSeq ++ edgeSeq,
+              /* Here contains "Bounds Checking" */
               if (preMinDepth == -1) parseDepth(edgeSeq.head) else preMinDepth)
         }
       }
+      /**
+       * Iterate each "stopEdges" and update the Map
+       */
       for ((key, curEdge) <- stopEdges; endIndex <- curEdge.ranges)
         updateRangeMap(endIndex, prefixSeq.length, curNode)
     }
@@ -78,6 +98,9 @@ object HTMLSuffixTree {
     val fatherMap = new MHashMap[(T, Int), List[(Int, Int)]]
     for (range <- sortedRanges) {
       val curDepth = tnArray(range._1).depth
+      /**
+       * Iterate to find the index of the father
+       */
       val fatherIndex = (range._1 to 0 by -1).iterator.dropWhile{
         tnArray(_).depth >= curDepth
       }.next
@@ -88,29 +111,62 @@ object HTMLSuffixTree {
     fatherMap.toMap
   }
   /**
-   * Used for template building system
+   * Two functions below are quite similar. The first one should be
+   * used with "Array of TreeNode", while the second one should be
+   * used with "Array of VerboseTreeNode". The main difference is how
+   * to update state variables when iterating each range.
+   * 
+   * The first one is mainly used for template building system, and the
+   * second is used for content extracting system. 
    */
+  // The first one
   def stripDuplicates(tnArray: Array[TreeNode], logStat: Boolean = false) = {
     val suffixTree = new HTMLSuffixTree(tnArray.map(_.toString), 
         verbose = false)
     val rangeMap = suffixTree.findAllRepetitions()
     val fatherMap = getFatherMap(rangeMap.keys, tnArray)
     type InternalNode = suffixTree.InternalNode
+    /**
+     * The boolean array indicates which nodes should be reserved
+     */
     val flagArray = Array.fill(tnArray.length)(RESERVE)
+    
     for (rangeList <- fatherMap.values if rangeList.length > 1) {
       val rangeCount = new MHashMap[InternalNode, Int]
+      /**
+       * Calculate the occurring count of each repeated sequence
+       */
       for (range <- rangeList; node = rangeMap(range))
         rangeCount(node) = rangeCount.getOrElse(node, 0) + 1
       val nodeOccursBefore = new MHashSet[InternalNode]
       var preRange = (0, 0)
+      /**
+       * Filter out the ones whose occurring count is not more than one
+       */
       for (range <- rangeList; node = rangeMap(range) if rangeCount(node) > 1;
       (start, end) = range) {
         if (nodeOccursBefore.contains(node)) {
+          /**
+           * if it is not the first time we see this node, mark all to be removed.
+           */
           start until end foreach {flagArray(_) = REMOVE}
         } else {
+          /**
+           * if it is the first time we see this node, add it to the set of 
+           * "already occurs"
+           */
           nodeOccursBefore += node
+          /**
+           * if the node has already been mark as "REMOVE", this means two
+           * sequences supposed to be removed overlapped. Then we should undo
+           * the previous operation which mark the node as "REMOVE".
+           */
           if (flagArray(start) == REMOVE && preRange._2 > start)
             preRange._1 until start foreach {flagArray(_) = RESERVE}
+          /**
+           * Merge all nodes to one node, place the merging node at the first
+           * index and mark other nodes as "REMOVE".
+           */
           flagArray(start) = MERGE
           tnArray(start) = tnArray(start).merge(tnArray.slice(start + 1, end))
           start + 1 until end foreach {flagArray(_) = REMOVE}
@@ -124,9 +180,7 @@ object HTMLSuffixTree {
     }
     for ((node, flag) <- tnArray zip flagArray if flag != REMOVE) yield node
   }
-  /**
-   * Used for content extracting system
-   */
+  // The second one, similar to the above one
   def stripDuplicates(vtnArray: Array[VerboseTreeNode]) = {
     val suffixTree = new HTMLSuffixTree(vtnArray.map(_.toString), 
         verbose = false)
@@ -140,15 +194,22 @@ object HTMLSuffixTree {
         rangeCount(node) = rangeCount.getOrElse(node, 0) + 1
       val nodeOccursBefore = new MHashSet[InternalNode]
       var preRange = (0, 0)
+      /**
+       * Record where we store the merged node
+       */
       val mergeTable = new MHashMap[InternalNode, Int]
       for (range <- rangeList; node = rangeMap(range) if rangeCount(node) > 1;
       (start, end) = range) {
         if (nodeOccursBefore.contains(node)) {
           start until end foreach {flagArray(_) = REMOVE}
+          /**
+           * Get the corresponding mergeNode and add all the Jsoup nodes to it
+           */
           val mergeNode = vtnArray(mergeTable(node))
           mergeNode.addRelatedRoot(vtnArray(start))
         } else {
           nodeOccursBefore += node
+          // UNDO!!
           if (flagArray(start) == REMOVE && preRange._2 > start) {
             preRange._1 until start foreach {flagArray(_) = RESERVE}
             val prevMergeNode = vtnArray(mergeTable(rangeMap(preRange)))

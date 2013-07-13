@@ -7,19 +7,23 @@ import thu.ailab.tree.{TreeNode, TreeBuilder, HTMLSuffixTree}
 
 /**
  * Manage all the TagSequences. Each TagSequence stands for a document.
+ * 
+ * Given an id, try to use `getInstance' to get the corresponding TagSequence. 
  */
 class TagSeqFactory(id2filename: Array[String]) {
+  /**
+   * Helper functions and variables
+   */
   final val factorySize = id2filename.length
+  val documentCache = new Array[TagSequence](factorySize)
   def getSize() = factorySize
   def getFilename(id: Int) = id2filename(id)
-  val documentCache = new Array[TagSequence](factorySize)
   private def fileIsLoaded(id: Int): Boolean = documentCache(id) != null
+  private def getPrepFilename(filename: String) = filename.replace(docDir, prepDir) 
   
   private val dataset = MyConfigFactory.getValue[String]("global.dataset")
   private val docDir = MyConfigFactory.getValue[String](dataset, "document.dir")
   private val prepDir = MyConfigFactory.getValue[String](dataset, "preprocess.dir")
-  
-  def getPrepFilename(filename: String) = filename.replace(docDir, prepDir) 
   
   /**
    * If we have pre-processed the document, use the pre-processing result,
@@ -41,7 +45,9 @@ class TagSeqFactory(id2filename: Array[String]) {
     }
     documentCache(id)
   }
-  
+  /**
+   * Run `getInstance' N times
+   */
   def getAllInstances() = {
     (0 until factorySize).toArray map getInstance
   }

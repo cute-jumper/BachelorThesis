@@ -51,7 +51,7 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       this.endNode = _endNode
       this.fixEndIndex = _fixEndIndex
     }
-    // Used when the edge is closed
+    // Used when the edge is closed, otherwise it is useless
     private var fixEndIndex: Int = 0
     var endNode: BaseNode = Leaf()
     val ranges = new ArrayBuffer[Int]
@@ -69,23 +69,27 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
     def getEdgeSeqLength = getEndIndex - beginIndex
     
     /**
-     * Important function used in construction
+     * split an edge 
      */
     def splitEdge(edgeLen: Int, _beginIndex: Int) = {
       val iNode = InternalNode()
       // save original state before any modification
       val save = sameExceptStart(iNode, beginIndex + edgeLen)
+      // then modify state variables
       fixEndIndex = beginIndex + edgeLen
       iNode.addEdge(_beginIndex)
       iNode.addEdge(inputSeq(fixEndIndex), save)
       endNode = iNode
     }
+    /**
+     * Helper function to do special node copy
+     */
     private def sameExceptStart(_parentNode: InternalNode, _beginIndex: Int) = {
       new Edge(_parentNode, _beginIndex, this.endNode, this.fixEndIndex)
     }
     
     /**
-     * For display purposes
+     * For display purposes, make debugging easier
      */    
     def getEdgeString = inputSeq.slice(beginIndex, getEndIndex).mkString(" ")
     def getEdgeStringLength = getEdgeString.length
@@ -105,7 +109,7 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       "\t" + parentNode.name + "->" + endNode.name + 
       "[label=\"%s\"];".format(getEdgeString/*compactString*/)
     }
-    def accept(visitor: SuffixTreeVisitor) = {
+    override def accept(visitor: SuffixTreeVisitor) = {
       visitor.visit(Edge.this)
     }
   }
@@ -115,7 +119,7 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
   abstract class BaseNode(baseName: String, number: Int) extends Show {
     val name = baseName + number
     val isLeaf: Boolean
-    def accept(visitor: SuffixTreeVisitor) = {
+    override def accept(visitor: SuffixTreeVisitor) = {
       visitor.visit(this)
     }
     def toDot() = {
@@ -126,6 +130,11 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
    * Return two closures for the subclass object.
    * The first one will be used to construct subclass
    * object and the second is just a getter.
+   * 
+   * It shortens the definition of "object Leaf" and
+   * "object InternalNode". However, this is not beautiful
+   * enough as I don't know how to define objects(or classes)
+   * dynamically in Scala. 
    */
   private def InstanceBuilder[T](stm: (Int) => T) = {
     var number = -1
@@ -242,6 +251,9 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
       } else {
         val edge = activeNode.getEdge(activeEdge).get
         edge.splitEdge(activeLength, curEndIndex)
+        /**
+         * We should insert a SuffixLink here
+         */
         if (preInsertNode.isDefined)
           preInsertNode.get.suffixLink = Some(edge.endNode.asInstanceOf[InternalNode])
         edge.endNode
@@ -266,6 +278,9 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
         activeNode = activeNode.suffixLink.getOrElse(root)
         if (oldEdgeOption.isDefined) normalizeAfterSuffix(oldEdgeOption.get, 0)
       }
+      /**
+       * We should insert a SuffixLink here
+       */
       if (!endNode.isLeaf) 
         endNode.asInstanceOf[InternalNode].suffixLink = Some(activeNode)
     }
@@ -359,7 +374,7 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
     }
   }
   /**
-   * The build process of the main constructor
+   * The building process of the main constructor
    */
   build
   postBuild  
@@ -384,7 +399,7 @@ class SuffixTree[T : Ordering](rawInputSeq: IndexedSeq[T],
     updateNodeEdge(root)
   }
   /**
-   * Visitor pattern
+   * Define visitor in "Visitor Pattern"
    */
   class SuffixTreeVisitor(pw: java.io.PrintWriter, toPrint: (Show) => String) {
     def visit(show: Show) = {

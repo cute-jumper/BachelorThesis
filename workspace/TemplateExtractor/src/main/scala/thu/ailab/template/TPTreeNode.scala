@@ -7,7 +7,12 @@ import thu.ailab.tree.TreeNode
 import thu.ailab.utils.RenderChars
 
 /**
- * This class is mainly for visualization
+ * This class is mainly for visualization. It is not the necessary part
+ * of the system. However, visualization can make debugging more easier, 
+ * especially in the case of TREE!!!
+ * 
+ * The main function, `toASCII', is similar to the implementation of `toASCII'
+ * in thu/ailab/tree/SuffixTree.scala
  */
 class TPTreeNode(val treeNode: TreeNode, val father: Option[TPTreeNode]) {
   val name = treeNode.toString
@@ -52,6 +57,9 @@ class TPTreeNode(val treeNode: TreeNode, val father: Option[TPTreeNode]) {
 }
 
 object TPTreeNode {
+  /**
+   * Iterate the array and build a TPTreeNode TREE
+   */
   def makeTPTree(tnArray: Array[TreeNode], posToOpNode: Map[Int, OptionalNode]) = {
     @tailrec
     def getAncestor(curNode: TPTreeNode, step: Int): TPTreeNode = {
@@ -60,6 +68,9 @@ object TPTreeNode {
     }
     val root = new TPTreeNode(tnArray.head, None)
     var curNode = root
+    /**
+     * Build the tree by the relation of tree node's depth
+     */
     for ((tn, idx) <- tnArray.tail.zip (1 until tnArray.length)) {
       val father =
         if (tn.depth <= curNode.depth) getAncestor(curNode, curNode.depth - tn.depth + 1)

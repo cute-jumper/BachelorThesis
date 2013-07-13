@@ -18,9 +18,9 @@ import thu.ailab.template.TPTreeNode
 class TreeBuilder(doc: Document) {
   def this(filename: String) = {
     /**
-     * I know this is a rather tricky way to deal with
-     * the restriction of Scala's rules for auxiliary
-     * constructor... Any new awesome ideas?
+     * I know this is a rather tricky(or dirty...) way to overcome
+     * the restriction of Scala's rules for auxiliary constructor...
+     * Any new awesome ideas?
      */
     this(((filename: String) => {
       val htmlDoc = new LocalHTMLDocument(filename)
@@ -33,6 +33,9 @@ class TreeBuilder(doc: Document) {
       def tail(node: Node, depth: Int) = println(depth + " Leaving " + node.nodeName())
     })
   }
+  /**
+   * Functions using "Visitor Pattern"!!
+   */
   def getTagSequence() = {
     val visitor = new TagSeqVisitor
     doc.traverse(visitor)
@@ -49,7 +52,7 @@ class TreeBuilder(doc: Document) {
     visitor.root
   }
   /**
-   * Various visitors for different purposes
+   * Visitor for TreeNode
    */
   class TagSeqVisitor extends NodeVisitor {
     val tagSeq = new ArrayBuffer[TreeNode]
@@ -64,6 +67,9 @@ class TreeBuilder(doc: Document) {
     def tail(node: Node, depth: Int) = {
     }
   }
+  /**
+   * Visitor for VerboseTreeNode
+   */
   class VerboseTagSeqVisitor extends NodeVisitor {
     val verboseTagSeq = new ArrayBuffer[VerboseTreeNode]
     def head(node: Node, depth: Int) = {
@@ -77,6 +83,9 @@ class TreeBuilder(doc: Document) {
     def tail(node: Node, depth: Int) = {
     }
   }
+  /**
+   * Visitor for TPTreeNode
+   */
   class TPTreeVisitor extends NodeVisitor {
     val root = new TPTreeNode(new TreeNode(doc.nodeName, 0), None)
     val jsoupToTP = new MHashMap[Node, TPTreeNode]

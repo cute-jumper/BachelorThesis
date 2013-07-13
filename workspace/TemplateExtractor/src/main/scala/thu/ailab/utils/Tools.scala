@@ -10,9 +10,7 @@ import thu.ailab.global.LoggerTrait
 
 object Tools extends LoggerTrait {
   /**
-   * @param process
-   * 
-   * @return (executionValue, executionTime)
+   * return a pair (executionValue, executionTime)
    */
   def timeIt[T](method: => T) = {
     val start = System.nanoTime()

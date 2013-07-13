@@ -18,6 +18,9 @@ class TagSequence private (compactArray: Array[TreeNode]) {
   val separateArray = compactArray flatMap (_.getSeparateNodes)
   def getCompact() = compactArray
   val compactLength = compactArray.length
+  /**
+   * Make TagSequence out of a sequence of indices
+   */
   def makeTagSequence(indices: Seq[Int]) = {
     TagSequence.fromNodeArray(indices.map(compactArray(_)).toArray, true)
   }
@@ -30,7 +33,7 @@ class TagSequence private (compactArray: Array[TreeNode]) {
     </tagsequence>
   }
   /**
-   * Useless. Make all to be private. 
+   * Useless. Make all private. 
    */
   private def getSeparate() = separateArray
   private val separateLength = separateArray.length

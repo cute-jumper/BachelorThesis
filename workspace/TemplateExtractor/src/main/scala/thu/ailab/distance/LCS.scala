@@ -8,12 +8,18 @@ import thu.ailab.tree.TreeNode
 import thu.ailab.tree.HTMLSuffixTree
 import thu.ailab.sequence.TagSequence
 
+/**
+ * Enumeration class, standing for different directions.
+ */
 object Direction extends Enumeration {
   type Direction = Value
   val DIAGONAL, DOWN, RIGHT = Value
 }
 import Direction._
 
+/**
+ * Base class
+ */
 abstract class Algorithm {
   def getDistance(): Double
   def getCommonIndices(): List[(Int, Int)]
@@ -35,7 +41,8 @@ abstract class Algorithm {
  */
 abstract class LCS extends Algorithm {
   /**
-   * Recursively find the path
+   * Recursively find the path.
+   * Use the tail-recursive version to speed up.
    */
   protected def backtraceLCS(directionMap: Array[Array[Direction]]): List[(Int, Int)] = {
     @tailrec
@@ -98,7 +105,8 @@ extends LCSTagSequence(ts1, ts2) {
 }
 
 /**
- * LCS algorithm with space optimized to O(n)
+ * LCS algorithm with space optimized to O(n).
+ * This class *ONLY* implement method "getDistance"!
  */
 class LCSArraySpaceOptimized(ts_1: TagSequence, ts_2: TagSequence)
 extends LCSTagSequence(ts_1, ts_2) {
@@ -120,6 +128,9 @@ extends LCSTagSequence(ts_1, ts_2) {
   }
   val distance = similarityToDistance(getLCSSpaceOptimized())
   def getDistance() = distance
+  /**
+   * Throw exception if calling this method!!!
+   */
   def getCommonIndices() = throw new NotImplementedException("This method has not been implemented")
 }
 

@@ -107,8 +107,21 @@ object TreeNode {
 }
 
 /**
- * A more verbose version of TreeNode class.
- * Add the corresponding original jsoup nodes to the TreeNode.
+ * Add the corresponding original Jsoup nodes to the TreeNode to
+ * form a more verbose version of TreeNode class. Others are similar.
+ * 
+ * ATTENTION when we deal with a series of VerboseTreeNodes:
+ * We would first convert `VerboseTreeNode' to `TreeNode' when we want
+ * to use various functions defined only for `TreeNode', especially when
+ * the input of a function is like "Array of TreeNode". When we finally
+ * need a `VerboseTreeNode', we convert it back from `TreeNode'. This
+ * convention requires ourselves to remember which nodes are actually
+ * `VerboseTreeNode' and which are not. It is not convenient. However, 
+ * this problem *SEEMS* inevitable due to the complexity to deal with
+ * problems like "covariance" or "contravariance" and the restriction of
+ * JVM's generics.
+ * 
+ * The Jsoup nodes will be stored in the variable `relatedRoots'. 
  */
 class VerboseTreeNode(override val nameArray: Array[String], 
     override val depthArray: Array[Int], 

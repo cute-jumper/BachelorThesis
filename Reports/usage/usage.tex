@@ -14,6 +14,9 @@
 注：很多Linux发行版的仓库中的Scala主版本号还是2.9（如我使用的Ubuntu 13.04），因
 此我是手动安装的Scala 2.10。
 
+我在我的服务器账号qiujunpeng目录下手动安装了需要的软件，并配置好了环境变量，因此
+使用qiujunpeng账号登陆可以直接使用各个软件。
+
 TemplateExtractor为主要的工程，实现了模板的自动聚类和抽
 取；TemplateExtractorDemo比较简单，实现了模板匹配的演示Web Service。
 \section{TemplateExtractor介绍}
@@ -89,6 +92,8 @@ PROJECT_DIR/target/scala-2.10/templateextractor_2.10-0.1-SNAPSHOT-one-jar.jar
   将最后导出的可运行的Jar包上传到服务器上。如果需要在本地进行编译，则使用这个脚本
   代替\texttt{send\_server.sh}。实际开发过程中我都是用\texttt{send\_server.sh}，
   没有使用这个脚本，因为本地的编译速度太慢了。
+\item  \texttt{fix\_template.sh}：这个脚本将服务器生成的模板XML文件转化为本地使
+  用的模板XML文件。主要的作用是供另外一个工程TemplateExtractorDemo使用。
 \end{itemize}
 
 \subsection{代码运行说明}
@@ -206,6 +211,12 @@ Web Service的路径定义在\prj/conf/routes中，定义了4种路径，分别�
 个路径可以正常使用，只需要将*url部分替换为一个本地测试HTML文件的地址即可；而后两
 个路径暂时存在一些问题：由于目前用于训练的文件是之前的同学已经抓取好的网页，
 和Web上直接得到的有些不同，匹配时有一些差错，测试发现后两个路径暂不能正常使用。
+
+需要注意的是，由于模板的XML文件是在服务器上生成的，而目前的Web Service则是在本地
+运行，因此需要将该模板XML中一些和路径相关的东西进行转化，即将服务器上的相关路径和
+文件转化为本地的路径和文件。在TemplateExtractor工程根目录下的tools目录里有一
+个\texttt{fix\_template.sh}shell脚本负责这个转化。这个脚本接受一个参数，该参数为
+服务器生成的模板文件的路径，详细的实现可以参考该脚本的具体内容。
 
 运行这个Web Service的步骤很简单，在Play控制台输入\icoding{run}之后，访
 问localhost:9000对应的路径即可。示例：在浏览器中访

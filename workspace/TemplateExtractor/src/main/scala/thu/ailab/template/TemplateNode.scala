@@ -7,6 +7,18 @@ import thu.ailab.sequence.TagSequence
 import thu.ailab.global.MyConfigFactory
 import thu.ailab.distance.LCSWithPath
 
+/**
+ * In this file, we define various classes and objects which
+ * together constitute a template.
+ * 
+ * Notice, that we define `toXML' in class definition, while
+ * the corresponding `fromXML' function is defined in the
+ * companion object. Someone may wonder why not solve this 
+ * problem using other design patterns, such as "Visitor Pattern".
+ * In fact, we choose this design because for each kind of class,
+ * it is more easy to follow how to build an instance and how to
+ * decompose it. 
+ */
 class TagSeqBundle(val tagSeq: TagSequence, val confidence: Double) {
   override def toString() = {
     tagSeq + " --> " + confidence

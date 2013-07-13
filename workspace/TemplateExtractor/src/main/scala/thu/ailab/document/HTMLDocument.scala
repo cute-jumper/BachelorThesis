@@ -78,6 +78,10 @@ abstract class HTMLDocument {
     removeOnlyTags(uselessTags)_,
     removePatterns(uselessPatterns)_) reduce (_ compose _)
   lazy val strippedLines = removeAll(fullContent) split "\n" map (_.trim) filter (_.length != 0)
+  /**
+   * The simplified content after removing various tags.
+   * Default evaluation strategy is "lazy", avoiding unnecessary overhead.
+   */
   lazy val simplifiedContent = strippedLines mkString "\n"
 }
 

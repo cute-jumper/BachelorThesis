@@ -14,6 +14,9 @@ import scala.collection.mutable.ArrayBuffer
 class TemplateManager private (val templates: Seq[Template]) extends LoggerTrait {
   private val clusterThreshold = MyConfigFactory.getValue[Double](
     "cluster.DocNaiveAggloCluster.clusterThreshold")
+  /**
+   * Choose the best matching template by the distance to the cluster center.
+   */
   def chooseTemplate(thatTagSeq: TagSequence): Option[Template] = {
     val (minDist, index) =
       templates.map(_.distFromCenter(thatTagSeq)).zipWithIndex.minBy(_._1)
@@ -36,17 +39,22 @@ object TemplateManager {
     val id2filename = io.Source.fromFile(
       MyConfigFactory.getValue[String](dataset, "output.id2filename")).getLines.toArray
     val templateFile = MyConfigFactory.getValue[String](dataset, "template.templateFile")
-    def ClusterFileReader() = {
+    /**
+     * Initialize clusters
+     */
+    val clusterFileIds = {
       val clusterXML = xml.XML.loadFile(
         MyConfigFactory.getValue[String](dataset, "output.clusterFile"))
       for (c <- clusterXML \ "cluster") yield (c.attributes("center").text.toInt, c \ "point" map (_.text.toInt))
     }
-    val clusterFileIds = ClusterFileReader()
     def getClusterTemplate(centerId: Int, fileIds: Seq[Int]) = {
       val tnArray = new ClusterMethod(centerId, fileIds).getTemplateNodeArray
       val tp = new Template(tnArray, id2filename(centerId))
       tp
     }
+    /**
+     * For each cluster, build a template
+     */
     val templates = clusterFileIds.map(ids =>
       Function.tupled(getClusterTemplate _)(ids))
     scala.xml.XML.save(templateFile,
@@ -58,7 +66,7 @@ object TemplateManager {
     new TemplateManager(templates)
   }
   /**
-   * Recover templates from XMLs automatically.
+   * Recover templates from XMLs *AUTOMATICALLY*.
    */
   def recoverTemplates() = {
     val dataset = MyConfigFactory.getValue[String]("global.dataset")
@@ -67,7 +75,7 @@ object TemplateManager {
     new TemplateManager((templatesXML \ "template" map (Template.fromXML(_))))
   }
   /**
-   * Recover templates from XMLs manually. 
+   * Recover templates from XMLs *MANUALLY*. 
    */
   def recoverTemplates(templateFile: String) = {
     val templatesXML = scala.xml.XML.loadFile(templateFile)
@@ -79,6 +87,9 @@ object TemplateManager {
  * Run various tests
  */
 object TestTemplateManager extends AppEntry {
+  /**
+   * Randomly pick a file, and try to extract things from the file
+   */
   def testExtract() {
     val fn = thu.ailab.utils.Tools.getRandomTestFile
     val vtnArray = new TreeBuilder(fn).getVerboseTagSequence.toArray
@@ -92,6 +103,9 @@ object TestTemplateManager extends AppEntry {
       println("No template found!")
     }
   }
+  /**
+   * Extract things from a series of files
+   */
   def testSaveToXML() {
     val dataset = MyConfigFactory.getValue[String]("global.dataset")
     val filenames = thu.ailab.utils.Tools.getTestFiles.slice(0, 
@@ -102,6 +116,9 @@ object TestTemplateManager extends AppEntry {
       val vtnArray = new TreeBuilder(fn).getVerboseTagSequence.toArray
       val thatTagSeq = TagSequence.fromNodeArray(vtnArray, false)
       val tpOption = templateArray.chooseTemplate(thatTagSeq)
+      /**
+       * If we find an appropriate template, build output
+       */
       if (tpOption.isDefined) {
         val tp = tpOption.get
         val exPattern = tp.extract(thatTagSeq)
@@ -125,6 +142,9 @@ object TestTemplateManager extends AppEntry {
   def testBuild() {
     println(TemplateManager.buildTemplates)
   }
+  /**
+   * Choose a function by the configuration
+   */
   MyConfigFactory.getValue[String]("global.stage") match {
     case "build" => testBuild()
     case "extractRandom" => testExtract()

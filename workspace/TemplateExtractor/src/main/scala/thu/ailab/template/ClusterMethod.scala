@@ -21,6 +21,9 @@ class ClusterMethod(centerId: Int, fileIds: Seq[Int]) {
     MyConfigFactory.getValue[String](dataset, "output.id2filename")).getLines.toArray
   val tagSeqFactory = new TagSeqFactory(id2filename)
   val docClusterSize = fileIds.size
+  /**
+   * Get the common sequence of all sequence, naming it "document center"
+   */
   val docCenter = ClusterMethod.findLCSInAll(tagSeqFactory.getInstance(centerId),
     fileIds.filter(_ != centerId).iterator,
     tagSeqFactory.getInstance)
@@ -35,7 +38,7 @@ class ClusterMethod(centerId: Int, fileIds: Seq[Int]) {
 }
 
 /**
- * Helper functions to build optional nodes.
+ * Define various helper functions to build optional nodes.
  * 
  * We use "Actor" to speed up the calculation.
  */
@@ -44,6 +47,9 @@ object ClusterMethod extends LoggerTrait {
   import akka.routing.RoundRobinRouter
   import scala.concurrent.duration._
 
+  /**
+   * Messages
+   */
   sealed trait Message
   case object StartCalculation extends Message
   case class AllFinished(duration: Duration) extends Message
@@ -65,11 +71,17 @@ object ClusterMethod extends LoggerTrait {
     val tns = new ArrayBuffer[TemplateNode]
     val sortedPos = posToOpNode.keys.toSeq.sorted
     var prevPos = 0
+    /**
+     * In every step, we generate one Essential Node and one Optional Node.
+     */
     for (pos <- sortedPos) {
       tns += new EssentialNode(docCenter.makeTagSequence((prevPos to pos)))
       tns += posToOpNode(pos)
       prevPos = pos + 1
     }
+    /**
+     * Bounds checking
+     */
     if (prevPos < docCenter.compactLength) {
       tns += new EssentialNode(docCenter.makeTagSequence(
           (prevPos until docCenter.compactLength)))
@@ -80,6 +92,10 @@ object ClusterMethod extends LoggerTrait {
   /**
    * Get TagSegment array according to alignment.
    * Return the mapping relation.
+   * 
+   * The mapping relation: 
+   *     key: Range represented by (Int, Int)
+   *   value: Array of TagSegment.
    */
   def getTagSegMap(docCenter: TagSequence, 
       idIterator: Iterator[Int],
@@ -91,6 +107,9 @@ object ClusterMethod extends LoggerTrait {
       val commonIndices = new LCSWithPath(docCenter, ts).getCommonIndices
       assert(centerLen == commonIndices.length)
       var prevIndex = (-1, -1)
+      /**
+       * Check if there are unaligned sequences
+       */
       for (curIndex <- commonIndices) {
         if (curIndex._2 - prevIndex._2 != 1) {
           val tagSeg = new TagSegment(ts, prevIndex._2, curIndex._2, id)
@@ -99,6 +118,9 @@ object ClusterMethod extends LoggerTrait {
         }
         prevIndex = curIndex
       }
+      /**
+       * Bounds checking
+       */
       if (ts.compactLength - 1 > prevIndex._2) {
         val tagSeg = new TagSegment(ts, prevIndex._2,
           ts.compactLength, id)
@@ -117,6 +139,9 @@ object ClusterMethod extends LoggerTrait {
     val naive = new TSNaiveAggloCluster(tss)
     naive.clustering
     val clusters = naive.getClusters
+    /**
+     * Generate TagSeqBundles which are the basic elements of an Optional Node 
+     */
     val bundles =
       (for {
         (centerId, cluster) <- clusters
@@ -128,6 +153,9 @@ object ClusterMethod extends LoggerTrait {
           getSequence)
         new TagSeqBundle(clcs, confidence)
       })
+    /**
+     * Build an Optional Node if necessary
+     */
     if (bundles.size > 0) {
       Some(new OptionalNode(bundles.toArray.sortBy(-_.confidence)))
     }
@@ -138,6 +166,9 @@ object ClusterMethod extends LoggerTrait {
    */
   def findLCSInAll(initTs: TagSequence, idIterator: Iterator[Int],
     getSequence: (Int) => TagSequence) = {
+    /**
+     * Tail-recursive version to optimize
+     */
     @tailrec
     def helper(lcs: TagSequence, it: Iterator[Int]): TagSequence = {
       if (it.hasNext) {

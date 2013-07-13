@@ -9,6 +9,9 @@ import thu.ailab.utils.Tools.getTrainFiles
  * Class to calculate the distances between documents
  */
 object DocDistance extends {
+  /**
+   * Pre-initialize abstract members
+   */
   val dataset = MyConfigFactory.getValue[String]("global.dataset")
   val id2filename = getTrainFiles
   val tagSeqFactory = new TagSeqFactory(id2filename)  
@@ -30,7 +33,7 @@ object DocDistance extends {
     withPrintWriter(MyConfigFactory.getValue[String](dataset, "output.id2filename")) {
       pw => id2filename.foreach(pw.println)
     }
-  }  
+  }
 }
 
 object TestDocDistance extends AppEntry {

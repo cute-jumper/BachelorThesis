@@ -40,7 +40,7 @@ object DocProcessor extends LoggerTrait {
     logger.info("-" * 10 + "end stat" + "-" * 10)
   }
   /**
-   * Copy file using "Channel", faster than IO "Stream".
+   * Copy file using "Channel", faster than "IO Stream".
    * FileChannel is a class defined in java.nio.channels
    */
   private def copyFile(srcFile: String, destFile: String) = {

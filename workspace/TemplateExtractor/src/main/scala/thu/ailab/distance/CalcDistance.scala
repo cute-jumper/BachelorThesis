@@ -45,7 +45,8 @@ abstract class CalcDistance extends LoggerTrait {
   def getSequence(id: Int): TagSequence
   def postCalculation(): Unit
   /**
-   * Initialize distArray to store all distances
+   * Initialize distArray to store all distances.
+   * Use 1-dimension array instead of 2-dimension array to save space.
    */
   val distArray = new Array[Double](totalSize * (totalSize - 1) / 2)
   
@@ -58,6 +59,9 @@ abstract class CalcDistance extends LoggerTrait {
     distArray
   }
 
+  /**
+   * Given id1 and id2, calculate the distance between them.
+   */
   def calcDistance(id1: Int, id2: Int) = {
     new LCSArraySpaceOptimized(getSequence(id1), getSequence(id2)).getDistance()
   }
